@@ -45,7 +45,6 @@ const Categories = () => {
   const [categoriesByWebsite, setCategoriesByWebsite] = useState([]);
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [error, setError] = useState(false);
-  const [selectedDescription, setSelectedDescription] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [expandedCategory, setExpandedCategory] = useState(null);
@@ -271,7 +270,7 @@ const Categories = () => {
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }; 
 
   const handlePayment = async (selection) => {
     try {
@@ -352,15 +351,12 @@ const Categories = () => {
                     <Heading level={4} className="mb-1">{selection.websiteName}</Heading>
                     <Text variant="muted" className="mb-2">{selection.categoryName}</Text>
                     <div className="flex items-center gap-2">
-                      <DollarSign size={18} className="text-green-600" />
                       <Text className="text-lg font-semibold">${selection.price}</Text>
                     </div>
                   </div>
                   <Button
                     onClick={() => handlePayment(selection)}
                     variant="secondary"
-                    icon={CreditCard}
-                    iconPosition="left"
                   >
                     Pay Now
                   </Button>
@@ -373,7 +369,6 @@ const Categories = () => {
             <div className="flex justify-between items-center mb-4">
               <Heading level={3}>Total Cost</Heading>
               <div className="flex items-center gap-2">
-                <DollarSign size={24} className="text-green-600" />
                 <Text className="text-2xl font-bold">${totalCost}</Text>
               </div>
             </div>

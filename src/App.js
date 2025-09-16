@@ -25,6 +25,7 @@ import Wallet from './AdPromoter/pages/Wallet';
 
 import AdReports from './AdPromoter/pages/AdReports';
 import AvailableAdsForWebOwners from './AdPromoter/pages/AvailableAdsForWebOwners';
+import WithdrawalDashboard from './AdPromoter/pages/WithdrawalDashboard';
 
 // AdOwner
 import UploadAdForWeb from './AdOwner/pages/UploadAdForWeb';
@@ -116,6 +117,12 @@ function App() {
               <Route path="/available-ads/:websiteId" element={
                 <ProtectedRoute>
                   <AvailableAdsForWebOwners />
+                </ProtectedRoute>
+              } />
+
+              <Route path="/withdraw" element={
+                <ProtectedRoute>
+                  <WithdrawalDashboard />
                 </ProtectedRoute>
               } />
 

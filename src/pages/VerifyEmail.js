@@ -26,7 +26,7 @@ const VerifyEmail = () => {
 
   const verifyEmail = async () => {
     try {
-      await axios.get(`/api/auth/verify-email?token=${token}`);
+      await axios.get(`http://localhost:5000/api/auth/verify-email?token=${token}`);
       setStatus('success');
       setMessage('Email verified successfully! You can now log in.');
     } catch (error) {
@@ -40,7 +40,7 @@ const VerifyEmail = () => {
     
     setResendLoading(true);
     try {
-      await axios.post('/api/auth/resend-verification', { email });
+      await axios.post('http://localhost:5000/api/auth/resend-verification', { email });
       setMessage('Verification email sent! Please check your inbox.');
     } catch (error) {
       setMessage(error.response?.data?.message || 'Failed to resend verification email');

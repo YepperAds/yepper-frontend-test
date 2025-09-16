@@ -52,7 +52,7 @@ export const AuthProvider = ({ children }) => {
 
   const loadUser = async () => {
     try {
-      const response = await axios.get('/api/auth/profile');
+      const response = await axios.get('http://localhost:5000/api/auth/profile');
       dispatch({
         type: 'LOGIN_SUCCESS',
         payload: {

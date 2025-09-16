@@ -192,20 +192,6 @@ const WebsiteDetails = () => {
         return `${minutes}m ${seconds}s`;
     };
 
-    // const openRejectModal = (ad) => {
-    //     const websiteSelection = ad.websiteSelections.find(sel => sel.approved && !sel.isRejected);
-    //     if (!websiteSelection) return;
-
-    //     const paymentAmount = ad.paymentAmount || 0;
-    //     if (walletBalance < paymentAmount) {
-    //         alert('Insufficient balance in your wallet to process this rejection. Please contact support.');
-    //         return;
-    //     }
-
-    //     setSelectedAd(ad);
-    //     setShowRejectModal(true);
-    // };
-
     const handleRejectAd = async () => {
         if (!selectedAd || !rejectionReason.trim()) return;
 

@@ -354,6 +354,18 @@ function Websites() {
                 </Button>
               </Link>
             </div>
+
+            {/* Add new website Section */}
+            <div className="flex-shrink-0">
+              <Link to='/withdraw'>
+                <Button
+                  variant="secondary"
+                  size="lg"
+                >
+                  Withdraw Money
+                </Button>
+              </Link>
+            </div>
           </div>
 
           {filteredWebsites && filteredWebsites.length > 0 ? (

@@ -1,4 +1,4 @@
-// Login.com
+// Login
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -16,7 +16,7 @@ const Login = () => {
     const onSubmit = async (data) => {
         setLoading(true);
         try {
-            const response = await axios.post('/api/auth/login', data);
+            const response = await axios.post('http://localhost:5000/api/auth/login', data);
             login(response.data);
             toast.success('Login successful!');
             navigate('/');
