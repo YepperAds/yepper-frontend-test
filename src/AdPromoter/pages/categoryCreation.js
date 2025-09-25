@@ -63,7 +63,7 @@ const CategoryCreation = () => {
         const token = localStorage.getItem('token'); // Get token from localStorage
 
         // Verify token and get user data
-        const response = await axios.get('http://localhost:5000/api/auth/me', {
+        const response = await axios.get('https://yepper-backend.onrender.com/api/auth/me', {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -91,7 +91,7 @@ const CategoryCreation = () => {
             try {
                 // CHANGED: Added authorization header for API calls
                 const token = localStorage.getItem('token');
-                const response = await axios.get(`http://localhost:5000/api/websites/${websiteId}`, {
+                const response = await axios.get(`https://yepper-backend.onrender.com/api/websites/${websiteId}`, {
                   headers: {
                     'Authorization': `Bearer ${token}` // NEW: Added auth header
                   }
@@ -392,7 +392,7 @@ const CategoryCreation = () => {
         categoriesToSubmit.map(async (category) => {
           try {
             const response = await axios.post(
-              'http://localhost:5000/api/ad-categories', 
+              'https://yepper-backend.onrender.com/api/ad-categories', 
               category, 
               {
                 headers: {

@@ -69,7 +69,7 @@ const AddNewCategory = ({ onSubmitSuccess }) => {
         const token = localStorage.getItem('token'); // Get token from localStorage
 
         // Verify token and get user data
-        const response = await axios.get('http://localhost:5000/api/auth/me', {
+        const response = await axios.get('https://yepper-backend.onrender.com/api/auth/me', {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -356,7 +356,7 @@ const AddNewCategory = ({ onSubmitSuccess }) => {
         const token = localStorage.getItem('token');
         const responses = await Promise.all(
             categoriesToSubmit.map(async (category) => {
-                const response = await axios.post('http://localhost:5000/api/ad-categories', category, {
+                const response = await axios.post('https://yepper-backend.onrender.com/api/ad-categories', category, {
                   headers: {
                     'Authorization': `Bearer ${token}` // NEW: Added auth header
                   }

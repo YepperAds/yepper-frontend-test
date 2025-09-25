@@ -1,0 +1,465 @@
+/* @import url('https://fonts.googleapis.com/css2?family=Montserrat+Alternates:wght@500&family=Noto+Sans:wght@500&display=swap');
+
+:root{
+    --black:#000000;
+    --white:hsl(0, 0%, 100%);
+    --main:#010022;
+    --second:#29F218;
+    --hover:rgb(132, 190, 154);
+    --div:rgba(0, 0, 0, 0.055);
+    --border:rgba(0, 0, 0, 0.158);
+    --box-shadow: 0 0 10px rgba(0, 0, 0, 0.116);
+}
+
+*{
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+a{
+    text-decoration: none;
+    color: var(--main);
+    font-weight: 200;
+    font-size: 1em;
+}
+
+.button{
+    padding: 10px 5px;
+    font-weight: bold;
+    color: var(--white);
+    font-size: 1em;
+    text-decoration: none;
+    border-radius: 10px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 45%;
+    transition: 0.3s;
+}
+
+.button:hover{
+    color: var(--hover);
+    transition: 0.3s;
+}
+
+
+#section6 {
+    padding: 8px;
+    margin-top: 20%;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+}
+
+#section6 .container{
+    width: 80%;
+    border-radius: 20px;
+    padding: 30px 40px;
+    background: var(--second);
+}
+
+#section6 .container .head-paragraph{
+    width: 68%;
+    padding: 0 5%;
+}
+
+#section6 .container .head-paragraph h1{
+    color: white;
+}
+
+#section6 .container .head-paragraph p{
+    color: white;
+}
+
+#section6 .container .download{
+    display: flex;
+    gap: 15rem;
+    padding: 0 50px;
+}
+
+#section6 .container .apple-google{
+    width: 50.8%;
+    height: 11.7%;
+    padding: 20px 0;
+    text-align: center;
+}
+
+#section6 .container .apple-google h3{
+    color: white;
+
+}
+
+#section6 .container .apple-google .store-container{
+    display: flex;
+    justify-content: center;
+    gap: 2.5rem;
+}
+
+#section6 .container .apple-google .store-container #stores{
+    border: 1px solid var(--white);
+}
+
+#section6 .container .apple-google .store-container #stores img{
+    width: 14%;
+}
+
+#section6 .container .scan{
+    width: 36.2%;
+    height: 13.3%;
+}
+
+#section6 .container .scan .div{
+    background: var(--white);
+    border-radius: 10px;
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    align-items: center;
+    padding: 10px 10px;
+}
+
+#section6 .container .scan .div .scan-code{
+    width: 50.2%;
+}
+
+#section6 .container .scan .div .scan-code img{
+    width: 100%;
+}
+
+
+#section7{
+    margin-top: 8%;
+    height: 7.21%;
+    width: 100%;
+    border-top: 1px solid var(--border);
+    border-radius: 10px;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+#section7 .register{
+    display: flex;
+    gap: 2rem;
+    justify-content: center;
+    align-items: center;
+}
+
+#section7 .register a{
+    border-bottom: 1px solid var(--main);
+    text-align: left;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2em;
+}
+
+#section7 .register a img{
+    width: 5%;
+    margin-left: 1rem;
+}
+
+#section7 a{
+    font-size: 1em;
+    color: var(--main);
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+#section7 a:hover{
+    color: var(--hover);
+    transition: 0.3s;
+}
+
+#section7 footer{
+    width: 100%;
+    background-color: var(--main);
+    margin-top: 6%;
+    padding: 20px 50px;
+}
+
+#section7 footer .upper-container{
+    display: flex;
+    gap: 35%;
+}
+
+#section7 footer .upper-container .logo{
+    margin-left: 7%;
+}
+
+#section7 footer .upper-container .infos-container{
+    display: flex;
+    padding: 0 10px;
+    gap: 7%;
+    width: 40em;
+}
+
+#section7 footer .upper-container .infos-container .info{
+    display: grid;
+    gap: 0.5rem;
+}
+
+#section7 footer .upper-container .infos-container .info h3{
+    color:var(--white);
+    text-align: left;
+    font-size: medium;
+}
+
+#section7 footer .upper-container .infos-container .info .links{
+    display: grid;
+    gap: 1.5rem;
+    text-align: left;
+}
+
+#section7 footer a{
+    font-size: 1em;
+    font-weight: 100;
+    color: white;
+    transition: 0.3s;
+}
+
+#section7 footer a:hover{
+    color: var(--hover);
+    transition: 0.3s;
+}
+
+#section7 footer .apple-google{
+    width: 30.8%;
+    height: 11.7%;
+    padding: 20px 0;
+    text-align: center;
+}
+
+#section7 footer .apple-google .store-container{
+    display: flex;
+    gap: 2.5rem;
+}
+
+#section7 footer .apple-google .store-container #stores{
+    border: 1px solid var(--white);
+}
+
+#section7 footer .apple-google .store-container #stores img{
+    width: 14%;
+}
+
+@media (max-width: 1281px){
+
+    a{
+        font-size: 1em;
+    }
+
+    .button{
+        font-size: 1em;
+    }
+}
+
+@media (max-width: 1198px){
+    .button{
+        font-size: 0.7em;
+    }
+
+    #section7 footer .upper-container .logo{
+        margin-left: 2%;
+    }
+
+    #section7 footer .upper-container{
+        gap: 30rem;
+    }
+}
+
+@media (max-width: 1100px){
+
+    #section7 footer .upper-container .infos-container{
+        display: flex;
+        padding: 0 10px;
+        gap: 5rem;
+    }
+}
+
+@media (max-width: 1024px){
+
+    .button{
+        width: 80%;
+    }
+
+    #section6 .container{
+        width: 95%;
+        padding: 30px 10px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    #section6 .container .head-paragraph{
+        width: 55%;
+        padding: 0 5px;
+    }
+
+    #section6 .container .download{
+        width: 50%;
+        display: flex;
+        gap: 18rem;
+        padding: 0;
+    }
+
+    #section6 .container .apple-google{
+        width: 100%;
+        height: 11.7%;
+        padding: 5px 0;
+        text-align: center;
+    }
+
+    #section6 .container .apple-google .store-container{
+        display: flex;
+        gap: 1rem;
+    }
+
+    #section6 .container .scan{
+        display: none;
+    }
+
+    #section7 .register{
+        margin-left: 0;
+        gap: 5rem;
+        display: grid;
+        padding: 0em 5em;
+        text-align: left;
+        width: 100%;
+    }
+
+    #section7 .register a{
+        width: 95%;
+        padding: 20px 20px;
+        border-radius: 10px;
+        background: #9747ff57;
+        border-bottom: none;
+        font-size: medium;
+    }
+
+    #section7 footer .upper-container{
+        display: grid;
+        gap: 3rem;
+    }
+
+    #section7 footer .upper-container .logo{
+        margin-left: 0;
+    }
+    
+    #section7 footer .upper-container .infos-container{
+        display: grid;
+        padding: 0 10px;
+        gap: 7rem;
+        width: 30%;
+    }
+
+    #section7 footer .apple-google{
+        width: 40%;
+        height: 11.7%;
+        padding: 20px 0;
+        text-align: center;
+    }
+
+    #section7 footer .apple-google .store-container{
+        display: grid;
+        gap: 2.5rem;
+    }
+}
+
+@media (max-width: 992px){
+    .button{
+        width: 50%;
+    }
+
+    #section6 .container .download{
+        display: flex;
+        gap: 15rem;
+        padding: 0 0;
+    }
+
+    #section6 .container .apple-google{
+        width: 100%;
+        height: 100%;
+        display: grid;
+    }
+
+    #section6 .container .apple-google .store-container{
+        display: grid;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+    }
+
+    #section6 .container .apple-google .store-container #stores{
+        border: 1px solid var(--white);
+        width: 100%;
+    }
+}
+
+@media (max-width: 701px){
+    
+    #section7 footer .upper-container .infos-container{
+        width: 100%;
+    }
+
+    #section7 footer .apple-google{
+        width: 100%;
+    }
+
+}
+
+@media (max-width: 558px){
+    .button{
+        padding: 15px 5px;
+    }
+}
+
+@media (max-width: 520px){
+
+    .button{
+        padding: 15px 5px;
+    }
+
+    #section7 footer{
+        display: grid;
+        gap: 3rem;
+    }
+
+    #section7 .register{
+        padding: 5px;
+    }
+
+    #section7 footer .upper-container{
+        display: grid;
+        gap: 3rem;
+    }
+    
+    #section7 footer .upper-container .infos-container{
+        width: 100%;
+    }
+
+    #section7 footer .apple-google{
+        width: 100%;
+        padding: 0 0;
+    }
+
+    #section7 footer .apple-google .store-container{
+        display: grid;
+        gap: 2.5rem;
+        width: 100%;
+    }
+
+    #section7 footer .apple-google .store-container .button{
+        width: 100%;
+    }
+
+}
+
+@media (max-width: 390px){
+    .button{
+        padding: 13px 8px;
+        font-weight: 600;
+    }  
+} */

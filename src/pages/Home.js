@@ -259,10 +259,6 @@ const Home = () => {
             {/* Marketing Header */}
             <div className="bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 text-white py-20">
               <div className="max-w-6xl mx-auto px-6 text-center">
-                <div className="inline-flex items-center px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-sm font-medium mb-6">
-                  <Zap size={16} className="mr-2" />
-                  Next-Generation AdTech Platform
-                </div>
                 <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
                   The Future of Digital Advertising
                 </h1>

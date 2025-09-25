@@ -26,7 +26,7 @@ function Websites() {
   const [walletBalance, setWalletBalance] = useState(0);
 
   const authenticatedAxios = axios.create({
-    baseURL: 'http://localhost:5000/api',
+    baseURL: 'https://yepper-backend.onrender.com/api',
     headers: {
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json'

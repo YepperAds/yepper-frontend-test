@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { Toaster } from 'react-hot-toast';
+// import Dost from './Dost';
 import { AuthProvider } from './context/AuthContext';
 import Home from './pages/Home';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -58,6 +59,7 @@ function App() {
           <div>
             <Routes>
               <Route path="/" element={<Home />} />
+              {/* <Route path="/dost" element={<Dost />} /> */}
 
               {/* User Auth */}
               <Route path="/login" element={<Login />} />

@@ -42,7 +42,7 @@ function AvailableAdsForWebOwners() {
     try {
       setLoading(true);
       const response = await axios.get(
-        `http://localhost:5000/api/web-advertise/available/${websiteId}`,
+        `https://yepper-backend.onrender.com/api/web-advertise/available/${websiteId}`,
         { headers: getAuthHeaders() }
       );
       
@@ -59,7 +59,7 @@ function AvailableAdsForWebOwners() {
   const fetchCategories = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:5000/api/ad-categories/${websiteId}/advertiser`,
+        `https://yepper-backend.onrender.com/api/ad-categories/${websiteId}/advertiser`,
         { headers: getAuthHeaders() }
       );
       
@@ -109,7 +109,7 @@ function AvailableAdsForWebOwners() {
 
     try {
       const response = await axios.post(
-        'http://localhost:5000/api/web-advertise/select-for-website',
+        'https://yepper-backend.onrender.com/api/web-advertise/select-for-website',
         {
           adId: selectedAd._id,
           websiteId: websiteId,

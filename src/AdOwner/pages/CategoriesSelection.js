@@ -97,7 +97,7 @@ const Categories = () => {
       }
 
       try {
-        const response = await axios.get('http://localhost:5000/api/auth/me', {
+        const response = await axios.get('https://yepper-backend.onrender.com/api/auth/me', {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -117,11 +117,11 @@ const Categories = () => {
       setIsLoading(true);
       try {
         const promises = selectedWebsites.map(async (websiteId) => {
-          const websiteResponse = await fetch(`http://localhost:5000/api/createWebsite/website/${websiteId}`);
+          const websiteResponse = await fetch(`https://yepper-backend.onrender.com/api/createWebsite/website/${websiteId}`);
           const websiteData = await websiteResponse.json();
           
           const categoriesResponse = await fetch(
-            `http://localhost:5000/api/ad-categories/${websiteId}/advertiser`,
+            `https://yepper-backend.onrender.com/api/ad-categories/${websiteId}/advertiser`,
             {
               headers: getAuthHeaders()
             }
@@ -248,7 +248,7 @@ const Categories = () => {
         }
       };
 
-      const response = await axios.post('http://localhost:5000/api/web-advertise', formData, config);
+      const response = await axios.post('https://yepper-backend.onrender.com/api/web-advertise', formData, config);
 
       if (response.data.success) {
         setAdCreated(response.data.data);
@@ -275,7 +275,7 @@ const Categories = () => {
   const handlePayment = async (selection) => {
     try {
       const token = getAuthToken();
-      const response = await axios.post('http://localhost:5000/api/web-advertise/payment/initiate', {
+      const response = await axios.post('https://yepper-backend.onrender.com/api/web-advertise/payment/initiate', {
         adId: adCreated._id,
         websiteId: selection.websiteId,
         categoryId: selection.categoryId

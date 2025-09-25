@@ -140,7 +140,7 @@ function BusinessForm() {
       // CHANGE: Don't include selectedWebsites or selectedCategories
 
       const token = getAuthToken();
-      const response = await axios.post('http://localhost:5000/api/web-advertise', formData, {
+      const response = await axios.post('https://yepper-backend.onrender.com/api/web-advertise', formData, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 

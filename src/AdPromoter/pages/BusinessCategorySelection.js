@@ -45,7 +45,7 @@ function BusinessCategorySelection() {
 
   const fetchCategories = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/business-categories/categories');
+      const response = await axios.get('https://yepper-backend.onrender.com/api/business-categories/categories');
       if (response.data.success) {
         const categoriesWithIcons = response.data.data.categories.map(category => ({
           ...category,
@@ -64,7 +64,7 @@ function BusinessCategorySelection() {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.get(
-        `http://localhost:5000/api/business-categories/website/${websiteId}`,
+        `https://yepper-backend.onrender.com/api/business-categories/website/${websiteId}`,
         {
           headers: {
             'Authorization': `Bearer ${token}`
@@ -112,7 +112,7 @@ function BusinessCategorySelection() {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.put(
-        `http://localhost:5000/api/business-categories/website/${websiteId}`,
+        `https://yepper-backend.onrender.com/api/business-categories/website/${websiteId}`,
         { businessCategories: selectedCategories },
         {
           headers: {

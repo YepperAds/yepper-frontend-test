@@ -67,7 +67,7 @@ const PaymentModal = ({ ad, websiteId, onClose }) => {
 
             console.log('Request headers:', requestConfig.headers);
 
-            const response = await axios.post('http://localhost:5000/api/web-advertise/initiate-payment', {
+            const response = await axios.post('https://yepper-backend.onrender.com/api/web-advertise/initiate-payment', {
                 adId: ad._id,
                 websiteId,
                 amount: totalPrice,

@@ -39,7 +39,7 @@ const WithdrawalDashboard = () => {
   const fetchWalletInfo = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/withdrawals/wallet-info', {
+      const response = await fetch('https://yepper-backend.onrender.com/api/withdrawals/wallet-info', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
@@ -57,7 +57,7 @@ const WithdrawalDashboard = () => {
   const fetchWithdrawalMethods = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/withdrawals/methods', {
+      const response = await fetch('https://yepper-backend.onrender.com/api/withdrawals/methods', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
@@ -78,7 +78,7 @@ const WithdrawalDashboard = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/withdrawals/request', {
+      const response = await fetch('https://yepper-backend.onrender.com/api/withdrawals/request', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -113,7 +113,7 @@ const WithdrawalDashboard = () => {
   const cancelWithdrawal = async (withdrawalId) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/withdrawals/${withdrawalId}/cancel`, {
+      const response = await fetch(`https://yepper-backend.onrender.com/api/withdrawals/${withdrawalId}/cancel`, {
         method: 'PATCH',
         headers: { 'Authorization': `Bearer ${token}` }
       });
