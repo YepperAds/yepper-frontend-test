@@ -14,6 +14,10 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import VerifyEmail from './pages/VerifyEmail';
 import AuthSuccess from './pages/AuthSuccess';
+import VerifySuccess from './pages/VerifySuccess';
+import VerifyError from './pages/VerifyError';
+import EmailVerification from './pages/EmailVerificationPending';
+import CheckEmail from './pages/CheckEmail';
 
 // AdPromoter
 import WebsiteCreation from './AdPromoter/pages/websiteCreation';
@@ -66,6 +70,10 @@ function App() {
               <Route path="/register" element={<Register />} />
               <Route path="/verify-email" element={<VerifyEmail />} />
               <Route path="/auth/success" element={<AuthSuccess />} />
+              <Route path="/verify-success" element={<VerifySuccess />} />
+              <Route path="/verify-error" element={<VerifyError />} />
+              <Route path="/email-verification" element={<EmailVerification />} />
+              <Route path="/check-email" element={<CheckEmail />} />
 
               {/* AdPromoter */}
               <Route path="/websites" element={
