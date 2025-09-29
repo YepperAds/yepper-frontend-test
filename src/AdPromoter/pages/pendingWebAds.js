@@ -26,7 +26,7 @@ const PendingAds = () => {
         setLoading(true);
         setError(null);
         
-        const response = await fetch(`https://yepper-backend.onrender.com/api/ad-categories/pending/${userId}`, {
+        const response = await fetch(`http://localhost:5000/api/ad-categories/pending/${userId}`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
@@ -52,7 +52,7 @@ const PendingAds = () => {
   const handleApprove = async (adId, websiteId) => {
     try {
       const response = await fetch(
-        `https://yepper-backend.onrender.com/api/ad-categories/approve/${adId}/website/${websiteId}`, 
+        `http://localhost:5000/api/ad-categories/approve/${adId}/website/${websiteId}`, 
         {
           method: 'PUT',
           headers: {

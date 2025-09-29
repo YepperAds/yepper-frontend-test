@@ -3,12 +3,10 @@ import React, { useState, useEffect } from 'react';
 import { DollarSign, Users } from 'lucide-react';
 import { 
   Button, 
-  Input, 
   Card, 
   CardContent,
   Text,
   Grid,
-  Container 
 } from '../../components/components';
 
 const PricingTiers = ({ selectedPrice, onPriceSelect }) => {
@@ -27,37 +25,6 @@ const PricingTiers = ({ selectedPrice, onPriceSelect }) => {
     return number.toLocaleString();
   };
 
-  const validateInputs = () => {
-    const newErrors = {};
-    
-    if (!customPrice || customPrice <= 0) {
-      newErrors.price = 'Please enter a valid price';
-    }
-    
-    if (!customVisitors || customVisitors <= 0) {
-      newErrors.visitors = 'Please enter expected visitor count';
-    }
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handlePriceChange = (e) => {
-    const value = e.target.value.replace(/[^0-9]/g, '');
-    setCustomPrice(value);
-    if (errors.price) {
-      setErrors(prev => ({ ...prev, price: null }));
-    }
-  };
-
-  const handleVisitorsChange = (e) => {
-    const value = e.target.value.replace(/[^0-9]/g, '');
-    setCustomVisitors(value);
-    if (errors.visitors) {
-      setErrors(prev => ({ ...prev, visitors: null }));
-    }
-  };
-
   const getTierFromVisitors = (visitors) => {
     const visitorCount = parseInt(visitors) || 0;
     if (visitorCount <= 5000) return 'bronze';
@@ -74,9 +41,40 @@ const PricingTiers = ({ selectedPrice, onPriceSelect }) => {
     return 'Platinum (Enterprise)';
   };
 
-  const handleSave = () => {
-    if (validateInputs()) {
+  const handlePriceChange = (e) => {
+    const value = e.target.value.replace(/[^0-9]/g, '');
+    setCustomPrice(value);
+    if (errors.price) {
+      setErrors(prev => ({ ...prev, price: null }));
+    }
+    
+    // Auto-save when both fields have values
+    if (value && customVisitors) {
       const visitors = parseInt(customVisitors);
+      const tier = getTierFromVisitors(visitors);
+      
+      onPriceSelect({
+        price: parseInt(value),
+        visitors: visitors,
+        tier: tier,
+        visitorRange: {
+          min: Math.max(0, visitors - 1000),
+          max: visitors + 1000
+        }
+      });
+    }
+  };
+
+  const handleVisitorsChange = (e) => {
+    const value = e.target.value.replace(/[^0-9]/g, '');
+    setCustomVisitors(value);
+    if (errors.visitors) {
+      setErrors(prev => ({ ...prev, visitors: null }));
+    }
+    
+    // Auto-save when both fields have values
+    if (customPrice && value) {
+      const visitors = parseInt(value);
       const tier = getTierFromVisitors(visitors);
       
       onPriceSelect({
@@ -105,7 +103,6 @@ const PricingTiers = ({ selectedPrice, onPriceSelect }) => {
             <Grid cols={2} gap={4}>
               <div>
                 <div className="flex items-center gap-2 mb-3">
-                  <DollarSign className="w-4 h-4 text-gray-600" />
                   <Text variant="body" className="font-medium">Monthly Price</Text>
                 </div>
                 <div className="relative">
@@ -125,7 +122,6 @@ const PricingTiers = ({ selectedPrice, onPriceSelect }) => {
 
               <div>
                 <div className="flex items-center gap-2 mb-3">
-                  <Users className="w-4 h-4 text-gray-600" />
                   <Text variant="body" className="font-medium">Monthly Visitors</Text>
                 </div>
                 <input
@@ -140,38 +136,6 @@ const PricingTiers = ({ selectedPrice, onPriceSelect }) => {
                 {errors.visitors && <Text variant="error">{errors.visitors}</Text>}
               </div>
             </Grid>
-
-            {customPrice && customVisitors && (
-              <div className="mt-6 pt-4 border-t border-gray-200">
-                <Grid cols={3} gap={4}>
-                  <div className="text-center p-3 bg-gray-50 border border-gray-200">
-                    <Text variant="small" className="mb-1">Cost Per 1K Visitors</Text>
-                    <Text variant="large" className="font-semibold">${getPricePerVisitor()}</Text>
-                  </div>
-                  
-                  <div className="text-center p-3 bg-gray-50 border border-gray-200">
-                    <Text variant="small" className="mb-1">Tier Assignment</Text>
-                    <Text variant="large" className="font-semibold">{getDisplayTier(customVisitors)}</Text>
-                  </div>
-                  
-                  <div className="text-center p-3 bg-gray-50 border border-gray-200">
-                    <Text variant="small" className="mb-1">Annual Value</Text>
-                    <Text variant="large" className="font-semibold">${formatNumber(parseInt(customPrice) * 12)}</Text>
-                  </div>
-                </Grid>
-              </div>
-            )}
-
-            <div className="mt-6 flex justify-center">
-              <Button
-                onClick={handleSave}
-                disabled={!customPrice || !customVisitors}
-                size="lg"
-                className="px-8"
-              >
-                Save Custom Pricing
-              </Button>
-            </div>
           </CardContent>
         </Card>
       </div>

@@ -5,14 +5,14 @@ import {
     AlertTriangle,
     X 
 } from 'lucide-react';
-import { useClerk } from '@clerk/clerk-react';
+import { useAuth } from '../../context/AuthContext';
 
 const DeleteCategoryModal = ({ 
     categoryId, 
     onDeleteSuccess, 
     onCancel 
 }) => {
-    const { user } = useClerk();
+    const { user } = useAuth();
     const userId = user?.id;
   
     const [isDeleting, setIsDeleting] = useState(false);
@@ -21,7 +21,7 @@ const DeleteCategoryModal = ({
     const handleDeleteCategory = async () => {
         setIsDeleting(true);
         try {
-          const response = await axios.delete(`https://yepper-backend.onrender.com/api/ad-categories/${categoryId}`, {
+          const response = await axios.delete(`http://localhost:5000/api/ad-categories/${categoryId}`, {
             data: { ownerId: userId }
           });
           

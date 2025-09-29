@@ -39,7 +39,7 @@ const PaymentCallback2 = () => {
   const createAuthenticatedAxios = () => {
     const token = getAuthToken();
     const axiosInstance = axios.create({
-      baseURL: 'https://yepper-backend.onrender.com',
+      baseURL: 'http://localhost:5000',
       timeout: 30000,
       headers: {
         'Content-Type': 'application/json'
@@ -120,7 +120,7 @@ const PaymentCallback2 = () => {
         
         // Try public callback route first (for payment callbacks)
         const response = await axios.post(
-          'https://yepper-backend.onrender.com/api/web-advertise/payment/verify-callback', 
+          'http://localhost:5000/api/web-advertise/payment/verify-callback', 
           requestData,
           {
             timeout: 30000,

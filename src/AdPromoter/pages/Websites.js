@@ -10,7 +10,8 @@ import LoadingSpinner from '../../components/LoadingSpinner';
 import AdModalData from '../components/adModalData'
 
 function Websites() {
-  const { user, token } = useAuth();
+  const { user, isAuthenticated, isLoading } = useAuth();
+  const token = localStorage.getItem('token');
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState('');
@@ -26,7 +27,7 @@ function Websites() {
   const [walletBalance, setWalletBalance] = useState(0);
 
   const authenticatedAxios = axios.create({
-    baseURL: 'https://yepper-backend.onrender.com/api',
+    baseURL: 'http://localhost:5000/api',
     headers: {
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json'
@@ -93,11 +94,13 @@ function Websites() {
   });
 
   useEffect(() => {
-    if (!user || !token) {
+    if (isLoading) return; // Wait for auth to load
+    
+    if (!user || !token || !isAuthenticated) {
       navigate('/login');
       return;
     }
-  }, [user, token, navigate]);
+  }, [user, token, isAuthenticated, isLoading, navigate]);
 
   const handleStartEdit = (website) => {
     setEditingWebsite(website._id);

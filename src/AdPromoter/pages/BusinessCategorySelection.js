@@ -1,3 +1,4 @@
+// BusinessCategorySelection.js - Modified version
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Check, ArrowLeft, Building2, Code, Utensils, Home, Car, Heart, Gamepad2, Shirt, BookOpen, Briefcase, Plane, Music, Camera, Gift, Shield, Zap, Loader } from 'lucide-react';
@@ -5,11 +6,26 @@ import axios from 'axios';
 import { Button, Grid, Badge, Container } from '../../components/components';
 
 function BusinessCategorySelection() {
-  const { websiteId } = useParams();
+  const { websiteId } = useParams(); // This is tempId
   const navigate = useNavigate();
   const location = useLocation();
-  const websiteDetails = location.state?.websiteDetails || {};
+  
+  // Get website details from location state OR sessionStorage
+  const getWebsiteDetails = () => {
+    if (location.state?.websiteDetails) {
+      return location.state.websiteDetails;
+    }
+    
+    // Fallback to sessionStorage if location state is empty (e.g., after refresh)
+    const storedData = sessionStorage.getItem('pendingWebsite');
+    if (storedData) {
+      return JSON.parse(storedData);
+    }
+    
+    return {};
+  };
 
+  const [websiteDetails, setWebsiteDetails] = useState(getWebsiteDetails());
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
@@ -37,15 +53,18 @@ function BusinessCategorySelection() {
   const [businessCategories, setBusinessCategories] = useState([]);
 
   useEffect(() => {
-    fetchCategories();
-    if (websiteId) {
-      fetchExistingCategories();
+    // Redirect to website creation if no website details found
+    if (!websiteDetails.name || !websiteDetails.url) {
+      navigate('/create-website');
+      return;
     }
-  }, [websiteId]);
+    
+    fetchCategories();
+  }, [websiteDetails, navigate]);
 
   const fetchCategories = async () => {
     try {
-      const response = await axios.get('https://yepper-backend.onrender.com/api/business-categories/categories');
+      const response = await axios.get('http://localhost:5000/api/business-categories/categories');
       if (response.data.success) {
         const categoriesWithIcons = response.data.data.categories.map(category => ({
           ...category,
@@ -57,26 +76,6 @@ function BusinessCategorySelection() {
       setError('Failed to load categories');
     } finally {
       setLoading(false);
-    }
-  };
-
-  const fetchExistingCategories = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await axios.get(
-        `https://yepper-backend.onrender.com/api/business-categories/website/${websiteId}`,
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        }
-      );
-      
-      if (response.data.success) {
-        setSelectedCategories(response.data.data.businessCategories || []);
-      }
-    } catch (error) {
-      console.log('No existing categories found or error fetching');
     }
   };
 
@@ -106,14 +105,27 @@ function BusinessCategorySelection() {
       return;
     }
 
+    // Double check if we have all required website details
+    if (!websiteDetails.name || !websiteDetails.url) {
+      setError('Missing website details. Please go back and fill in all fields.');
+      return;
+    }
+
     setIsSubmitting(true);
     setError(null);
 
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.put(
-        `https://yepper-backend.onrender.com/api/business-categories/website/${websiteId}`,
-        { businessCategories: selectedCategories },
+      
+      // Create the website with categories in one request
+      const response = await axios.post(
+        'http://localhost:5000/api/createWebsite/createWebsiteWithCategories',
+        {
+          websiteName: websiteDetails.name,
+          websiteLink: websiteDetails.url,
+          imageUrl: websiteDetails.imageUrl || '',
+          businessCategories: selectedCategories
+        },
         {
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -123,36 +135,67 @@ function BusinessCategorySelection() {
       );
 
       if (response.data.success) {
-        navigate(`/create-categories/${websiteId}`, {
+        const createdWebsite = response.data.data;
+        
+        // Clear the pending website data since it's now created
+        sessionStorage.removeItem('pendingWebsite');
+        
+        // Navigate to the next step with the actual website ID
+        navigate(`/create-categories/${createdWebsite._id}`, {
           state: {
             websiteDetails: {
-              ...websiteDetails,
-              businessCategories: selectedCategories
+              id: createdWebsite._id,
+              name: createdWebsite.websiteName,
+              url: createdWebsite.websiteLink,
+              imageUrl: createdWebsite.imageUrl,
+              businessCategories: createdWebsite.businessCategories
             }
           }
         });
       }
       
     } catch (error) {
-      setError(error.response?.data?.message || 'Failed to update business categories');
+      setError(error.response?.data?.message || 'Failed to create website');
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleBack = () => {
-    navigate(-1);
+    // Clear pending website data and go back to website creation
+    sessionStorage.removeItem('pendingWebsite');
+    navigate('/create-website');
   };
+
+  // Show loading if no website details and we're trying to fetch from storage
+  if (!websiteDetails.name && !websiteDetails.url) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-xl font-bold text-gray-800 mb-4">No Website Details Found</h2>
+          <p className="text-gray-600 mb-6">Please start by creating a website first.</p>
+          <Button onClick={() => navigate('/create-website')} variant="primary">
+            Create Website
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   if (error) return (
     <>
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-xl font-bold text-red-600 mb-4">Error loading categories</h2>
+          <h2 className="text-xl font-bold text-red-600 mb-4">Error</h2>
           <p className="text-gray-600 mb-6">{error}</p>
-          <Button onClick={() => window.location.reload()} variant="primary">
-            Retry
-          </Button>
+          <div className="space-x-4">
+            <Button onClick={() => window.location.reload()} variant="primary">
+              Retry
+            </Button>
+            <Button onClick={() => navigate('/create-website')} variant="secondary">
+              Start Over
+            </Button>
+          </div>
         </div>
       </div>
     </>
@@ -177,13 +220,13 @@ function BusinessCategorySelection() {
           <Container>
             <div className="h-16 flex items-center justify-between">
               <button 
-                onClick={() => navigate(-1)} 
+                onClick={handleBack}
                 className="flex items-center text-gray-600 hover:text-black transition-colors"
               >
                 <ArrowLeft size={18} className="mr-2" />
                 <span className="font-medium">Back</span>
               </button>
-              <Badge variant="default">Choose Business Categiries</Badge>
+              <Badge variant="default">Choose Business Categories</Badge>
             </div>
           </Container>
         </header>
@@ -213,6 +256,13 @@ function BusinessCategorySelection() {
                   );
                 })}
               </div>
+            </div>
+          )}
+
+          {/* Error Message */}
+          {error && (
+            <div className="mb-8 p-4 border border-red-300 bg-red-50 text-red-700 rounded">
+              {error}
             </div>
           )}
 
@@ -276,7 +326,7 @@ function BusinessCategorySelection() {
               variant="secondary"
               loading={isSubmitting}
             >
-              {isSubmitting ? 'Saving...' : 'Continue'}
+              {isSubmitting ? 'Creating Website...' : 'Create Website'}
             </Button>
           </div>
         </div>

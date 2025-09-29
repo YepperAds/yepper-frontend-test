@@ -25,6 +25,7 @@ import { Button, Card, CardContent, Heading, Text, Input, Badge, Grid, Container
 import LoadingSpinner from '../../components/LoadingSpinner';
 import { useAuth } from '../../context/AuthContext';
 import AdModalData from '../components/adModalData'
+import DeleteCategoryModal from '../components/DeleteCategoryModal';
 
 const WebsiteDetails = () => {
     const navigate = useNavigate();
@@ -59,7 +60,7 @@ const WebsiteDetails = () => {
     const [walletBalance, setWalletBalance] = useState(0);
 
     const authenticatedAxios = axios.create({
-        baseURL: 'https://yepper-backend.onrender.com/api',
+        baseURL: 'http://localhost:5000/api',
         headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
@@ -103,8 +104,8 @@ const WebsiteDetails = () => {
         setFetchError(null);
 
         try {
-            const websiteResponse = await axios.get(`https://yepper-backend.onrender.com/api/createWebsite/website/${websiteId}`);
-            const categoriesResponse = await axios.get(`https://yepper-backend.onrender.com/api/ad-categories/${websiteId}`);
+            const websiteResponse = await axios.get(`http://localhost:5000/api/createWebsite/website/${websiteId}`);
+            const categoriesResponse = await axios.get(`http://localhost:5000/api/ad-categories/${websiteId}`);
             setWebsite(websiteResponse.data);
             setCategories(categoriesResponse.data.categories);
             setLoading(false);
@@ -233,7 +234,7 @@ const WebsiteDetails = () => {
         if (!tempWebsiteName.trim()) return;
 
         try {
-            const response = await axios.patch(`https://yepper-backend.onrender.com/api/createWebsite/${websiteId}/name`, {
+            const response = await axios.patch(`http://localhost:5000/api/createWebsite/${websiteId}/name`, {
                 websiteName: tempWebsiteName.trim()
             });
             
@@ -332,7 +333,7 @@ const WebsiteDetails = () => {
                 return;
             }
 
-            const response = await axios.put(`https://yepper-backend.onrender.com/api/ad-categories/${categoryId}/reset-user-count`, {
+            const response = await axios.put(`http://localhost:5000/api/ad-categories/${categoryId}/reset-user-count`, {
                 newUserCount: parsedCount
             });
 
@@ -381,7 +382,7 @@ const WebsiteDetails = () => {
         
         try {
             const response = await axios.patch(
-                `https://yepper-backend.onrender.com/api/ad-categories/category/${currentCategory._id}/language`,
+                `http://localhost:5000/api/ad-categories/category/${currentCategory._id}/language`,
                 { defaultLanguage: selectedLanguage }
             );
             
@@ -1170,6 +1171,15 @@ const WebsiteDetails = () => {
                         </div>
                     </div>
                 </div>
+            )}
+
+            {categoryToDelete && (
+                <DeleteCategoryModal 
+                    categoryId={categoryToDelete._id}
+                    category={categoryToDelete}
+                    onDeleteSuccess={handleDeleteSuccess}
+                    onCancel={() => setCategoryToDelete(null)}
+                />
             )}
             
             {/* Category Form Modal */}

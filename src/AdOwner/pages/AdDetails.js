@@ -25,7 +25,7 @@ function AdDetails() {
             try {
                 setLoading(true);
                 setError(null);
-                const adResponse = await axios.get(`https://yepper-backend.onrender.com/api/web-advertise/ad-details/${adId}`);
+                const adResponse = await axios.get(`http://localhost:5000/api/web-advertise/ad-details/${adId}`);
                 setAd(adResponse.data);
             } catch (err) {
                 setError(err.response?.data?.message || err.message || 'Failed to load ad details');

@@ -1,4 +1,4 @@
-// WebsiteCreation.js
+// WebsiteCreation.js - Modified version
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Upload, ArrowLeft, AlertTriangle } from 'lucide-react';
@@ -101,7 +101,7 @@ function WebsiteCreation() {
 
       const token = localStorage.getItem('token');
       const response = await axios.post(
-        'https://yepper-backend.onrender.com/api/createWebsite',
+        'http://localhost:5000/api/createWebsite/prepareWebsite',
         formData,
         {
           headers: {
@@ -111,15 +111,22 @@ function WebsiteCreation() {
         }
       );
 
-      if (response.status === 201) {
-        navigate(`/business-categories/${response.data._id}`, {
+      if (response.status === 200) {
+        // Store website data in sessionStorage to persist across page refreshes
+        const websiteData = {
+          tempId: response.data.tempId,
+          name: formState.websiteName,
+          url: formState.websiteUrl,
+          imageUrl: response.data.imageUrl,
+          ownerId: response.data.ownerId
+        };
+        
+        sessionStorage.setItem('pendingWebsite', JSON.stringify(websiteData));
+        
+        // Navigate to business categories
+        navigate(`/business-categories/${response.data.tempId}`, {
           state: {
-            websiteDetails: {
-              id: response.data._id,
-              name: formState.websiteName,
-              url: formState.websiteUrl,
-              imageUrl: response.data.imageUrl
-            }
+            websiteDetails: websiteData
           }
         });
       }
@@ -127,7 +134,7 @@ function WebsiteCreation() {
     } catch (error) {
       setUiState(prev => ({
         ...prev,
-        error: error.response?.data?.message || 'Failed to create website'
+        error: error.response?.data?.message || 'Failed to prepare website'
       }));
     } finally {
       setUiState(prev => ({ ...prev, isSubmitting: false }));
@@ -239,7 +246,7 @@ function WebsiteCreation() {
                 disabled={uiState.isSubmitting}
                 loading={uiState.isSubmitting}
               >
-                {uiState.isSubmitting ? 'Creating...' : 'Create Website'}
+                {uiState.isSubmitting ? 'Preparing...' : 'Continue to Categories'}
               </Button>
               
             </form>

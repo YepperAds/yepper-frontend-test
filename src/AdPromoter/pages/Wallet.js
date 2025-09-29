@@ -96,7 +96,7 @@ const Wallet = () => {
         return;
       }
 
-      const response = await axios.get('https://yepper-backend.onrender.com/api/auth/me', {
+      const response = await axios.get('http://localhost:5000/api/auth/me', {
         headers: getAuthHeaders()
       });
       setUser(response.data.user);
@@ -116,7 +116,7 @@ const Wallet = () => {
         return;
       }
 
-      const response = await axios.get(`https://yepper-backend.onrender.com/api/ad-categories/wallet/${walletType}/balance`, {
+      const response = await axios.get(`http://localhost:5000/api/ad-categories/wallet/${walletType}/balance`, {
         headers: getAuthHeaders()
       });
 
@@ -147,7 +147,7 @@ const Wallet = () => {
     try {
       const token = getAuthToken();
       const response = await axios.get(
-        `https://yepper-backend.onrender.com/api/ad-categories/wallet/${walletType}/transactions?page=${page}&limit=10`, 
+        `http://localhost:5000/api/ad-categories/wallet/${walletType}/transactions?page=${page}&limit=10`, 
         {
           headers: getAuthHeaders()
         }

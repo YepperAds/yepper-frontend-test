@@ -20,7 +20,7 @@ function WebsiteSelection() {
       const fetchWebsites = async () => {
         try {
           setLoading(true);
-          const response = await fetch('https://yepper-backend.onrender.com/api/createWebsite');
+          const response = await fetch('http://localhost:5000/api/createWebsite');
           const data = await response.json();
           
           const relevantWebsites = data.filter(website => {

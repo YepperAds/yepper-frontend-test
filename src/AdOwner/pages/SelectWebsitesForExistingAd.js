@@ -45,7 +45,7 @@ function SelectWebsitesForExistingAd() {
 
   const fetchAdDetails = async () => {
     try {
-      const response = await axios.get(`https://yepper-backend.onrender.com/api/web-advertise/${adId}`, {
+      const response = await axios.get(`http://localhost:5000/api/web-advertise/${adId}`, {
         headers: getAuthHeaders()
       });
       
@@ -61,7 +61,7 @@ function SelectWebsitesForExistingAd() {
   const fetchWebsites = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('https://yepper-backend.onrender.com/api/createWebsite', {
+      const response = await axios.get('http://localhost:5000/api/createWebsite', {
         headers: getAuthHeaders()
       });
       

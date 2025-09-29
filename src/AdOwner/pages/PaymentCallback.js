@@ -23,7 +23,7 @@ const PaymentCallback = () => {
       }
 
       try {
-        const response = await axios.post('https://yepper-backend.onrender.com/api/web-advertise/payment/verify', {
+        const response = await axios.post('http://localhost:5000/api/web-advertise/payment/verify', {
           transaction_id: transactionId
         });
 

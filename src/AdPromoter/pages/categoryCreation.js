@@ -63,7 +63,7 @@ const CategoryCreation = () => {
         const token = localStorage.getItem('token'); // Get token from localStorage
 
         // Verify token and get user data
-        const response = await axios.get('https://yepper-backend.onrender.com/api/auth/me', {
+        const response = await axios.get('http://localhost:5000/api/auth/me', {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -91,7 +91,7 @@ const CategoryCreation = () => {
             try {
                 // CHANGED: Added authorization header for API calls
                 const token = localStorage.getItem('token');
-                const response = await axios.get(`https://yepper-backend.onrender.com/api/websites/${websiteId}`, {
+                const response = await axios.get(`http://localhost:5000/api/websites/${websiteId}`, {
                   headers: {
                     'Authorization': `Bearer ${token}` // NEW: Added auth header
                   }
@@ -392,7 +392,7 @@ const CategoryCreation = () => {
         categoriesToSubmit.map(async (category) => {
           try {
             const response = await axios.post(
-              'https://yepper-backend.onrender.com/api/ad-categories', 
+              'http://localhost:5000/api/ad-categories', 
               category, 
               {
                 headers: {
@@ -508,12 +508,11 @@ const CategoryCreation = () => {
                   <div className="space-y-6">
                     <div className="w-full">
                       <div className="flex items-center gap-3 mb-2">
-                        <Users size={20} className="text-black" />
-                        <span className="text-sm font-medium text-gray-700">Estimated Monthly Users</span>
+                        <span className="text-sm font-medium text-gray-700">Number of ads for this space</span>
                       </div>
                       <Input
                         type="number"
-                        placeholder="Enter estimated monthly users"
+                        placeholder="Number of ads"
                         value={categoryData[activeCategory]?.userCount || ''}
                         onChange={(e) => updateCategoryData(activeCategory, 'userCount', e.target.value)}
                         className="w-full"
@@ -522,7 +521,6 @@ const CategoryCreation = () => {
   
                     <div className="w-full">
                       <div className="flex items-center gap-3 mb-2">
-                        <FileText size={20} className="text-black" />
                         <span className="text-sm font-medium text-gray-700">Additional Requirements</span>
                       </div>
                       <TextArea

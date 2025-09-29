@@ -22,19 +22,23 @@ const Home = () => {
   const [showMarketing, setShowMarketing] = useState(false);
   const marketingRef = useRef(null);
 
-  const authenticatedAxios = axios.create({
-    baseURL: 'http://localhost:5000/api',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    }
-  });
+  const getAuthenticatedAxios = () => {
+    const token = localStorage.getItem('token');
+    return axios.create({
+      baseURL: 'http://localhost:5000/api',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+  };
 
   const { data: mixedAds, isLoading, error, refetch } = useQuery({
     queryKey: ['mixedAds', user?._id || user?.id],
     queryFn: async () => {
       try {
         const userId = user?._id || user?.id;
+        const authenticatedAxios = getAuthenticatedAxios();
         const response = await authenticatedAxios.get(`/web-advertise/mixed/${userId}`);
         return response.data;
       } catch (error) {
@@ -42,9 +46,9 @@ const Home = () => {
         throw error;
       }
     },
-    enabled: !!(user?._id || user?.id) && !!token,
+    enabled: isAuthenticated && !!(user?._id || user?.id), // Fixed: use isAuthenticated
     onSuccess: (data) => {
-      setFilteredAds(data);
+      setFilteredAds(data || []);
     }
   });
 
@@ -53,6 +57,7 @@ const Home = () => {
     queryFn: async () => {
       try {
         const userId = user?._id || user?.id;
+        const authenticatedAxios = getAuthenticatedAxios();
         const response = await authenticatedAxios.get(`/createWebsite/${userId}`);
         return response.data;
       } catch (error) {
@@ -60,9 +65,9 @@ const Home = () => {
         throw error;
       }
     },
-    enabled: !!(user?._id || user?.id) && !!token,
+    enabled: isAuthenticated && !!(user?._id || user?.id), // Fixed: use isAuthenticated
     onSuccess: (data) => {
-      setFilteredWebsites(data);
+      setFilteredWebsites(data || []);
     }
   });
 
@@ -73,7 +78,7 @@ const Home = () => {
       const query = searchQuery.toLowerCase().trim();
       const statusFiltered = selectedFilter === 'all' 
         ? mixedAds 
-        : mixedAds.filter(ad => ad.websiteSelections.some(ws => 
+        : mixedAds.filter(ad => ad.websiteSelections?.some(ws => 
           selectedFilter === 'approved' ? ws.approved : !ws.approved
         ));
 
@@ -86,15 +91,14 @@ const Home = () => {
         const searchFields = [
           ad.businessName?.toLowerCase(),
           ad.adDescription?.toLowerCase(),
-          ...ad.websiteSelections.map(ws => ws.websiteId?.websiteName?.toLowerCase())
+          ...(ad.websiteSelections?.map(ws => ws.websiteId?.websiteName?.toLowerCase()) || [])
         ];
         return searchFields.some(field => field?.includes(query));
       });
       
       setFilteredAds(searched);
     };
-
-    performSearch();
+  performSearch();
   }, [searchQuery, selectedFilter, mixedAds]);
 
   useEffect(() => {
@@ -152,6 +156,17 @@ const Home = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, [isAuthenticated, showMarketing]);
+
+  useEffect(() => {
+    console.log('Home component state:', {
+      isAuthenticated,
+      user: user ? { id: user._id || user.id, email: user.email } : null,
+      mixedAdsLength: mixedAds?.length || 0,
+      websitesLength: websites?.length || 0,
+      isLoading,
+      error: error?.message
+    });
+  }, [isAuthenticated, user, mixedAds, websites, isLoading, error]);
 
   if (error) return (
       <div style={{ padding: '20px', border: '1px solid #ccc' }}>

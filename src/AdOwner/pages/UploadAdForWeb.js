@@ -21,7 +21,7 @@ function Select() {
       try {
         const token = localStorage.getItem('token');
 
-        const response = await axios.get('https://yepper-backend.onrender.com/api/auth/me', {
+        const response = await axios.get('http://localhost:5000/api/auth/me', {
           headers: {
             'Authorization': `Bearer ${token}`
           }
