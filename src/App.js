@@ -40,6 +40,7 @@ import CategoriesSelection from './AdOwner/pages/CategoriesSelection';
 import PaymentCallback from './AdOwner/pages/PaymentCallback';
 import PaymentCallback2 from './AdOwner/pages/PaymentCallback2';
 import Ads from './AdOwner/pages/Ads';
+import UpdateAdSelections from './AdOwner/pages/UpdateAdSelections';
 import AdDetails from './AdOwner/pages/AdDetails';
 import SelectWebsitesForExistingAd from './AdOwner/pages/SelectWebsitesForExistingAd';
 import SelectCategoriesForExistingAd from './AdOwner/pages/SelectCategoriesForExistingAd';
@@ -74,6 +75,7 @@ function App() {
               <Route path="/verify-error" element={<VerifyError />} />
               <Route path="/email-verification" element={<EmailVerification />} />
               <Route path="/check-email" element={<CheckEmail />} />
+              <Route path="/payment/callback" element={<PaymentCallback />} />
 
               {/* AdPromoter */}
               <Route path="/websites" element={
@@ -161,12 +163,6 @@ function App() {
                 </ProtectedRoute>
               } />
 
-              <Route path="/payment/callback" element={
-                <ProtectedRoute>
-                  <PaymentCallback />
-                </ProtectedRoute>
-              } />
-
               <Route path="/payment-callback2" element={
                 <ProtectedRoute>
                   <PaymentCallback2 />
@@ -176,6 +172,12 @@ function App() {
               <Route path="/ads" element={
                 <ProtectedRoute>
                   <Ads />
+                </ProtectedRoute>
+              } />
+
+              <Route path="/update-ad-selections" element={
+                <ProtectedRoute>
+                  <UpdateAdSelections />
                 </ProtectedRoute>
               } />
 

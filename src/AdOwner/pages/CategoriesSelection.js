@@ -1,13 +1,10 @@
-// Categories.jsx
+// Categories.js
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
   Check,
-  DollarSign,
   ArrowLeft,
   Eye,
-  CreditCard,
-  ShoppingCart
 } from 'lucide-react';
 import axios from 'axios';
 import { Button, Text, Heading, Container, Badge } from '../../components/components';
@@ -33,6 +30,21 @@ const Categories = () => {
   const [user, setUser] = useState(null);
   const location = useLocation();
   const navigate = useNavigate();
+
+  const getInitialData = () => {
+    if (location.state && Object.keys(location.state).length > 0) {
+      return location.state;
+    }
+    
+    const savedData = localStorage.getItem('adFormData');
+    if (savedData) {
+      return JSON.parse(savedData);
+    }
+    
+    return {};
+  };
+
+  const initialData = getInitialData();
   const { 
     file,
     businessName,
@@ -40,10 +52,12 @@ const Categories = () => {
     businessLocation,
     adDescription,
     selectedWebsites
-  } = location.state || {};
+  } = initialData;
 
   const [categoriesByWebsite, setCategoriesByWebsite] = useState([]);
-  const [selectedCategories, setSelectedCategories] = useState([]);
+  const [selectedCategories, setSelectedCategories] = useState(
+    initialData.selectedCategories || []
+  );
   const [error, setError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -51,7 +65,47 @@ const Categories = () => {
   const [showPaymentSummary, setShowPaymentSummary] = useState(false);
   const [totalCost, setTotalCost] = useState(0);
   const [adCreated, setAdCreated] = useState(null);
+  const [fileObject, setFileObject] = useState(null);
   
+  useEffect(() => {
+    const loadFileFromStorage = async () => {
+      if (file && file.data && !fileObject) {
+        try {
+          const response = await fetch(file.data);
+          const blob = await response.blob();
+          const restoredFile = new File([blob], file.name, {
+            type: file.type
+          });
+          setFileObject(restoredFile);
+        } catch (error) {
+          console.error('Failed to restore file:', error);
+        }
+      } else if (file instanceof File) {
+        setFileObject(file);
+      }
+    };
+    
+    loadFileFromStorage();
+  }, [file]);
+
+  useEffect(() => {
+    if (businessName) {
+      const dataToSave = {
+        ...initialData,
+        selectedCategories
+      };
+      localStorage.setItem('adFormData', JSON.stringify(dataToSave));
+    }
+  }, [selectedCategories, businessName]);
+
+  // Redirect if no business data
+  useEffect(() => {
+    const savedData = localStorage.getItem('adFormData');
+    if (!savedData && !businessName) {
+      navigate('/insert-data');
+    }
+  }, [businessName, navigate]);
+
   const getAdSpaceImage = (categoryName) => {
     const normalizedName = categoryName.toLowerCase().replace(/\s+/g, '');
     
@@ -167,7 +221,6 @@ const Categories = () => {
     if (selectedWebsites) fetchCategories();
   }, [selectedWebsites, navigate]);
 
-  // Calculate total cost when categories are selected
   useEffect(() => {
     const calculateTotal = () => {
       let total = 0;
@@ -228,7 +281,14 @@ const Categories = () => {
     try {
       const formData = new FormData();
       formData.append('adOwnerEmail', user?.email);
-      if (file) formData.append('file', file);
+      
+      // Use the restored File object
+      if (fileObject) {
+        formData.append('file', fileObject);
+      } else if (file instanceof File) {
+        formData.append('file', file);
+      }
+      
       formData.append('businessName', businessName);
       formData.append('businessLink', businessLink);
       formData.append('businessLocation', businessLocation);
@@ -253,6 +313,9 @@ const Categories = () => {
       if (response.data.success) {
         setAdCreated(response.data.data);
         setShowPaymentSummary(true);
+        
+        // Don't clear saved data yet - keep it in case user goes back
+        // It will be cleared after successful payment
       }
       
     } catch (error) {
@@ -270,29 +333,41 @@ const Categories = () => {
     } finally {
       setIsSubmitting(false);
     }
-  }; 
+  };
 
-  const handlePayment = async (selection) => {
+  const handleBulkPayment = async () => {
     try {
       const token = getAuthToken();
-      const response = await axios.post('http://localhost:5000/api/web-advertise/payment/initiate', {
-        adId: adCreated._id,
-        websiteId: selection.websiteId,
-        categoryId: selection.categoryId
-      }, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+      
+      // Prepare selections array
+      const selections = getSelectedCategoryDetails().map(detail => ({
+        websiteId: detail.websiteId,
+        categoryId: detail.categoryId
+      }));
+
+      const response = await axios.post(
+        'http://localhost:5000/api/web-advertise/payment/initiate', 
+        {
+          adId: adCreated._id,
+          selections: selections
+        }, 
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
         }
-      });
+      );
 
       if (response.data.success) {
-        // Redirect to Flutterwave payment page
+        // Clear saved data when payment is initiated
+        localStorage.removeItem('adFormData');
+        // Redirect to payment URL
         window.location.href = response.data.paymentUrl;
       }
     } catch (error) {
-      console.error('Payment initiation error:', error);
-      setError('Failed to initiate payment. Please try again.');
+      console.error('Bulk payment initiation error:', error);
+      setError(error.response?.data?.error || 'Failed to initiate payment. Please try again.');
     }
   };
 
@@ -300,7 +375,6 @@ const Categories = () => {
     return <LoadingSpinner />;
   }
 
-  // Payment Summary Modal
   if (showPaymentSummary && adCreated) {
     const paymentSelections = getSelectedCategoryDetails();
     
@@ -310,11 +384,15 @@ const Categories = () => {
           <Container>
             <div className="h-16 flex items-center justify-between">
               <button 
-                onClick={() => setShowPaymentSummary(false)} 
+                onClick={() => {
+                  setShowPaymentSummary(false);
+                  setAdCreated(null);
+                  setError(false);
+                }} 
                 className="flex items-center text-gray-600 hover:text-black transition-colors"
               >
                 <ArrowLeft size={18} className="mr-2" />
-                <span className="font-medium">Back to Selection</span>
+                <span className="font-medium">Back to Edit Selections</span>
               </button>
               <Badge variant="default">Complete Your Payment</Badge>
             </div>
@@ -325,55 +403,71 @@ const Categories = () => {
           <div className="text-center mb-8">
             <Heading level={2} className="mb-2">Ad Created Successfully!</Heading>
             <Text variant="muted">
-              Now complete payment for each ad placement to publish your ad
+              Review your ad placements and complete payment to publish
             </Text>
           </div>
 
           <div className="bg-gray-50 border border-gray-200 p-6 mb-8">
             <Heading level={3} className="mb-4">Ad Summary</Heading>
             <div className="grid grid-cols-2 gap-4 text-sm">
-              <div>
+              <div className='flex gap-2'>
                 <Text className="font-medium">Business:</Text>
                 <Text>{businessName}</Text>
               </div>
-              <div>
+              <div className='flex gap-2'>
                 <Text className="font-medium">Location:</Text>
                 <Text>{businessLocation}</Text>
               </div>
             </div>
           </div>
 
-          <div className="space-y-4">
-            {paymentSelections.map((selection, index) => (
-              <div key={index} className="border border-gray-300 bg-white p-6">
-                <div className="flex justify-between items-center">
-                  <div className="flex-1">
-                    <Heading level={4} className="mb-1">{selection.websiteName}</Heading>
-                    <Text variant="muted" className="mb-2">{selection.categoryName}</Text>
-                    <div className="flex items-center gap-2">
-                      <Text className="text-lg font-semibold">${selection.price}</Text>
+          {/* Selected Placements */}
+          <div className="mb-8">
+            <Heading level={3} className="mb-4">Selected Ad Placements</Heading>
+            <div className="space-y-3">
+              {paymentSelections.map((selection, index) => (
+                <div key={index} className="border border-gray-300 bg-white p-4">
+                  <div className="flex justify-between items-center">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Text className="font-semibold">{selection.websiteName}</Text>
+                        <span className="text-gray-400">•</span>
+                        <Text variant="muted">{selection.categoryName}</Text>
+                      </div>
                     </div>
+                    <Text className="font-semibold">${selection.price}</Text>
                   </div>
-                  <Button
-                    onClick={() => handlePayment(selection)}
-                    variant="secondary"
-                  >
-                    Pay Now
-                  </Button>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
 
-          <div className="border-t border-gray-200 pt-6 mt-8">
-            <div className="flex justify-between items-center mb-4">
-              <Heading level={3}>Total Cost</Heading>
-              <div className="flex items-center gap-2">
-                <Text className="text-2xl font-bold">${totalCost}</Text>
+          {/* Total and Payment Button */}
+          <div className="border-t border-gray-200 pt-6">
+            <div className="flex justify-between items-center mb-6">
+              <div>
+                <Heading level={3}>Total Payment</Heading>
+                <Text variant="muted" className="mt-1">
+                  {paymentSelections.length} ad placement{paymentSelections.length > 1 ? 's' : ''}
+                </Text>
+              </div>
+              <div className="text-right">
+                <Text className="text-3xl font-bold">${totalCost}</Text>
               </div>
             </div>
-            <Text variant="muted" className="text-center">
-              Pay for each ad placement individually. Your ads will go live immediately after payment confirmation.
+
+            <Button
+              onClick={handleBulkPayment}
+              variant="secondary"
+              size="lg"
+              className="w-full"
+              iconPosition="left"
+            >
+              Pay ${totalCost} Now
+            </Button>
+
+            <Text variant="muted" className="text-center mt-4">
+              Your ads will go live immediately after payment confirmation
             </Text>
           </div>
         </div>
@@ -457,15 +551,17 @@ const Categories = () => {
                       const adImage = getAdSpaceImage(category.categoryName);
                       const isExpanded = expandedCategory === category._id;
                       const isSelected = selectedCategories.includes(category._id);
+                      // Allow re-selection of categories if they're currently selected
+                      const isActuallyFullyBooked = category.isFullyBooked && !isSelected;
                       
                       return (
                         <div
                           key={category._id}
                           className={`border transition-all duration-200 bg-white relative ${
                             isSelected ? 'border-black shadow-md' : 'border-gray-300'
-                          } ${category.isFullyBooked ? 'opacity-60' : ''}`}
+                          } ${isActuallyFullyBooked ? 'opacity-60' : ''}`}
                         >
-                          {category.isFullyBooked && (
+                          {isActuallyFullyBooked && (
                             <div className="absolute top-4 right-4 bg-red-600 text-white px-3 py-1 text-xs font-medium z-10">
                               FULLY BOOKED
                             </div>
@@ -473,8 +569,8 @@ const Categories = () => {
                           
                           {/* Main Content */}
                           <div
-                            onClick={() => !category.isFullyBooked && handleCategorySelection(category._id)}
-                            className={`p-6 ${category.isFullyBooked ? 'cursor-not-allowed' : 'cursor-pointer hover:bg-gray-50'}`}
+                            onClick={() => !isActuallyFullyBooked && handleCategorySelection(category._id)}
+                            className={`p-6 ${isActuallyFullyBooked ? 'cursor-not-allowed' : 'cursor-pointer hover:bg-gray-50'}`}
                           >
                             <div className={`grid gap-6 items-center ${adImage ? 'grid-cols-1 md:grid-cols-3' : 'grid-cols-1 md:grid-cols-4'}`}>
                               {/* Ad Preview Image */}

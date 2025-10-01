@@ -67,14 +67,12 @@ function AdModalData({
                                 <div className="text-center p-6 bg-gray-50 border border-gray-200">
                                     <div className="text-4xl font-bold text-black mb-2">{adModalData.views || 0}</div>
                                     <div className="text-gray-600 flex items-center justify-center">
-                                        <Eye className="mr-2" size={18} />
                                         Views
                                     </div>
                                 </div>
                                 <div className="text-center p-6 bg-gray-50 border border-gray-200">
                                     <div className="text-4xl font-bold text-black mb-2">{adModalData.clicks || 0}</div>
                                     <div className="text-gray-600 flex items-center justify-center">
-                                        <MousePointer className="mr-2" size={18} />
                                         Clicks
                                     </div>
                                 </div>
@@ -174,15 +172,6 @@ function AdModalData({
                                         <span className="font-bold text-black">Created:</span>
                                         <div className="text-gray-600">
                                             {formatDate ? formatDate(adModalData.createdAt) : new Date(adModalData.createdAt).toLocaleDateString()}
-                                        </div>
-                                    </div>
-                                )}
-                                
-                                {adModalData.websiteSelection?.approvedAt && (
-                                    <div className="text-sm flex gap-2 items-center">
-                                        <span className="font-bold text-black">Approved:</span>
-                                        <div className="text-gray-600">
-                                            {formatDate ? formatDate(adModalData.websiteSelection.approvedAt) : new Date(adModalData.websiteSelection.approvedAt).toLocaleDateString()}
                                         </div>
                                     </div>
                                 )}

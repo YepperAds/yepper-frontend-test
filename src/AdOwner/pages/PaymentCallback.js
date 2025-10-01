@@ -44,19 +44,6 @@ const PaymentCallback = () => {
     verifyPayment();
   }, [searchParams]);
 
-  const getIcon = () => {
-    switch (status) {
-      case 'verifying':
-        return <Loader2 size={64} className="text-blue-600 animate-spin" />;
-      case 'success':
-        return <CheckCircle size={64} className="text-green-600" />;
-      case 'failed':
-        return <XCircle size={64} className="text-red-600" />;
-      default:
-        return <Loader2 size={64} className="text-blue-600 animate-spin" />;
-    }
-  };
-
   const getTitle = () => {
     switch (status) {
       case 'verifying':
@@ -70,15 +57,25 @@ const PaymentCallback = () => {
     }
   };
 
+  const getTitleColor = () => {
+    switch (status) {
+      case 'verifying':
+        return 'text-gray-500';
+      case 'success':
+        return 'text-green-600';
+      case 'failed':
+        return 'text-red-600';
+      default:
+        return 'text-gray-500';
+    }
+  };
+
   return (
     <div className="min-h-screen bg-white flex items-center justify-center">
       <Container>
         <div className="max-w-md mx-auto text-center">
-          <div className="mb-6">
-            {getIcon()}
-          </div>
           
-          <Heading level={2} className="mb-4">
+          <Heading level={2} className={`mb-4 ${getTitleColor()}`}>
             {getTitle()}
           </Heading>
           
@@ -89,7 +86,7 @@ const PaymentCallback = () => {
           <div className="space-y-4">
             {status === 'success' && (
               <Button 
-                onClick={() => navigate('/dashboard')}
+                onClick={() => navigate('/')}
                 variant="secondary"
                 size="lg"
               >
@@ -100,14 +97,14 @@ const PaymentCallback = () => {
             {status === 'failed' && (
               <div className="space-y-2">
                 <Button 
-                  onClick={() => navigate('/dashboard')}
+                  onClick={() => navigate('/')}
                   variant="secondary"
                   size="lg"
                 >
                   Try Again
                 </Button>
                 <Button 
-                  onClick={() => navigate('/dashboard')}
+                  onClick={() => navigate('/')}
                   variant="outline"
                   size="lg"
                 >

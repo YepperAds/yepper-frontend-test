@@ -1,6 +1,6 @@
 // Websites.js
 import React, { useState, useEffect } from 'react';
-import { Globe, Search, Edit, Check, X, Plus, AlertTriangle, RefreshCw, ArrowLeft } from 'lucide-react';
+import { Globe, Search, Edit, Check, X, Plus, AlertTriangle, ArrowLeft } from 'lucide-react';
 import { Link, useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import axios from 'axios';
@@ -18,13 +18,15 @@ function Websites() {
   const [filteredWebsites, setFilteredWebsites] = useState([]);
   const [editingWebsite, setEditingWebsite] = useState(null);
   const [tempWebsiteName, setTempWebsiteName] = useState('');
-  const [rejecting, setRejecting] = useState(null);
-  const [rejectionReason, setRejectionReason] = useState('');
-  const [showRejectModal, setShowRejectModal] = useState(false);
-  const [selectedAd, setSelectedAd] = useState(null);
+  // COMMENTED OUT: Rejection state management
+  // const [rejecting, setRejecting] = useState(null);
+  // const [rejectionReason, setRejectionReason] = useState('');
+  // const [showRejectModal, setShowRejectModal] = useState(false);
+  // const [selectedAd, setSelectedAd] = useState(null);
   const [showAdModal, setShowAdModal] = useState(false);
   const [adModalData, setAdModalData] = useState(null);
-  const [walletBalance, setWalletBalance] = useState(0);
+  // COMMENTED OUT: Wallet balance for rejection processing
+  // const [walletBalance, setWalletBalance] = useState(0);
 
   const authenticatedAxios = axios.create({
     baseURL: 'http://localhost:5000/api',
@@ -49,19 +51,20 @@ function Websites() {
     enabled: !!(user?._id || user?.id) && !!token,
   });
 
-  const { data: pendingAds = [], isLoading: pendingLoading } = useQuery({
-    queryKey: ['pendingAds'],
-    queryFn: async () => {
-      try {
-        const response = await authenticatedAxios.get('/ad-categories/pending-rejections');
-        return response.data.pendingAds || [];
-      } catch (error) {
-        console.error('Error fetching pending ads:', error);
-        return [];
-      }
-    },
-    enabled: !!token,
-  });
+  // COMMENTED OUT: Pending ads query (for rejection functionality)
+  // const { data: pendingAds = [], isLoading: pendingLoading } = useQuery({
+  //   queryKey: ['pendingAds'],
+  //   queryFn: async () => {
+  //     try {
+  //       const response = await authenticatedAxios.get('/ad-categories/pending-rejections');
+  //       return response.data.pendingAds || [];
+  //     } catch (error) {
+  //       console.error('Error fetching pending ads:', error);
+  //       return [];
+  //     }
+  //   },
+  //   enabled: !!token,
+  // });
 
   const { data: activeAds = [], isLoading: activeLoading } = useQuery({
     queryKey: ['activeAds'],
@@ -94,7 +97,7 @@ function Websites() {
   });
 
   useEffect(() => {
-    if (isLoading) return; // Wait for auth to load
+    if (isLoading) return;
     
     if (!user || !token || !isAuthenticated) {
       navigate('/login');
@@ -121,11 +124,12 @@ function Websites() {
   };
 
   const getAdsForWebsite = (websiteId) => {
-    const pending = pendingAds.filter(ad => 
-      ad.websiteSelections?.some(sel => 
-        sel.websiteId === websiteId && sel.approved && !sel.isRejected
-      )
-    );
+    // COMMENTED OUT: Pending ads filtering
+    // const pending = pendingAds.filter(ad => 
+    //   ad.websiteSelections?.some(sel => 
+    //     sel.websiteId === websiteId && sel.approved && !sel.isRejected
+    //   )
+    // );
     
     const active = activeAds.filter(ad => 
       ad.websiteSelections?.some(sel => 
@@ -133,22 +137,26 @@ function Websites() {
       )
     );
     
-    return { pending, active };
+    return { 
+      // pending: [], // COMMENTED OUT
+      active 
+    };
   };
 
-  const openRejectModal = (ad) => {
-    const websiteSelection = ad.websiteSelections.find(sel => sel.approved && !sel.isRejected);
-    if (!websiteSelection) return;
+  // COMMENTED OUT: Rejection modal functions
+  // const openRejectModal = (ad) => {
+  //   const websiteSelection = ad.websiteSelections.find(sel => sel.approved && !sel.isRejected);
+  //   if (!websiteSelection) return;
 
-    const paymentAmount = ad.paymentAmount || 0;
-    if (walletBalance < paymentAmount) {
-      alert('Insufficient balance in your wallet to process this rejection. Please contact support.');
-      return;
-    }
+  //   const paymentAmount = ad.paymentAmount || 0;
+  //   if (walletBalance < paymentAmount) {
+  //     alert('Insufficient balance in your wallet to process this rejection. Please contact support.');
+  //     return;
+  //   }
 
-    setSelectedAd(ad);
-    setShowRejectModal(true);
-  };
+  //   setSelectedAd(ad);
+  //   setShowRejectModal(true);
+  // };
 
   const openAdModal = (ad, websiteId) => {
     const currentWebsite = websites?.find(w => w._id === websiteId);
@@ -159,7 +167,7 @@ function Websites() {
       ...ad,
       currentWebsite,
       websiteSelection,
-      status: websiteSelection?.status || 'pending'
+      status: websiteSelection?.status || 'active' // Changed default from 'pending' to 'active'
     };
 
     setAdModalData(adData);
@@ -171,54 +179,57 @@ function Websites() {
     setAdModalData(null);
   };
 
-  const handleRejectAd = async () => {
-    if (!selectedAd || !rejectionReason.trim()) return;
+  // COMMENTED OUT: Rejection handler
+  // const handleRejectAd = async () => {
+  //   if (!selectedAd || !rejectionReason.trim()) return;
 
-    setRejecting(selectedAd._id);
-    try {
-      const websiteSelection = selectedAd.websiteSelections.find(sel => sel.approved && !sel.isRejected);
+  //   setRejecting(selectedAd._id);
+  //   try {
+  //     const websiteSelection = selectedAd.websiteSelections.find(sel => sel.approved && !sel.isRejected);
       
-      await authenticatedAxios.post(
-        `/ad-categories/reject/${selectedAd._id}/${websiteSelection.websiteId}/${websiteSelection.categories[0]}`,
-        { rejectionReason: rejectionReason.trim() }
-      );
+  //     await authenticatedAxios.post(
+  //       `/ad-categories/reject/${selectedAd._id}/${websiteSelection.websiteId}/${websiteSelection.categories[0]}`,
+  //       { rejectionReason: rejectionReason.trim() }
+  //     );
 
-      queryClient.invalidateQueries(['pendingAds']);
-      queryClient.invalidateQueries(['activeAds']);
-      queryClient.invalidateQueries(['wallet']);
+  //     queryClient.invalidateQueries(['pendingAds']);
+  //     queryClient.invalidateQueries(['activeAds']);
+  //     queryClient.invalidateQueries(['wallet']);
       
-      setShowRejectModal(false);
-      setSelectedAd(null);
-      setRejectionReason('');
+  //     setShowRejectModal(false);
+  //     setSelectedAd(null);
+  //     setRejectionReason('');
       
-      alert('Ad rejected successfully. Refund has been processed.');
+  //     alert('Ad rejected successfully. Refund has been processed.');
       
-    } catch (error) {
-      console.error('Error rejecting ad:', error);
-      const errorMessage = error.response?.data?.error || 'Failed to reject ad';
-      alert(errorMessage);
-    } finally {
-      setRejecting(null);
-    }
-  };
+  //   } catch (error) {
+  //     console.error('Error rejecting ad:', error);
+  //     const errorMessage = error.response?.data?.error || 'Failed to reject ad';
+  //     alert(errorMessage);
+  //   } finally {
+  //     setRejecting(null);
+  //   }
+  // };
 
-  const closeRejectModal = () => {
-    setShowRejectModal(false);
-    setSelectedAd(null);
-    setRejectionReason('');
-  };
+  // COMMENTED OUT: Close rejection modal
+  // const closeRejectModal = () => {
+  //   setShowRejectModal(false);
+  //   setSelectedAd(null);
+  //   setRejectionReason('');
+  // };
 
-  const getTimeRemaining = (deadline) => {
-    const now = new Date();
-    const timeLeft = new Date(deadline) - now;
+  // COMMENTED OUT: Time remaining calculator for rejection deadline
+  // const getTimeRemaining = (deadline) => {
+  //   const now = new Date();
+  //   const timeLeft = new Date(deadline) - now;
     
-    if (timeLeft <= 0) return 'Expired';
+  //   if (timeLeft <= 0) return 'Expired';
     
-    const minutes = Math.floor(timeLeft / (1000 * 60));
-    const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+  //   const minutes = Math.floor(timeLeft / (1000 * 60));
+  //   const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
     
-    return `${minutes}m ${seconds}s`;
-  };
+  //   return `${minutes}m ${seconds}s`;
+  // };
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-US', {
@@ -294,7 +305,7 @@ function Websites() {
     </>
   );
 
-  if (websitesLoading || pendingLoading || activeLoading) {
+  if (websitesLoading || activeLoading) { // REMOVED: pendingLoading
     return <LoadingSpinner />;
   }
 
@@ -318,7 +329,6 @@ function Websites() {
         <div className="max-w-6xl mx-auto px-4 py-12">
 
           <div className='flex justify-between items-center gap-4 mb-12'>
-            {/* Search Section */}
             <div className="flex justify-start flex-1">
               <div className="relative w-full max-w-md">
                 <Search size={20} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
@@ -332,39 +342,25 @@ function Websites() {
               </div>
             </div>
 
-            {/* Wallet Balance */}
             <div className="flex-shrink-0">
               <Link to='/wallet'>
-                <Button
-                  variant="primary"
-                  size="lg"
-                >
+                <Button variant="primary" size="lg">
                   Wallet
                 </Button>
               </Link>
             </div>
 
-            {/* Add new website Section */}
             <div className="flex-shrink-0">
               <Link to='/create-website'>
-                <Button
-                  variant="secondary"
-                  size="lg"
-                  icon={Plus}
-                  iconPosition="left"
-                >
+                <Button variant="secondary" size="lg" icon={Plus} iconPosition="left">
                   Add Website
                 </Button>
               </Link>
             </div>
 
-            {/* Add new website Section */}
             <div className="flex-shrink-0">
               <Link to='/withdraw'>
-                <Button
-                  variant="secondary"
-                  size="lg"
-                >
+                <Button variant="secondary" size="lg">
                   Withdraw Money
                 </Button>
               </Link>
@@ -374,8 +370,8 @@ function Websites() {
           {filteredWebsites && filteredWebsites.length > 0 ? (
             <div className="space-y-8">
               {filteredWebsites.slice().reverse().map((website) => {
-                const { pending, active } = getAdsForWebsite(website._id);
-                const totalAds = pending.length + active.length;
+                const { active } = getAdsForWebsite(website._id); // REMOVED: pending
+                const totalAds = active.length; // REMOVED: pending.length
 
                 return (
                   <div
@@ -453,7 +449,8 @@ function Websites() {
 
                     {totalAds > 0 ? (
                       <div className="p-6">
-                        {pending.length > 0 && (
+                        {/* COMMENTED OUT: Pending ads section */}
+                        {/* {pending.length > 0 && (
                           <div className="mb-6">
                             <Grid cols={1} gap={4}>
                               {pending.map((ad) => {
@@ -527,7 +524,7 @@ function Websites() {
                               })}
                             </Grid>
                           </div>
-                        )}
+                        )} */}
 
                         {active.length > 0 && (
                           <div>
@@ -550,7 +547,6 @@ function Websites() {
                                     </div>
                                   )}
                                   
-                                  {/* Ad Content */}
                                   <div className="p-4">
                                     <div className="flex justify-between items-start mb-3">
                                       <div className="flex-1">
@@ -559,7 +555,6 @@ function Websites() {
                                       </div>
                                     </div>
                                     
-                                    {/* Performance metrics */}
                                     <div className="grid grid-cols-2 gap-4 mb-4 p-3 bg-white rounded border">
                                       <div className="text-center">
                                         <div className="text-xl font-bold text-black">{ad.views || 0}</div>
@@ -618,11 +613,12 @@ function Websites() {
               closeAdModal={closeAdModal}
               formatCurrency={formatCurrency}
               formatDate={formatDate}
-              getTimeRemaining={getTimeRemaining}
+              // COMMENTED OUT: getTimeRemaining={getTimeRemaining}
             />
           )}
 
-          {showRejectModal && selectedAd && (
+          {/* COMMENTED OUT: Rejection modal */}
+          {/* {showRejectModal && selectedAd && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
               <div className="bg-white border border-black max-w-md w-full p-6">
                 <div className="flex items-center justify-between mb-4">
@@ -683,7 +679,7 @@ function Websites() {
                 </div>
               </div>
             </div>
-          )}
+          )} */}
         </div>
       </div>
     </>

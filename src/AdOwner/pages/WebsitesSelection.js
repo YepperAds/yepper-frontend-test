@@ -8,63 +8,128 @@ import LoadingSpinner from '../../components/LoadingSpinner';
 function WebsiteSelection() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { file, userId, businessName, businessLink, businessLocation, adDescription, businessCategory } = location.state || {};
+  
+  // Get data from location.state or localStorage
+  const getInitialData = () => {
+    if (location.state && Object.keys(location.state).length > 0) {
+      return location.state;
+    }
+    
+    const savedData = localStorage.getItem('adFormData');
+    if (savedData) {
+      return JSON.parse(savedData);
+    }
+    
+    return {};
+  };
+
+  const initialData = getInitialData();
+  const { 
+    file, 
+    userId, 
+    businessName, 
+    businessLink, 
+    businessLocation, 
+    adDescription, 
+    businessCategory 
+  } = initialData;
+
   const [websites, setWebsites] = useState([]);
   const [filteredWebsites, setFilteredWebsites] = useState([]);
-  const [selectedWebsites, setSelectedWebsites] = useState([]);
+  const [selectedWebsites, setSelectedWebsites] = useState(
+    initialData.selectedWebsites || []
+  );
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [fileObject, setFileObject] = useState(null);
 
   useEffect(() => {
-      const fetchWebsites = async () => {
+    const loadFileFromStorage = async () => {
+      if (file && file.data && !fileObject) {
         try {
-          setLoading(true);
-          const response = await fetch('http://localhost:5000/api/createWebsite');
-          const data = await response.json();
-          
-          const relevantWebsites = data.filter(website => {
-            const categories = website.businessCategories;
-            if (!categories || !Array.isArray(categories)) {
-              return false;
-            }
-  
-            if (categories.includes('any')) {
-              return true;
-            }
-            
-            if (businessCategory && categories.includes(businessCategory)) {
-              return true;
-            }
-            
-            return false;
+          const response = await fetch(file.data);
+          const blob = await response.blob();
+          const restoredFile = new File([blob], file.name, {
+            type: file.type
           });
-          
-          setWebsites(relevantWebsites);
-          setFilteredWebsites(relevantWebsites);
-          setLoading(false);
+          setFileObject(restoredFile);
         } catch (error) {
-          console.error('Failed to fetch websites:', error);
-          setError('Failed to fetch websites. Please try again.');
-          setLoading(false);
+          console.error('Failed to restore file:', error);
         }
-      };
-  
-      fetchWebsites();
-    }, [businessCategory]);
+      } else if (file instanceof File) {
+        setFileObject(file);
+      }
+    };
+    
+    loadFileFromStorage();
+  }, [file]);
 
-    useEffect(() => {
-        let result = websites;
+  useEffect(() => {
+    if (businessName) {
+      const dataToSave = {
+        ...initialData,
+        selectedWebsites
+      };
+      localStorage.setItem('adFormData', JSON.stringify(dataToSave));
+    }
+  }, [selectedWebsites, businessName]);
+
+  useEffect(() => {
+    if (!businessName) {
+      navigate('/insert-data');
+    }
+  }, [businessName, navigate]);
+
+  useEffect(() => {
+    const fetchWebsites = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('http://localhost:5000/api/createWebsite');
+        const data = await response.json();
         
-        if (searchTerm) {
-            result = result.filter(site => 
-            site.websiteName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            site.websiteLink.toLowerCase().includes(searchTerm.toLowerCase())
-            );
-        }
+        const relevantWebsites = data.filter(website => {
+          const categories = website.businessCategories;
+          if (!categories || !Array.isArray(categories)) {
+            return false;
+          }
+
+          if (categories.includes('any')) {
+            return true;
+          }
+          
+          if (businessCategory && categories.includes(businessCategory)) {
+            return true;
+          }
+          
+          return false;
+        });
         
-        setFilteredWebsites(result);
-    }, [searchTerm, websites]);
+        setWebsites(relevantWebsites);
+        setFilteredWebsites(relevantWebsites);
+        setLoading(false);
+      } catch (error) {
+        console.error('Failed to fetch websites:', error);
+        setError('Failed to fetch websites. Please try again.');
+        setLoading(false);
+      }
+    };
+
+    fetchWebsites();
+  }, [businessCategory]);
+
+  useEffect(() => {
+    let result = websites;
+    
+    if (searchTerm) {
+      result = result.filter(site => 
+        site.websiteName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        site.websiteLink.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+    
+    setFilteredWebsites(result);
+  }, [searchTerm, websites]);
 
   const handleSelect = (websiteId) => {
     setSelectedWebsites(prev => 
@@ -77,17 +142,19 @@ function WebsiteSelection() {
   const handleNext = () => {
     if (selectedWebsites.length === 0) return;
 
+    const dataToPass = {
+      file: fileObject || file, // Use actual File object
+      userId,
+      businessName,
+      businessLink,
+      businessLocation,
+      adDescription,
+      businessCategory,
+      selectedWebsites,
+    };
+
     navigate('/select-categories', {
-      state: {
-        file,
-        userId,
-        businessName,
-        businessLink,
-        businessLocation,
-        adDescription,
-        businessCategory,
-        selectedWebsites,
-      },
+      state: dataToPass
     });
   };
 
@@ -131,7 +198,7 @@ function WebsiteSelection() {
         <Container>
           <div className="h-16 flex items-center justify-between">
             <button 
-              onClick={() => navigate(-1)} 
+              onClick={() => navigate(-1, {state: initialData})} 
               className="flex items-center text-gray-600 hover:text-black transition-colors"
             >
               <ArrowLeft size={18} className="mr-2" />

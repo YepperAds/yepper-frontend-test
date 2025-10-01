@@ -1,43 +1,105 @@
 // BusinessForm.js
-import React, { useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { Building2, MapPin, Link, FileText, ArrowLeft, Tag, X, Monitor, Coffee, Home, Car, Heart, Gamepad2, Shirt, GraduationCap, Briefcase, Plane, Palette, Camera, Gift, Users, ShoppingBag, ChevronDown } from 'lucide-react';
-import { Button, Input, TextArea, Container, Badge } from '../../components/components';
+import React, { useState, useEffect } from 'react';
+import { useLocation, useNavigate, Link } from 'react-router-dom';
+import { ArrowLeft, Building2, Tag, MapPin, FileText, X } from 'lucide-react';
+import { Container, Badge, Input, Button, TextArea } from '../../components/components';
 
 function BusinessForm() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { file, userId } = location.state || {};
+  
+  const getInitialData = () => {
+    if (location.state?.file || location.state?.userId) {
+      return location.state;
+    }
+    
+    const savedData = localStorage.getItem('adFormData');
+    if (savedData) {
+      const parsed = JSON.parse(savedData);
+      return { ...parsed, file: null };
+    }
+    
+    return {};
+  };
+
+  const initialData = getInitialData();
+  const { file: initialFile, userId: initialUserId } = initialData;
+  
+  const [file, setFile] = useState(initialFile || null);
+  const [userId, setUserId] = useState(initialUserId || null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   const [businessData, setBusinessData] = useState({
-    businessName: '',
-    businessLink: '',
-    businessLocation: '',
-    adDescription: '',
-    businessCategory: ''
+    businessName: initialData.businessName || '',
+    businessLink: initialData.businessLink || '',
+    businessLocation: initialData.businessLocation || '',
+    adDescription: initialData.adDescription || '',
+    businessCategory: initialData.businessCategory || ''
   });
 
   const [errors, setErrors] = useState({});
   const [showCategoryModal, setShowCategoryModal] = useState(false);
 
+  useEffect(() => {
+    const dataToSave = {
+      userId,
+      ...businessData
+      // Do NOT include file here
+    };
+    
+    try {
+      localStorage.setItem('adFormData', JSON.stringify(dataToSave));
+    } catch (e) {
+      console.error('Failed to save to localStorage:', e);
+      // If it still fails, clear old data
+      localStorage.removeItem('adFormData');
+    }
+  }, [businessData, userId]);
+
+//  useEffect(() => {
+//     const loadFileFromStorage = () => {
+//       const savedData = localStorage.getItem('adFormData');
+//       if (savedData) {
+//         const parsed = JSON.parse(savedData);
+//         if (parsed.file && parsed.file.data && !file) {
+//           fetch(parsed.file.data)
+//             .then(res => res.blob())
+//             .then(blob => {
+//               const restoredFile = new File([blob], parsed.file.name, {
+//                 type: parsed.file.type
+//               });
+//               setFile(restoredFile);
+//             });
+//         }
+//       }
+//     };
+    
+//     loadFileFromStorage();
+//   }, []);
+  
+  useEffect(() => {
+    if (!file && !location.state?.file) {
+      navigate('/upload-ad');
+    }
+  }, [file, location.state, navigate]);
+
   const businessCategories = [
-    { value: 'technology', label: 'Technology', icon: Monitor, description: 'Software, hardware, IT services' },
-    { value: 'food-beverage', label: 'Food & Beverage', icon: Coffee, description: 'Restaurants, cafes, food services' },
-    { value: 'real-estate', label: 'Real Estate', icon: Home, description: 'Property sales, rentals, development' },
-    { value: 'automotive', label: 'Automotive', icon: Car, description: 'Car sales, repairs, services' },
-    { value: 'health-wellness', label: 'Health & Wellness', icon: Heart, description: 'Healthcare, fitness, beauty' },
-    { value: 'entertainment', label: 'Entertainment', icon: Gamepad2, description: 'Gaming, events, recreation' },
-    { value: 'fashion', label: 'Fashion', icon: Shirt, description: 'Clothing, accessories, style' },
-    { value: 'education', label: 'Education', icon: GraduationCap, description: 'Schools, training, courses' },
-    { value: 'business-services', label: 'Business Services', icon: Briefcase, description: 'Consulting, legal, finance' },
-    { value: 'travel-tourism', label: 'Travel & Tourism', icon: Plane, description: 'Hotels, tours, travel agencies' },
-    { value: 'arts-culture', label: 'Arts & Culture', icon: Palette, description: 'Museums, galleries, creative' },
-    { value: 'photography', label: 'Photography', icon: Camera, description: 'Photo services, studios' },
-    { value: 'gifts-events', label: 'Gifts & Events', icon: Gift, description: 'Party planning, gift shops' },
-    { value: 'government-public', label: 'Government & Public', icon: Users, description: 'Public services, non-profit' },
-    { value: 'general-retail', label: 'General Retail', icon: ShoppingBag, description: 'Stores, e-commerce, shopping' }
+    { value: 'technology', label: 'Technology', icon: 'Monitor', description: 'Software, hardware, IT services' },
+    { value: 'food-beverage', label: 'Food & Beverage', icon: 'Coffee', description: 'Restaurants, cafes, food services' },
+    { value: 'real-estate', label: 'Real Estate', icon: 'Home', description: 'Property sales, rentals, development' },
+    { value: 'automotive', label: 'Automotive', icon: 'Car', description: 'Car sales, repairs, services' },
+    { value: 'health-wellness', label: 'Health & Wellness', icon: 'Heart', description: 'Healthcare, fitness, beauty' },
+    { value: 'entertainment', label: 'Entertainment', icon: 'Gamepad2', description: 'Gaming, events, recreation' },
+    { value: 'fashion', label: 'Fashion', icon: 'Shirt', description: 'Clothing, accessories, style' },
+    { value: 'education', label: 'Education', icon: 'GraduationCap', description: 'Schools, training, courses' },
+    { value: 'business-services', label: 'Business Services', icon: 'Briefcase', description: 'Consulting, legal, finance' },
+    { value: 'travel-tourism', label: 'Travel & Tourism', icon: 'Plane', description: 'Hotels, tours, travel agencies' },
+    { value: 'arts-culture', label: 'Arts & Culture', icon: 'Palette', description: 'Museums, galleries, creative' },
+    { value: 'photography', label: 'Photography', icon: 'Camera', description: 'Photo services, studios' },
+    { value: 'gifts-events', label: 'Gifts & Events', icon: 'Gift', description: 'Party planning, gift shops' },
+    { value: 'government-public', label: 'Government & Public', icon: 'Users', description: 'Public services, non-profit' },
+    { value: 'general-retail', label: 'General Retail', icon: 'ShoppingBag', description: 'Stores, e-commerce, shopping' }
   ];
 
   const handleInputChange = (e) => {
@@ -100,35 +162,10 @@ function BusinessForm() {
     );
   };
 
-  const handleNext = (e) => {
-    e.preventDefault();
-
-    if (validateForm()) {
-      setLoading(true);
-      try {
-        // CHANGE: Check which button was clicked
-        if (e.target.name === 'saveOnly') {
-          // Save ad without website selections
-          handleSaveAd();
-        } else {
-          // Continue to website selection
-          navigate('/select-websites', {
-            state: {
-              file,
-              userId,
-              ...businessData
-            },
-          });
-        }
-      } catch (error) {
-        setError('An error occurred during upload');
-      } finally {
-        setLoading(false);
-      }
-    }
+  const getAuthToken = () => {
+    return localStorage.getItem('token') || sessionStorage.getItem('token');
   };
 
-  // NEW: Save ad function using existing createImportAd endpoint
   const handleSaveAd = async () => {
     try {
       const formData = new FormData();
@@ -140,16 +177,51 @@ function BusinessForm() {
 
       const token = getAuthToken();
       const response = await axios.post('http://localhost:5000/api/web-advertise', formData, {
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data'
+        }
       });
 
       if (response.data.success) {
+        // Clear saved data after successful save
+        localStorage.removeItem('adFormData');
+        
         navigate('/my-ads', {
           state: { message: 'Ad saved successfully!' }
         });
       }
     } catch (error) {
+      console.error('Save error:', error);
       setError('Failed to save ad');
+    }
+  };
+
+  const handleNext = (e) => {
+    e.preventDefault();
+
+    if (validateForm()) {
+      setLoading(true);
+      try {
+        if (e.target.name === 'saveOnly') {
+          handleSaveAd();
+        } else {
+          // Pass file through state, not localStorage
+          const dataToPass = {
+            file,
+            userId,
+            ...businessData
+          };
+          
+          navigate('/select-websites', {
+            state: dataToPass
+          });
+        }
+      } catch (error) {
+        setError('An error occurred during upload');
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
