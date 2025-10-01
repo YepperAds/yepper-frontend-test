@@ -44,6 +44,7 @@ import UpdateAdSelections from './AdOwner/pages/UpdateAdSelections';
 import AdDetails from './AdOwner/pages/AdDetails';
 import SelectWebsitesForExistingAd from './AdOwner/pages/SelectWebsitesForExistingAd';
 import SelectCategoriesForExistingAd from './AdOwner/pages/SelectCategoriesForExistingAd';
+import DirectAdvertise from './AdOwner/pages/DirectAdvertise';
 
 // Create a client
 const queryClient = new QueryClient({
@@ -198,6 +199,13 @@ function App() {
                   <SelectCategoriesForExistingAd />
                 </ProtectedRoute>
               } />
+
+              <Route path="/direct-ad" element={
+                <ProtectedRoute allowUnauthorized={true}>
+                  <DirectAdvertise />
+                </ProtectedRoute>
+              } />
+
             </Routes>
             <Toaster position="top-right" />
           </div>
