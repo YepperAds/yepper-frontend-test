@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import axios from 'axios';
-import { FileUp, Building2, Link, MapPin, FileText, Tag, CreditCard, AlertCircle, CheckCircle, X, Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, ArrowLeft, Building2, Link as LinkIcon, MapPin, FileText, Upload, X } from 'lucide-react';
+import LoadingSpinner from '../../components/LoadingSpinner';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
@@ -14,6 +15,7 @@ function DirectAdvertise() {
   
   const websiteId = queryParams.get('websiteId');
   const categoryId = queryParams.get('categoryId');
+  const verificationReturn = queryParams.get('verificationReturn');
   
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -24,7 +26,6 @@ function DirectAdvertise() {
   const [filePreview, setFilePreview] = useState(null);
   const [step, setStep] = useState(1);
   const [adId, setAdId] = useState(null);
-  const [showAuthModal, setShowAuthModal] = useState(false);
   const [authMode, setAuthMode] = useState('login');
   const [showPassword, setShowPassword] = useState(false);
   const fileInputRef = useRef(null);
@@ -61,10 +62,87 @@ function DirectAdvertise() {
     { value: 'general-retail', label: 'General Retail' }
   ];
 
+  const [fileLoaded, setFileLoaded] = useState(false);
+  
+  useEffect(() => {
+    const loadSavedFile = async () => {
+      try {
+        const savedFile = await getFileFromIndexedDB(FILE_STORAGE_KEY);
+        if (savedFile) {
+          setFile(savedFile);
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            setFilePreview({
+              url: reader.result,
+              type: savedFile.type
+            });
+          };
+          reader.readAsDataURL(savedFile);
+        }
+      } catch (error) {
+      } finally {
+        setFileLoaded(true);
+      }
+    };
+
+    loadSavedFile();
+  }, []);
+
+  useEffect(() => {
+    const savedData = localStorage.getItem('directAdvertise_formData');
+    if (savedData) {
+      try {
+        const parsed = JSON.parse(savedData);
+        setBusinessData(parsed.businessData || businessData);
+        setStep(parsed.step || 1);
+      } catch (e) {
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    const handleStorageChange = (e) => {
+      if (e.key === 'emailVerified' && e.newValue === 'true') {
+        localStorage.removeItem('emailVerified');
+        window.location.reload();
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (isLoading || !fileLoaded) return;
+    
+    const savedData = localStorage.getItem('directAdvertise_formData');
+    
+    if (isAuthenticated && savedData && !adId && step !== 3) {
+      try {
+        const parsed = JSON.parse(savedData);
+        
+        if (parsed.step === 2) {
+          setBusinessData(parsed.businessData || {});
+          
+          setSuccess('You are successfully signed in! Now continue with paying for your advertisement...');
+          setError(null);
+          
+          setTimeout(() => {
+            setSuccess(null);
+            createAdAndProceed();
+          }, 2000);
+        }
+      } catch (e) {
+      }
+    }
+  }, [isAuthenticated, isLoading, fileLoaded]);
+
   useEffect(() => {
     const fetchData = async () => {
       if (!websiteId || !categoryId) {
-        setError('Missing website or category information.');
         setIsLoading(false);
         return;
       }
@@ -79,8 +157,6 @@ function DirectAdvertise() {
         setCategoryInfo(categoryResponse.data);
         setIsLoading(false);
       } catch (err) {
-        console.error('Error fetching data:', err);
-        setError('Failed to load website or category information');
         setIsLoading(false);
       }
     };
@@ -88,7 +164,7 @@ function DirectAdvertise() {
     fetchData();
   }, [websiteId, categoryId]);
 
-  const processFile = (selectedFile) => {
+  const processFile = async (selectedFile) => {
     const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'video/mp4', 'video/quicktime', 'application/pdf'];
     const maxSize = 50 * 1024 * 1024;
 
@@ -106,6 +182,11 @@ function DirectAdvertise() {
 
     setFile(selectedFile);
     setError(null);
+
+    try {
+      await saveFileToIndexedDB(FILE_STORAGE_KEY, selectedFile);
+    } catch (dbError) {
+    }
 
     const reader = new FileReader();
     reader.onloadend = () => {
@@ -182,6 +263,19 @@ function DirectAdvertise() {
     if (!validateForm()) return;
     if (!checkCategoryMatch()) return;
 
+    try {
+      localStorage.setItem('directAdvertise_formData', JSON.stringify({
+        businessData,
+        hasFile: !!file,
+        fileName: file?.name,
+        fileType: file?.type,
+        step: 2,
+        websiteId,
+        categoryId
+      }));
+    } catch (storageError) {
+    }
+
     setSuccess('Ad details saved! Category verified.');
     setTimeout(() => {
       setStep(2);
@@ -202,23 +296,24 @@ function DirectAdvertise() {
           return;
         }
         await login(authData.email, authData.password);
+        setSuccess('Authentication successful!');
+        await createAdAndProceed();
       } else {
         if (!authData.name || !authData.email || !authData.password) {
           setError('All fields are required');
           setIsLoading(false);
           return;
         }
-        const result = await signup(authData.email, authData.password, authData.name);
+        
+        const returnUrl = `${window.location.origin}/direct-advertise?websiteId=${websiteId}&categoryId=${categoryId}&verificationReturn=true`;
+        const result = await signup(authData.email, authData.password, authData.name, returnUrl);
+        
         if (result.requiresVerification) {
-          setSuccess('Registration successful! Please check your email to verify your account.');
+          setSuccess('Registration successful! Please check your email to verify your account. After verification, you\'ll be redirected back here to complete your advertisement.');
           setIsLoading(false);
           return;
         }
       }
-
-      setShowAuthModal(false);
-      setSuccess('Authentication successful!');
-      await createAdAndProceed();
       
     } catch (err) {
       setError(err.message || 'Authentication failed');
@@ -230,9 +325,22 @@ function DirectAdvertise() {
     try {
       setIsLoading(true);
       
+      let fileToUpload = file;
+      if (!fileToUpload) {
+        try {
+          fileToUpload = await getFileFromIndexedDB(FILE_STORAGE_KEY);
+          if (fileToUpload) {
+            setFile(fileToUpload);
+          }
+        } catch (dbError) {
+        }
+      }
+      
       const formData = new FormData();
       formData.append('adOwnerEmail', user?.email || authData.email);
-      if (file) formData.append('file', file);
+      if (fileToUpload) {
+        formData.append('file', fileToUpload);
+      }
       formData.append('businessName', businessData.businessName);
       formData.append('businessLink', businessData.businessLink);
       formData.append('businessLocation', businessData.businessLocation);
@@ -249,22 +357,21 @@ function DirectAdvertise() {
 
       if (response.data.success) {
         setAdId(response.data.data.adId || response.data.data._id);
+        
+        localStorage.removeItem('directAdvertise_formData');
+        
+        try {
+          await deleteFileFromIndexedDB(FILE_STORAGE_KEY);
+        } catch (clearError) {
+        }
+        
         setStep(3);
       }
       
     } catch (error) {
-      console.error('Error creating ad:', error);
       setError(error.response?.data?.message || 'Failed to create advertisement');
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const handleProceedToPayment = () => {
-    if (!isAuthenticated) {
-      setShowAuthModal(true);
-    } else {
-      createAdAndProceed();
     }
   };
 
@@ -291,29 +398,26 @@ function DirectAdvertise() {
       }
       
     } catch (error) {
-      console.error('Payment error:', error);
       setError(error.response?.data?.error || 'Failed to initiate payment');
       setIsLoading(false);
     }
   };
 
+  const handleBackToStep1 = () => {
+    setStep(1);
+    setError(null);
+    setSuccess(null);
+  };
+
   if (isLoading && !websiteInfo) {
-    return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <p className="text-white/60">Loading...</p>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
   return (
-    <div className="min-h-screen bg-black text-white">
-      <div className="container mx-auto px-6 py-20">
-        
-        <div className="max-w-4xl mx-auto mb-12">
-          <div className="flex items-center justify-between">
+    <div className="min-h-screen bg-white">
+      <div className="border-b border-gray-200 bg-gray-50">
+        <div className="container mx-auto px-6 py-6">
+          <div className="max-w-4xl mx-auto flex items-center justify-between">
             {[
               { num: 1, label: 'Ad Details' },
               { num: 2, label: 'Authentication' },
@@ -321,61 +425,66 @@ function DirectAdvertise() {
             ].map((item, index) => (
               <React.Fragment key={item.num}>
                 <div className="flex flex-col items-center">
-                  <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                    step >= item.num ? 'bg-gradient-to-r from-blue-600 to-indigo-600' : 'bg-white/10'
-                  } transition-all duration-300`}>
-                    {step > item.num ? (
-                      <CheckCircle size={24} />
-                    ) : (
-                      <span className="font-semibold">{item.num}</span>
-                    )}
+                  <div className={`w-10 h-10 border-2 flex items-center justify-center transition-all ${
+                    step >= item.num 
+                      ? 'border-black bg-black text-white' 
+                      : 'border-gray-300 bg-white text-gray-400'
+                  }`}>
+                    <span className="text-sm font-semibold">{item.num}</span>
                   </div>
-                  <span className="text-sm mt-2 text-white/60">{item.label}</span>
+                  <span className="text-xs mt-2 text-gray-600 font-medium">{item.label}</span>
                 </div>
                 {index < 2 && (
-                  <div className={`flex-1 h-1 mx-4 ${
-                    step > item.num ? 'bg-gradient-to-r from-blue-600 to-indigo-600' : 'bg-white/10'
-                  } transition-all duration-300`}></div>
+                  <div className={`flex-1 h-0.5 mx-4 ${
+                    step > item.num ? 'bg-black' : 'bg-gray-300'
+                  } transition-all`}></div>
                 )}
               </React.Fragment>
             ))}
           </div>
         </div>
+      </div>
 
-        {error && (
-          <div className="max-w-4xl mx-auto mb-6">
-            <div className="bg-red-500/10 border border-red-500/50 rounded-xl p-4 flex items-start">
-              <AlertCircle className="text-red-400 mr-3 flex-shrink-0 mt-0.5" size={20} />
-              <p className="text-red-200">{error}</p>
-            </div>
-          </div>
-        )}
-
-        {success && (
-          <div className="max-w-4xl mx-auto mb-6">
-            <div className="bg-green-500/10 border border-green-500/50 rounded-xl p-4 flex items-start">
-              <CheckCircle className="text-green-400 mr-3 flex-shrink-0 mt-0.5" size={20} />
-              <p className="text-green-200">{success}</p>
-            </div>
-          </div>
-        )}
-
+      {/* Main Content */}
+      <div className="container mx-auto px-6 py-12">
         <div className="max-w-4xl mx-auto">
-          <div className="backdrop-blur-md bg-gradient-to-b from-purple-900/30 to-purple-900/10 rounded-3xl overflow-hidden border border-white/10 p-8 mb-12">
+          
+          {/* Alerts */}
+          {error && (
+            <div className="mb-6 border border-red-600 bg-red-50 p-4">
+              <p className="text-red-700 text-sm">{error}</p>
+            </div>
+          )}
+
+          {success && (
+            <div className="mb-6 border border-green-600 bg-green-50 p-4">
+              <p className="text-green-700 text-sm">{success}</p>
+            </div>
+          )}
+
+          <div className="border border-black bg-white p-8 mb-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="backdrop-blur-md bg-white/5 rounded-2xl p-6 border border-white/10">
-                <p className="text-xl font-medium text-white mb-2">{websiteInfo?.websiteName}</p>
-                <a href={websiteInfo?.websiteLink} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 transition-colors">
+              <div>
+                <h3 className="text-lg font-semibold mb-3">Website Details</h3>
+                <p className="text-base font-medium mb-1">{websiteInfo?.websiteName}</p>
+                <a 
+                  href={websiteInfo?.websiteLink} 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="text-sm text-gray-600 hover:text-black underline"
+                >
                   {websiteInfo?.websiteLink}
                 </a>
-                <div className="mt-4 pt-4 border-t border-white/10">
-                  <p className="text-white/60 text-sm mb-2">Accepted Categories:</p>
+                <div className="mt-4 pt-4 border-t border-gray-200">
+                  <p className="text-xs font-medium text-gray-500 mb-2">ACCEPTED CATEGORIES</p>
                   <div className="flex flex-wrap gap-2">
                     {websiteInfo?.businessCategories?.includes('any') ? (
-                      <span className="px-3 py-1 bg-green-500/20 text-green-300 rounded-full text-xs">All Categories</span>
+                      <span className="px-2 py-1 border border-gray-300 bg-gray-50 text-gray-700 text-xs">
+                        All Categories
+                      </span>
                     ) : (
                       websiteInfo?.businessCategories?.map(cat => (
-                        <span key={cat} className="px-3 py-1 bg-blue-500/20 text-blue-300 rounded-full text-xs">
+                        <span key={cat} className="px-2 py-1 border border-gray-300 bg-gray-50 text-gray-700 text-xs">
                           {businessCategories.find(bc => bc.value === cat)?.label || cat}
                         </span>
                       ))
@@ -384,51 +493,69 @@ function DirectAdvertise() {
                 </div>
               </div>
               
-              <div className="backdrop-blur-md bg-white/5 rounded-2xl p-6 border border-white/10">
-                <p className="text-lg font-medium text-white mb-2">{categoryInfo?.categoryName}</p>
-                <p className="text-white/60 text-sm mb-4">{categoryInfo?.description}</p>
+              <div>
+                <h3 className="text-lg font-semibold mb-3">Category Details</h3>
+                <p className="text-base font-medium mb-2">{categoryInfo?.categoryName}</p>
+                <p className="text-sm text-gray-600 mb-4">{categoryInfo?.description}</p>
                 <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-white/60 text-sm">Price:</span>
-                    <span className="text-white font-medium">${categoryInfo?.price}</span>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Price:</span>
+                    <span className="font-semibold">${categoryInfo?.price}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-white/60 text-sm">Tier:</span>
-                    <span className="text-white font-medium capitalize">{categoryInfo?.tier}</span>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Tier:</span>
+                    <span className="font-medium capitalize">{categoryInfo?.tier}</span>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-          
+
+          {/* Step 1: Ad Details Form */}
           {step === 1 && (
-            <form onSubmit={handleSubmitBasicInfo} className="backdrop-blur-md bg-white/5 rounded-3xl p-8 border border-white/10">
-              <h2 className="text-2xl font-bold mb-6">Advertisement Details</h2>
+            <div className="border border-black bg-white p-8">
+              <h2 className="text-xl font-semibold mb-6">Advertisement Details</h2>
               
-              <div className="space-y-6">
+              <form onSubmit={handleSubmitBasicInfo} className="space-y-6">
+                {/* File Upload */}
                 <div>
-                  <label className="block text-sm font-medium mb-2">Upload Ad Media</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Upload Ad Media
+                  </label>
                   <div
                     onDrop={handleDrop}
                     onDragOver={(e) => e.preventDefault()}
                     onClick={() => fileInputRef.current?.click()}
-                    className="border-2 border-dashed border-white/20 rounded-xl p-8 text-center cursor-pointer hover:border-blue-500/50 transition-colors"
+                    className="border-2 border-dashed border-gray-300 bg-gray-50 p-8 text-center cursor-pointer hover:border-gray-400 transition-colors"
                   >
                     {filePreview ? (
                       <div className="space-y-4">
                         {filePreview.type.startsWith('image/') && (
-                          <img src={filePreview.url} alt="Preview" className="max-h-48 mx-auto rounded-lg" />
+                          <img src={filePreview.url} alt="Preview" className="max-h-48 mx-auto" />
                         )}
                         {filePreview.type.startsWith('video/') && (
-                          <video src={filePreview.url} controls className="max-h-48 mx-auto rounded-lg" />
+                          <video src={filePreview.url} controls className="max-h-48 mx-auto" />
                         )}
-                        <p className="text-sm text-white/60">{file?.name}</p>
+                        <div className="flex items-center justify-center gap-2">
+                          <p className="text-sm text-gray-600">{file?.name}</p>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setFile(null);
+                              setFilePreview(null);
+                            }}
+                            className="text-gray-400 hover:text-gray-600"
+                          >
+                            <X size={16} />
+                          </button>
+                        </div>
                       </div>
                     ) : (
                       <div>
-                        <FileUp className="mx-auto mb-4 text-white/40" size={48} />
-                        <p className="text-white/60">Drop your file here or click to browse</p>
-                        <p className="text-xs text-white/40 mt-2">Images, Videos, or PDFs (Max 50MB)</p>
+                        <Upload size={32} className="mx-auto mb-3 text-gray-400" />
+                        <p className="text-gray-600 mb-1">Drop your file here or click to browse</p>
+                        <p className="text-xs text-gray-500">Images, Videos, or PDFs (Max 50MB)</p>
                       </div>
                     )}
                   </div>
@@ -441,31 +568,32 @@ function DirectAdvertise() {
                   />
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    <Building2 className="inline mr-2" size={16} />
-                    Business Name
+                {/* Business Name */}
+                <div className="relative">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Business Name <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
                     name="businessName"
                     value={businessData.businessName}
                     onChange={handleInputChange}
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500"
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black focus:border-black"
                     required
                   />
+                  <Building2 size={16} className="absolute left-3 top-11 text-gray-400" />
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    <Tag className="inline mr-2" size={16} />
-                    Business Category
+                {/* Business Category */}
+                <div className="relative">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Business Category <span className="text-red-500">*</span>
                   </label>
                   <select
                     name="businessCategory"
                     value={businessData.businessCategory}
                     onChange={handleInputChange}
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500"
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-black focus:border-black"
                     required
                   >
                     <option value="">Select a category</option>
@@ -473,91 +601,111 @@ function DirectAdvertise() {
                       <option key={cat.value} value={cat.value}>{cat.label}</option>
                     ))}
                   </select>
+                  <FileText size={16} className="absolute left-3 top-11 text-gray-400" />
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    <Link className="inline mr-2" size={16} />
-                    Business Website/Link
+                {/* Business Link */}
+                <div className="relative">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Business Website <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="url"
                     name="businessLink"
                     value={businessData.businessLink}
                     onChange={handleInputChange}
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500"
+                    placeholder="https://www.yourbusiness.com"
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black focus:border-black"
                     required
                   />
+                  <LinkIcon size={16} className="absolute left-3 top-11 text-gray-400" />
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    <MapPin className="inline mr-2" size={16} />
-                    Business Location
+                {/* Business Location */}
+                <div className="relative">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Business Location <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
                     name="businessLocation"
                     value={businessData.businessLocation}
                     onChange={handleInputChange}
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500"
+                    placeholder="City, State, or Country"
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black focus:border-black"
                     required
                   />
+                  <MapPin size={16} className="absolute left-3 top-11 text-gray-400" />
                 </div>
 
+                {/* Ad Description */}
                 <div>
-                  <label className="block text-sm font-medium mb-2">
-                    <FileText className="inline mr-2" size={16} />
-                    Advertisement Description
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Advertisement Description <span className="text-red-500">*</span>
                   </label>
                   <textarea
                     name="adDescription"
                     value={businessData.adDescription}
                     onChange={handleInputChange}
                     rows="4"
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500"
+                    placeholder="Tell us about your business in a few compelling words..."
+                    className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black focus:border-black"
                     required
                   />
                 </div>
 
+                {/* Submit Button */}
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 py-4 rounded-xl font-semibold transition-all disabled:opacity-50"
+                  className="w-full bg-black text-white py-3 font-semibold hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {isLoading ? 'Processing...' : 'Continue'}
+                  {isLoading ? 'Processing...' : 'Continue to Authentication'}
                 </button>
-              </div>
-            </form>
+              </form>
+            </div>
           )}
 
+          {/* Step 2: Authentication */}
           {step === 2 && (
-            <div className="backdrop-blur-md bg-white/5 rounded-3xl p-8 border border-white/10">
-              <h2 className="text-2xl font-bold mb-6">
-                {isAuthenticated ? 'Review & Create Ad' : 'Sign In to Continue'}
-              </h2>
+            <div className="border border-black bg-white p-8">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-semibold">
+                  {isAuthenticated ? 'Review & Create Ad' : 'Sign In to Continue'}
+                </h2>
+                {!adId && (
+                  <button
+                    onClick={handleBackToStep1}
+                    className="text-gray-600 hover:text-black transition-colors flex items-center gap-2"
+                  >
+                    <ArrowLeft size={18} />
+                    <span className="text-sm font-medium">Back to Edit</span>
+                  </button>
+                )}
+              </div>
               
               {!isAuthenticated ? (
                 <div className="space-y-6">
-                  <p className="text-white/60">Please sign in or create an account to proceed with your advertisement.</p>
+                  <p className="text-gray-600 text-sm">Please sign in or create an account to proceed with your advertisement.</p>
                   
-                  <div className="flex gap-4 border-b border-white/10">
+                  {/* Auth Mode Tabs */}
+                  <div className="flex gap-4 border-b border-gray-200">
                     <button
                       onClick={() => setAuthMode('login')}
-                      className={`pb-3 px-4 font-medium transition-colors ${
+                      className={`pb-3 px-1 font-medium transition-colors ${
                         authMode === 'login' 
-                          ? 'text-blue-400 border-b-2 border-blue-400' 
-                          : 'text-white/60 hover:text-white'
+                          ? 'text-black border-b-2 border-black' 
+                          : 'text-gray-500 hover:text-gray-700'
                       }`}
                     >
                       Sign In
                     </button>
                     <button
                       onClick={() => setAuthMode('signup')}
-                      className={`pb-3 px-4 font-medium transition-colors ${
+                      className={`pb-3 px-1 font-medium transition-colors ${
                         authMode === 'signup' 
-                          ? 'text-blue-400 border-b-2 border-blue-400' 
-                          : 'text-white/60 hover:text-white'
+                          ? 'text-black border-b-2 border-black' 
+                          : 'text-gray-500 hover:text-gray-700'
                       }`}
                     >
                       Sign Up
@@ -567,45 +715,51 @@ function DirectAdvertise() {
                   <form onSubmit={handleAuth} className="space-y-4">
                     {authMode === 'signup' && (
                       <div>
-                        <label className="block text-sm font-medium mb-2">Full Name</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Full Name <span className="text-red-500">*</span>
+                        </label>
                         <input
                           type="text"
                           name="name"
                           value={authData.name}
                           onChange={handleAuthInputChange}
-                          className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500"
+                          className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black focus:border-black"
                           required={authMode === 'signup'}
                         />
                       </div>
                     )}
 
                     <div>
-                      <label className="block text-sm font-medium mb-2">Email</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Email <span className="text-red-500">*</span>
+                      </label>
                       <input
                         type="email"
                         name="email"
                         value={authData.email}
                         onChange={handleAuthInputChange}
-                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500"
+                        className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black focus:border-black"
                         required
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium mb-2">Password</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Password <span className="text-red-500">*</span>
+                      </label>
                       <div className="relative">
                         <input
                           type={showPassword ? 'text' : 'password'}
                           name="password"
                           value={authData.password}
                           onChange={handleAuthInputChange}
-                          className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500"
+                          className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black focus:border-black"
                           required
                         />
                         <button
                           type="button"
                           onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white"
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                         >
                           {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                         </button>
@@ -615,7 +769,7 @@ function DirectAdvertise() {
                     <button
                       type="submit"
                       disabled={isLoading}
-                      className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 py-4 rounded-xl font-semibold transition-all disabled:opacity-50"
+                      className="w-full bg-black text-white py-3 font-semibold hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {isLoading ? 'Processing...' : (authMode === 'login' ? 'Sign In & Continue' : 'Create Account & Continue')}
                     </button>
@@ -623,15 +777,14 @@ function DirectAdvertise() {
                 </div>
               ) : (
                 <div className="space-y-6">
-                  <div className="bg-green-500/10 border border-green-500/50 rounded-xl p-4">
-                    <CheckCircle className="inline mr-2 text-green-400" size={20} />
-                    <span className="text-green-200">You're signed in as {user?.email}</span>
+                  <div className="border border-green-600 bg-green-50 p-4">
+                    <span className="text-green-700 text-sm">You're signed in as {user?.email}</span>
                   </div>
                   
                   <button
                     onClick={createAdAndProceed}
                     disabled={isLoading}
-                    className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 py-4 rounded-xl font-semibold transition-all disabled:opacity-50"
+                    className="w-full bg-black text-white py-3 font-semibold hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {isLoading ? 'Creating Ad...' : 'Create Ad & Proceed to Payment'}
                   </button>
@@ -640,27 +793,28 @@ function DirectAdvertise() {
             </div>
           )}
 
+          {/* Step 3: Payment */}
           {step === 3 && (
-            <div className="backdrop-blur-md bg-white/5 rounded-3xl p-8 border border-white/10">
-              <h2 className="text-2xl font-bold mb-6">Complete Payment</h2>
+            <div className="border border-black bg-white p-8">
+              <h2 className="text-xl font-semibold mb-6">Complete Payment</h2>
               
               <div className="space-y-6">
-                <div className="bg-white/5 rounded-xl p-6">
+                <div className="border border-gray-200 bg-gray-50 p-6">
                   <h3 className="font-semibold mb-4">Order Summary</h3>
                   <div className="space-y-3">
-                    <div className="flex justify-between">
-                      <span className="text-white/60">Website:</span>
-                      <span>{websiteInfo?.websiteName}</span>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Website:</span>
+                      <span className="font-medium">{websiteInfo?.websiteName}</span>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-white/60">Category:</span>
-                      <span>{categoryInfo?.categoryName}</span>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Category:</span>
+                      <span className="font-medium">{categoryInfo?.categoryName}</span>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-white/60">Business:</span>
-                      <span>{businessData.businessName}</span>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Business:</span>
+                      <span className="font-medium">{businessData.businessName}</span>
                     </div>
-                    <div className="border-t border-white/10 pt-3 flex justify-between font-bold text-lg">
+                    <div className="border-t border-gray-300 pt-3 flex justify-between font-semibold text-base">
                       <span>Total:</span>
                       <span>${categoryInfo?.price}</span>
                     </div>
@@ -670,9 +824,8 @@ function DirectAdvertise() {
                 <button
                   onClick={handlePayment}
                   disabled={isLoading}
-                  className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 py-4 rounded-xl font-semibold transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="w-full bg-black text-white py-3 font-semibold hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <CreditCard size={20} />
                   {isLoading ? 'Processing...' : 'Proceed to Payment'}
                 </button>
               </div>
@@ -682,6 +835,63 @@ function DirectAdvertise() {
       </div>
     </div>
   );
+}
+
+// IndexedDB helper functions for file storage
+const FILE_STORAGE_KEY = 'directAdvertise_uploadedFile';
+const DB_NAME = 'DirectAdvertiseDB';
+const STORE_NAME = 'files';
+
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, 1);
+    
+    request.onerror = () => reject(request.error);
+    request.onsuccess = () => resolve(request.result);
+    
+    request.onupgradeneeded = (event) => {
+      const db = event.target.result;
+      if (!db.objectStoreNames.contains(STORE_NAME)) {
+        db.createObjectStore(STORE_NAME);
+      }
+    };
+  });
+}
+
+async function saveFileToIndexedDB(key, file) {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([STORE_NAME], 'readwrite');
+    const store = transaction.objectStore(STORE_NAME);
+    const request = store.put(file, key);
+    
+    request.onerror = () => reject(request.error);
+    request.onsuccess = () => resolve();
+  });
+}
+
+async function getFileFromIndexedDB(key) {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([STORE_NAME], 'readonly');
+    const store = transaction.objectStore(STORE_NAME);
+    const request = store.get(key);
+    
+    request.onerror = () => reject(request.error);
+    request.onsuccess = () => resolve(request.result);
+  });
+}
+
+async function deleteFileFromIndexedDB(key) {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([STORE_NAME], 'readwrite');
+    const store = transaction.objectStore(STORE_NAME);
+    const request = store.delete(key);
+    
+    request.onerror = () => reject(request.error);
+    request.onsuccess = () => resolve();
+  });
 }
 
 export default DirectAdvertise;

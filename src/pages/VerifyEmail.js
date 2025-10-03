@@ -28,7 +28,6 @@ const VerifyEmail = () => {
     try {
       await axios.get(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/auth/verify-email?token=${token}`);
       setStatus('success');
-      setMessage('Email verified successfully! You can now log in.');
     } catch (error) {
       setStatus('error');
       if (error.response?.data?.message) {
@@ -45,7 +44,6 @@ const VerifyEmail = () => {
     setResendLoading(true);
     try {
       await axios.post(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/auth/resend-verification`, { email });
-      setMessage('Verification email sent! Please check your inbox.');
     } catch (error) {
       if (error.response?.data?.message) {
         setMessage(error.response.data.message);
@@ -65,14 +63,6 @@ const VerifyEmail = () => {
     <div className="min-h-screen bg-white flex items-center justify-center px-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-12">
-          {status === 'success' && (
-            <CheckCircle className="mx-auto h-16 w-16 text-green-600 mb-6" />
-          )}
-
-          {status === 'error' && (
-            <XCircle className="mx-auto h-16 w-16 text-red-600 mb-6" />
-          )}
-
           <h2 className="text-3xl font-bold text-black mb-4">
             {status === 'verifying' ? 'Verifying Email...' : 'Email Verification'}
           </h2>

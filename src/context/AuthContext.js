@@ -1,4 +1,4 @@
-// AuthContext.js
+// AuthContext.js - Updated with returnUrl support
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 
@@ -88,11 +88,9 @@ export const AuthProvider = ({ children }) => {
             return;
           } else {
             console.log('Server still unavailable after retry');
-            // Don't remove token, but set loading to false
             setIsLoading(false);
           }
         } else {
-          // Other client errors (400, 403, etc.) - remove token
           handleInvalidToken();
         }
       } else if (error.request) {
@@ -103,7 +101,6 @@ export const AuthProvider = ({ children }) => {
           return;
         } else {
           console.log('Network still unavailable after retries');
-          // Don't remove token - server might just be starting up
           setIsLoading(false);
         }
       } else {
@@ -111,7 +108,6 @@ export const AuthProvider = ({ children }) => {
         setIsLoading(false);
       }
     } finally {
-      // Only set loading to false if we're not retrying
       if (retryCount === 0) {
         setIsLoading(false);
       }
@@ -154,13 +150,21 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const signup = async (email, password, name) => {
+  // UPDATED: Now accepts optional returnUrl parameter
+  const signup = async (email, password, name, returnUrl = null) => {
     try {
-      const response = await axios.post(`${API_URL}/api/auth/register`, {
+      const requestData = {
         email,
         password,
         name
-      });
+      };
+      
+      // Add returnUrl if provided
+      if (returnUrl) {
+        requestData.returnUrl = returnUrl;
+      }
+
+      const response = await axios.post(`${API_URL}/api/auth/register`, requestData);
 
       return {
         success: true,
@@ -245,7 +249,7 @@ export const AuthProvider = ({ children }) => {
     getCurrentUser,
     handleAutoLogin,
     retryAuthentication,
-    token: localStorage.getItem('token') // Add this line
+    token: localStorage.getItem('token')
   };
 
   return (

@@ -1,10 +1,9 @@
-// FIXED: New VerifySuccess.js component
+// VerifySuccess.js
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { CheckCircle, ArrowRight, Loader } from 'lucide-react';
 import { Button } from '../components/components';
 import { useAuth } from '../context/AuthContext';
-import toast from 'react-hot-toast';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 const VerifySuccess = () => {
   const [searchParams] = useSearchParams();
@@ -15,6 +14,7 @@ const VerifySuccess = () => {
   
   const token = searchParams.get('token');
   const autoLogin = searchParams.get('auto_login');
+  const fromDirectAdvertise = searchParams.get('fromDirectAdvertise') === 'true';
 
   useEffect(() => {
     const processVerification = async () => {
@@ -22,73 +22,73 @@ const VerifySuccess = () => {
         try {
           await handleAutoLogin(token);
           setAutoLoginSuccess(true);
-          toast.success('Email verified! You are now signed in.');
+          
+          if (fromDirectAdvertise) {
+            
+            localStorage.setItem('emailVerified', 'true');
+            
+            window.dispatchEvent(new StorageEvent('storage', {
+              key: 'emailVerified',
+              newValue: 'true',
+              url: window.location.href
+            }));
+          } else {
+            // 
+          }
         } catch (error) {
-          console.error('Auto-login failed:', error);
-          toast.error('Email verified but auto-login failed. Please sign in manually.');
         }
       }
       setIsLoading(false);
     };
 
     processVerification();
-  }, [token, autoLogin, handleAutoLogin]);
+  }, [token, autoLogin, handleAutoLogin, fromDirectAdvertise]);
 
   const handleContinue = () => {
     navigate('/');
   };
 
   if (isLoading) {
+    return <LoadingSpinner />;
+  }
+
+  if (fromDirectAdvertise) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center px-4">
-        <div className="text-center">
-          <Loader className="w-8 h-8 text-blue-600 animate-spin mx-auto mb-4" />
-          <p className="text-gray-600">Verifying your email...</p>
+        <div className="w-full max-w-md text-center">
+          <div className="mb-8">
+            
+            <h1 className="text-3xl font-bold text-black mb-4">
+              Email Verified Successfully!
+            </h1>
+            
+            <div className="space-y-4">
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 text-left">
+                <p className="text-blue-900 font-medium mb-2">
+                  Next Step:
+                </p>
+                <p className="text-blue-800 text-sm">
+                  Please <strong>go back to your Direct Advertise tab/window</strong> (the page where you were creating your advertisement). 
+                </p>
+                <p className="text-blue-800 text-sm mt-2">
+                  Your advertisement will automatically continue to the payment step once you return to that page.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     );
   }
 
+  // Normal verification success (not from DirectAdvertise)
   return (
     <div className="min-h-screen bg-white flex items-center justify-center px-4">
       <div className="w-full max-w-md text-center">
         <div className="mb-8">
-          <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-6">
-            <CheckCircle className="w-8 h-8 text-green-600" />
-          </div>
-          
           <h1 className="text-3xl font-bold text-black mb-4">
             Email Verified Successfully!
           </h1>
-          
-          {autoLoginSuccess ? (
-            <div className="space-y-4">
-              <p className="text-gray-600">
-                Your email has been verified and you're now signed in to your account.
-              </p>
-              
-              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                <p className="text-green-800 text-sm">
-                  ✅ Account verified<br/>
-                  ✅ Automatically signed in<br/>
-                  ✅ Ready to use the platform
-                </p>
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              <p className="text-gray-600">
-                Your email has been verified successfully! You can now sign in to your account.
-              </p>
-              
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <p className="text-blue-800 text-sm">
-                  ✅ Account verified<br/>
-                  → Please sign in to continue
-                </p>
-              </div>
-            </div>
-          )}
         </div>
 
         <div className="space-y-4">
@@ -101,19 +101,13 @@ const VerifySuccess = () => {
             {autoLoginSuccess ? (
               <>
                 Continue to Dashboard
-                <ArrowRight className="w-4 h-4 ml-2" />
               </>
             ) : (
               <>
                 Go to Sign In
-                <ArrowRight className="w-4 h-4 ml-2" />
               </>
             )}
           </Button>
-        </div>
-
-        <div className="mt-8 text-xs text-gray-500">
-          <p>Welcome to the platform! You can now access all features.</p>
         </div>
       </div>
     </div>

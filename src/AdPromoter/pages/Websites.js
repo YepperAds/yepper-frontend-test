@@ -1,4 +1,3 @@
-// Websites.js
 import React, { useState, useEffect } from 'react';
 import { Globe, Search, Edit, Check, X, Plus, AlertTriangle, ArrowLeft } from 'lucide-react';
 import { Link, useNavigate } from "react-router-dom";
@@ -18,14 +17,12 @@ function Websites() {
   const [filteredWebsites, setFilteredWebsites] = useState([]);
   const [editingWebsite, setEditingWebsite] = useState(null);
   const [tempWebsiteName, setTempWebsiteName] = useState('');
-  // COMMENTED OUT: Rejection state management
   // const [rejecting, setRejecting] = useState(null);
   // const [rejectionReason, setRejectionReason] = useState('');
   // const [showRejectModal, setShowRejectModal] = useState(false);
   // const [selectedAd, setSelectedAd] = useState(null);
   const [showAdModal, setShowAdModal] = useState(false);
   const [adModalData, setAdModalData] = useState(null);
-  // COMMENTED OUT: Wallet balance for rejection processing
   // const [walletBalance, setWalletBalance] = useState(0);
 
   const authenticatedAxios = axios.create({
@@ -44,14 +41,12 @@ function Websites() {
         const response = await authenticatedAxios.get(`/createWebsite/${userId}`);
         return response.data;
       } catch (error) {
-        console.error('Error fetching websites:', error.response?.data || error.message);
         throw error;
       }
     },
     enabled: !!(user?._id || user?.id) && !!token,
   });
 
-  // COMMENTED OUT: Pending ads query (for rejection functionality)
   // const { data: pendingAds = [], isLoading: pendingLoading } = useQuery({
   //   queryKey: ['pendingAds'],
   //   queryFn: async () => {
@@ -92,7 +87,6 @@ function Websites() {
       setEditingWebsite(null);
     },
     onError: (error) => {
-      console.error('Failed to update website name:', error);
     }
   });
 
@@ -124,7 +118,6 @@ function Websites() {
   };
 
   const getAdsForWebsite = (websiteId) => {
-    // COMMENTED OUT: Pending ads filtering
     // const pending = pendingAds.filter(ad => 
     //   ad.websiteSelections?.some(sel => 
     //     sel.websiteId === websiteId && sel.approved && !sel.isRejected
@@ -138,12 +131,11 @@ function Websites() {
     );
     
     return { 
-      // pending: [], // COMMENTED OUT
+      // pending: [],
       active 
     };
   };
 
-  // COMMENTED OUT: Rejection modal functions
   // const openRejectModal = (ad) => {
   //   const websiteSelection = ad.websiteSelections.find(sel => sel.approved && !sel.isRejected);
   //   if (!websiteSelection) return;
@@ -167,7 +159,7 @@ function Websites() {
       ...ad,
       currentWebsite,
       websiteSelection,
-      status: websiteSelection?.status || 'active' // Changed default from 'pending' to 'active'
+      status: websiteSelection?.status || 'active'
     };
 
     setAdModalData(adData);
@@ -179,7 +171,6 @@ function Websites() {
     setAdModalData(null);
   };
 
-  // COMMENTED OUT: Rejection handler
   // const handleRejectAd = async () => {
   //   if (!selectedAd || !rejectionReason.trim()) return;
 
@@ -211,14 +202,12 @@ function Websites() {
   //   }
   // };
 
-  // COMMENTED OUT: Close rejection modal
   // const closeRejectModal = () => {
   //   setShowRejectModal(false);
   //   setSelectedAd(null);
   //   setRejectionReason('');
   // };
 
-  // COMMENTED OUT: Time remaining calculator for rejection deadline
   // const getTimeRemaining = (deadline) => {
   //   const now = new Date();
   //   const timeLeft = new Date(deadline) - now;
@@ -305,7 +294,7 @@ function Websites() {
     </>
   );
 
-  if (websitesLoading || activeLoading) { // REMOVED: pendingLoading
+  if (websitesLoading || activeLoading) {
     return <LoadingSpinner />;
   }
 

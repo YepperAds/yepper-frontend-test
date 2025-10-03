@@ -53,11 +53,7 @@ const VerifyError = () => {
     <div className="min-h-screen bg-white flex items-center justify-center px-4">
       <div className="w-full max-w-md text-center">
         <div className="mb-8">
-          <div className="mx-auto w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-6">
-            <XCircle className="w-8 h-8 text-red-600" />
-          </div>
-          
-          <h1 className="text-3xl font-bold text-black mb-4">
+          <h1 className="text-3xl font-bold text-red-600 mb-4">
             {title}
           </h1>
           
@@ -91,10 +87,6 @@ const VerifyError = () => {
           >
             I already have a verified account
           </Button>
-        </div>
-
-        <div className="mt-8 text-xs text-gray-500">
-          <p>Need help? Contact our support team.</p>
         </div>
       </div>
     </div>
