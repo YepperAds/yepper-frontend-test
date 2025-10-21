@@ -1,11 +1,13 @@
+// UnifiedAdUploadFlow.js
 import React, { useState, useRef, useEffect } from 'react';
 import {
-  Upload, ArrowLeft, ArrowRight, Check, AlertTriangle, X,
-  Mail, Lock, User, Eye, EyeOff, Loader, Building2, Tag,
-  MapPin, FileText, Globe, Search, DollarSign, CreditCard,
-  Wallet, CheckCircle, Cloud, Monitor, Smartphone
+  Upload, ArrowLeft, Check, AlertTriangle, X,
+  Mail, Lock, User, Eye, EyeOff, Building2, Tag,
+  MapPin, FileText, Globe, Search, Cloud
 } from 'lucide-react';
+import { Button, Container, Badge } from '../../components/components';
 import axios from 'axios';
+import LoadingSpinner from "../../components/LoadingSpinner";
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
@@ -236,6 +238,15 @@ const UnifiedAdUploadFlow = () => {
   };
 
   // Step 2: Business Details Handlers
+
+  const isFormValid = () => {
+    return (
+      Object.values(businessData).every((value) => value.trim()) &&
+      (!businessData.businessLink || 
+       /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/.test(businessData.businessLink))
+    );
+  };
+
   const handleBusinessInputChange = (e) => {
     const { name, value } = e.target;
     setBusinessData(prev => ({ ...prev, [name]: value }));
@@ -458,186 +469,277 @@ const UnifiedAdUploadFlow = () => {
     }
   };
 
-  // Render functions for each step
   const renderStep1 = () => (
-    <div className="space-y-6">
-      <div className="mb-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">Upload Your Ad</h3>
-        <p className="text-sm text-gray-600">
-          Upload an image or video for your advertisement
-        </p>
-      </div>
-
-      <div
-        onDrop={handleDrop}
-        onDragEnter={(e) => { e.preventDefault(); setDragActive(true); }}
-        onDragLeave={(e) => { e.preventDefault(); setDragActive(false); }}
-        onDragOver={(e) => e.preventDefault()}
-        onClick={() => fileInputRef.current?.click()}
-        className={`border-2 border-dashed rounded-lg p-12 text-center cursor-pointer transition-colors ${
-          dragActive ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-blue-400'
-        }`}
-      >
-        {filePreview ? (
-          <div className="space-y-4">
-            {filePreview.type.startsWith('image/') ? (
-              <img
-                src={filePreview.url}
-                alt="Preview"
-                className="mx-auto max-h-64 rounded-lg"
-              />
-            ) : (
-              <video
-                src={filePreview.url}
-                controls
-                className="mx-auto max-h-64 rounded-lg"
-              />
-            )}
-            <div className="text-sm text-gray-600">
-              <p className="font-medium">{filePreview.name}</p>
-              <p>{formatFileSize(filePreview.size)}</p>
-            </div>
-            <p className="text-xs text-gray-500">Click to change file</p>
+    <div className="max-w-6xl mx-auto px-4 py-12">
+      {/* File Requirements - Only show when no file is selected */}
+      {!filePreview && (
+        <div className="mb-8 p-4 bg-gray-50 border border-gray-300">
+          <h3 className="text-lg font-semibold text-black mb-3">File Requirements</h3>
+          <div className="space-y-1 text-sm text-gray-700">
+            <p>• Supported formats: JPEG, PNG, GIF, MP4</p>
+            <p>• Maximum file size: 50MB</p>
+            <p>• Recommended dimensions: 1920x1080 for videos, 1200x630 for images</p>
           </div>
-        ) : (
-          <div className="space-y-4">
-            <Cloud className="mx-auto h-16 w-16 text-gray-400" />
-            <div>
-              <p className="text-base text-gray-700 font-medium">
-                Drop your file here or click to browse
-              </p>
-              <p className="text-sm text-gray-500 mt-2">
-                Supports: JPEG, PNG, GIF, MP4 (max 50MB)
-              </p>
-            </div>
-          </div>
-        )}
-      </div>
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*,video/*"
-        onChange={handleFileChange}
-        className="hidden"
-      />
+        </div>
+      )}
 
+      {/* Error Display */}
       {errors.file && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm flex items-center">
-          <AlertTriangle className="w-5 h-5 mr-2" />
-          {errors.file}
+        <div className="mb-6 border border-red-600 bg-red-50 p-4 flex items-start">
+          <AlertTriangle size={20} className="mr-2 text-red-600 flex-shrink-0 mt-0.5" />
+          <span className="text-red-700">{errors.file}</span>
+        </div>
+      )}
+
+      {/* Upload Area - Only show if no file is selected */}
+      {!filePreview && (
+        <div 
+          className={`border-2 border-dashed p-12 text-center cursor-pointer transition-all duration-200 mb-6 ${
+            dragActive 
+              ? 'border-black bg-gray-50' 
+              : 'border-gray-400 hover:border-gray-600 hover:bg-gray-50'
+          }`}
+          onDragEnter={(e) => { e.preventDefault(); setDragActive(true); }}
+          onDragLeave={(e) => { e.preventDefault(); setDragActive(false); }}
+          onDragOver={(e) => e.preventDefault()}
+          onDrop={handleDrop}
+          onClick={() => fileInputRef.current?.click()}
+        >
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/gif,video/mp4,video/quicktime"
+            onChange={handleFileChange}
+            className="hidden"
+          />
+          
+          <div className="space-y-4">
+            <Cloud size={64} className="mx-auto text-gray-400" />
+            <div>
+              <p className="text-lg font-medium text-black mb-2">
+                {dragActive ? 'Drop your file here' : 'Drag and drop your file here'}
+              </p>
+              <p className="text-gray-600">or click to browse files</p>
+            </div>
+            <button 
+              type="button"
+              className="inline-flex items-center px-6 py-3 border border-black bg-white text-black hover:bg-gray-50 transition-colors"
+            >
+              <Upload size={20} className="mr-2" />
+              Choose File
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* File Preview - Only show if file is selected */}
+      {filePreview && (
+        <div className="mb-8">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/gif,video/mp4,video/quicktime"
+            onChange={handleFileChange}
+            className="hidden"
+          />
+          
+          {/* Large Media Display */}
+          <div className="relative border border-black bg-black">
+            {/* Replace Button in Corner */}
+            <div className="absolute top-4 right-4 z-10">
+              <button 
+                onClick={() => fileInputRef.current?.click()}
+                type="button"
+                className="px-4 py-2 bg-black text-white border border-white hover:bg-gray-900 transition-colors"
+              >
+                Replace File
+              </button>
+            </div>
+            
+            {/* Media Content */}
+            <div className="flex items-center justify-center min-h-96">
+              {filePreview.type.startsWith('image/') ? (
+                <img 
+                  src={filePreview.url} 
+                  alt="Advertisement Preview" 
+                  className="max-w-full max-h-[600px] object-contain"
+                />
+              ) : (
+                <video 
+                  src={filePreview.url} 
+                  controls 
+                  className="max-w-full max-h-[600px] object-contain"
+                />
+              )}
+            </div>
+          </div>
         </div>
       )}
     </div>
   );
 
   const renderStep2 = () => (
-    <div className="space-y-6">
-      <div className="mb-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">Business Details</h3>
-        <p className="text-sm text-gray-600">
-          Tell us about your business
-        </p>
-      </div>
+    <div className="max-w-6xl mx-auto px-4 py-12">
+      <div className="space-y-6">
+        {/* First Row - Business Name & Website */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="relative">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Business Name <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              name="businessName"
+              value={businessData.businessName}
+              onChange={handleBusinessInputChange}
+              className="w-full pl-10 pr-4 py-3 border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-black focus:border-black transition-colors"
+              placeholder="Enter your business name"
+            />
+            <Building2 size={16} className="absolute left-3 top-11 text-gray-400" />
+          </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          <Building2 className="inline w-4 h-4 mr-1" />
-          Business Name *
-        </label>
-        <input
-          type="text"
-          name="businessName"
-          value={businessData.businessName}
-          onChange={handleBusinessInputChange}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-          placeholder="Your Business Name"
-        />
-      </div>
+          <div className="relative">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Business Website <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="url"
+              name="businessLink"
+              value={businessData.businessLink}
+              onChange={handleBusinessInputChange}
+              className="w-full pl-10 pr-4 py-3 border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-black focus:border-black transition-colors"
+              placeholder="https://www.yourbusiness.com"
+            />
+            <Globe size={16} className="absolute left-3 top-11 text-gray-400" />
+          </div>
+        </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          <Globe className="inline w-4 h-4 mr-1" />
-          Business Website *
-        </label>
-        <input
-          type="url"
-          name="businessLink"
-          value={businessData.businessLink}
-          onChange={handleBusinessInputChange}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-          placeholder="https://yourbusiness.com"
-        />
-      </div>
+        {/* Business Category - Custom Selector */}
+        <div className="relative">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Business Category <span className="text-red-500">*</span>
+          </label>
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setShowCategoryModal(true)}
+              className="w-full pl-10 pr-4 py-3 border border-gray-300 bg-white text-left focus:outline-none focus:ring-2 focus:ring-black focus:border-black transition-colors"
+            >
+              <div className="flex items-center justify-between">
+                <span className={businessData.businessCategory ? 'text-black' : 'text-gray-500'}>
+                  {getSelectedCategory()?.label || 'Select your business category'}
+                </span>
+              </div>
+            </button>
+            <Tag size={16} className="absolute left-3 top-4 text-gray-400" />
+          </div>
+        </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          <MapPin className="inline w-4 h-4 mr-1" />
-          Business Location *
-        </label>
-        <input
-          type="text"
-          name="businessLocation"
-          value={businessData.businessLocation}
-          onChange={handleBusinessInputChange}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-          placeholder="City, Country"
-        />
-      </div>
+        {/* Business Location */}
+        <div className="relative">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Business Location <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            name="businessLocation"
+            value={businessData.businessLocation}
+            onChange={handleBusinessInputChange}
+            className="w-full pl-10 pr-4 py-3 border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-black focus:border-black transition-colors"
+            placeholder="City, State, or Country"
+          />
+          <MapPin size={16} className="absolute left-3 top-11 text-gray-400" />
+        </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          <Tag className="inline w-4 h-4 mr-1" />
-          Business Category *
-        </label>
-        <button
-          type="button"
-          onClick={() => setShowCategoryModal(true)}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg text-left hover:border-blue-500 focus:ring-2 focus:ring-blue-500"
-        >
-          {getSelectedCategory()?.label || 'Select a category'}
-        </button>
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          <FileText className="inline w-4 h-4 mr-1" />
-          Ad Description *
-        </label>
-        <textarea
-          name="adDescription"
-          value={businessData.adDescription}
-          onChange={handleBusinessInputChange}
-          rows="4"
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-          placeholder="Describe your advertisement..."
-        />
+        {/* Business Description */}
+        <div className="relative">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Business Description <span className="text-red-500">*</span>
+          </label>
+          <textarea
+            name="adDescription"
+            value={businessData.adDescription}
+            onChange={handleBusinessInputChange}
+            rows={4}
+            className="w-full pl-10 pr-4 py-3 border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-black focus:border-black transition-colors"
+            placeholder="Tell us about your business in a few compelling words..."
+          />
+          <FileText size={16} className="absolute left-3 top-11 text-gray-400" />
+        </div>
       </div>
 
       {/* Category Selection Modal */}
       {showCategoryModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-bold">Select Category</h3>
-              <button onClick={() => setShowCategoryModal(false)}>
-                <X className="w-6 h-6 text-gray-400 hover:text-gray-600" />
+          <div className="bg-white border border-black max-w-4xl w-full max-h-[80vh] overflow-hidden">
+            {/* Modal Header */}
+            <div className="border-b border-black p-6 flex items-center justify-between">
+              <div className="flex items-center">
+                <h3 className="text-xl font-semibold text-black">Select Business Category</h3>
+              </div>
+              <button
+                onClick={() => setShowCategoryModal(false)}
+                className="p-2 hover:bg-gray-100 transition-colors"
+              >
+                <X size={20} className="text-gray-500" />
               </button>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {businessCategories.map((category) => (
-                <button
-                  key={category.value}
-                  onClick={() => handleCategorySelect(category.value)}
-                  className={`p-4 border-2 rounded-lg text-left transition-all ${
-                    businessData.businessCategory === category.value
-                      ? 'border-blue-500 bg-blue-50'
-                      : 'border-gray-200 hover:border-gray-300'
-                  }`}
-                >
-                  <div className="font-semibold text-gray-900">{category.label}</div>
-                  <div className="text-sm text-gray-600 mt-1">{category.description}</div>
-                </button>
-              ))}
+
+            {/* Modal Content */}
+            <div className="p-6 overflow-y-auto max-h-[calc(80vh-120px)]">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {businessCategories.map((category) => {
+                  const IconComponent = category.icon;
+                  const isSelected = businessData.businessCategory === category.value;
+                  
+                  return (
+                    <button
+                      key={category.value}
+                      onClick={() => handleCategorySelect(category.value)}
+                      className={`p-4 border text-left transition-all duration-200 hover:shadow-lg group ${
+                        isSelected 
+                          ? 'border-black bg-black text-white' 
+                          : 'border-gray-200 hover:border-gray-300 bg-white'
+                      }`}
+                    >
+                      <div className="flex items-start space-x-3">
+                        <div className={`p-2 rounded-lg transition-colors ${
+                          isSelected 
+                            ? 'bg-white bg-opacity-20' 
+                            : 'bg-gray-100 group-hover:bg-gray-200'
+                        }`}>
+                          {IconComponent && (
+                            <IconComponent 
+                              size={24} 
+                              className={isSelected ? 'text-white' : 'text-gray-700'}
+                            />
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className={`font-medium mb-1 ${
+                            isSelected ? 'text-white' : 'text-black'
+                          }`}>
+                            {category.label}
+                          </h4>
+                          <p className={`text-sm ${
+                            isSelected ? 'text-white text-opacity-80' : 'text-gray-600'
+                          }`}>
+                            {category.description}
+                          </p>
+                        </div>
+                      </div>
+                      
+                      {isSelected && (
+                        <div className="mt-3 flex items-center justify-end">
+                          <div className="w-5 h-5 bg-white rounded-full flex items-center justify-center">
+                            <div className="w-2 h-2 bg-black rounded-full"></div>
+                          </div>
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
         </div>
@@ -646,162 +748,239 @@ const UnifiedAdUploadFlow = () => {
   );
 
   const renderStep3 = () => (
-    <div className="space-y-6">
-      <div className="mb-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">Select Websites</h3>
-        <p className="text-sm text-gray-600">
-          Choose where you want your ad to appear
-        </p>
-      </div>
-
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-        <input
-          type="text"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          placeholder="Search websites..."
-          className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-        />
+    <div className="max-w-6xl mx-auto px-4 py-12">
+      <div className="flex justify-between items-center gap-4 mb-8">
+        <div className="relative flex-1 max-w-md">
+          <Search size={20} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Search websites..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-10 pr-4 py-3 border border-black bg-white text-black placeholder-gray-500 focus:outline-none focus:ring-0 transition-all duration-200"
+          />
+        </div>
       </div>
 
       {loading ? (
-        <div className="flex items-center justify-center py-12">
-          <Loader className="w-8 h-8 animate-spin text-blue-600" />
+        <div className="flex items-center justify-center min-h-96">
+          <LoadingSpinner/>
+        </div>
+      ) : filteredWebsites.length === 0 ? (
+        <div className="flex items-center justify-center min-h-96">
+          <div className="text-center">
+            <h2 className="text-2xl font-semibold mb-4 text-black">No websites available</h2>
+            <p className="text-gray-600">
+              {searchTerm 
+                ? 'Try adjusting your search terms'
+                : 'No websites are currently available'
+              }
+            </p>
+          </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-96 overflow-y-auto">
-          {filteredWebsites.map((website) => (
-            <button
-              key={website._id}
-              onClick={() => handleWebsiteSelect(website._id)}
-              className={`p-4 border-2 rounded-lg text-left transition-all ${
-                selectedWebsites.includes(website._id)
-                  ? 'border-blue-500 bg-blue-50'
-                  : 'border-gray-200 hover:border-gray-300'
-              }`}
-            >
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center space-x-2 mb-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredWebsites.map((website) => {
+            const isSelected = selectedWebsites.includes(website._id);
+            
+            return (
+              <div 
+                key={website._id} 
+                onClick={() => handleWebsiteSelect(website._id)}
+                className={`border p-6 cursor-pointer transition-all duration-200 hover:bg-gray-50 ${
+                  isSelected 
+                    ? 'border-black bg-gray-50' 
+                    : 'border-gray-300'
+                }`}
+              >
+                <div className="flex justify-between items-start mb-6">
+                  <div className="flex items-center">
                     {website.imageUrl ? (
-                      <img
-                        src={website.imageUrl}
+                      <img 
+                        src={website.imageUrl} 
                         alt={website.websiteName}
-                        className="w-8 h-8 rounded object-cover"
+                        className="w-10 h-10 object-contain mr-3"
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = '/global.png';
+                        }}
                       />
                     ) : (
-                      <Globe className="w-8 h-8 text-gray-400" />
+                      <Globe size={40} className="mr-3 text-black" />
                     )}
-                    <span className="font-semibold text-gray-900">
-                      {website.websiteName}
-                    </span>
+                    <div>
+                      <h3 className="text-lg font-semibold text-black">{website.websiteName}</h3>
+                      <p className="text-sm text-gray-600 break-all">{website.websiteLink}</p>
+                    </div>
                   </div>
-                  <p className="text-sm text-gray-600 truncate">
-                    {website.websiteLink}
-                  </p>
+                  
+                  <div className={`w-6 h-6 border flex items-center justify-center ${
+                    isSelected 
+                      ? 'border-black bg-black text-white' 
+                      : 'border-gray-300'
+                  }`}>
+                    {isSelected && <Check size={14} />}
+                  </div>
                 </div>
-                {selectedWebsites.includes(website._id) && (
-                  <CheckCircle className="w-6 h-6 text-blue-600 flex-shrink-0" />
-                )}
+                
+                <div className="flex flex-wrap gap-2">
+                  {website.businessCategories && (
+                    <div className="text-xs px-2 py-1 bg-black text-white">
+                      {website.businessCategories}
+                    </div>
+                  )}
+                </div>
               </div>
-            </button>
-          ))}
-        </div>
-      )}
-
-      {selectedWebsites.length > 0 && (
-        <div className="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded-lg text-sm">
-          {selectedWebsites.length} website{selectedWebsites.length > 1 ? 's' : ''} selected
+            );
+          })}
         </div>
       )}
     </div>
   );
 
-  const renderStep4 = () => (
-    <div className="space-y-6">
-      <div className="mb-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">Select Ad Categories</h3>
-        <p className="text-sm text-gray-600">
-          Choose ad placements for each website
-        </p>
-      </div>
+  const renderStep4 = () => {
+    const getAdSpaceImage = (categoryName) => {
+      return null;
+    };
 
-      {loading ? (
-        <div className="flex items-center justify-center py-12">
-          <Loader className="w-8 h-8 animate-spin text-blue-600" />
+    return (
+      <div className="max-w-6xl mx-auto px-4 py-12">
+        <div className="mb-8">
+          <p className="text-gray-600">
+            Select where your ad will appear on each website. Each placement shows exactly where visitors will see it.
+          </p>
         </div>
-      ) : (
-        <div className="space-y-6">
-          {categoriesByWebsite.map((website) => (
-            <div key={website.websiteId} className="border border-gray-200 rounded-lg p-4">
-              <h4 className="font-semibold text-gray-900 mb-4">{website.websiteName}</h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {website.categories.map((category) => {
-                  const isSelected = selectedCategories.includes(category._id);
-                  const isExpanded = expandedCategory === category._id;
 
-                  return (
-                    <div key={category._id} className="border border-gray-200 rounded-lg">
-                      <button
-                        onClick={() => toggleCategoryExpansion(category._id)}
-                        className="w-full p-4 text-left hover:bg-gray-50"
-                      >
-                        <div className="flex justify-between items-start">
-                          <div className="flex-1">
-                            <div className="font-medium text-gray-900">{category.categoryName}</div>
-                            <div className="text-sm text-gray-600 mt-1">{category.spaceType}</div>
-                            <div className="text-lg font-bold text-blue-600 mt-2">
-                              ${category.price}
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <LoadingSpinner />
+          </div>
+        ) : categoriesByWebsite.length > 0 ? (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+            {categoriesByWebsite.map((website) => (
+              <div key={website.websiteId} className="border border-black bg-white">
+                {/* Website Header */}
+                <div className="p-6 border-b border-gray-200">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <h3 className="text-xl font-semibold text-black mb-1">{website.websiteName}</h3>
+                      <p className="text-sm text-gray-600">Available ad placements on this website</p>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Categories */}
+                {website.categories.length > 0 ? (
+                  <div className="p-6 space-y-6">
+                    {website.categories.map((category) => {
+                      const adImage = getAdSpaceImage(category.categoryName);
+                      const isExpanded = expandedCategory === category._id;
+                      const isSelected = selectedCategories.includes(category._id);
+                      
+                      return (
+                        <div
+                          key={category._id}
+                          className={`border transition-all duration-200 bg-white ${
+                            isSelected ? 'border-black shadow-md' : 'border-gray-300'
+                          }`}
+                        >
+                          {/* Main Content */}
+                          <div
+                            onClick={() => handleCategorySelection(category._id)}
+                            className="p-6 cursor-pointer hover:bg-gray-50"
+                          >
+                            <div className={`grid gap-6 items-center ${adImage ? 'grid-cols-1 md:grid-cols-3' : 'grid-cols-1 md:grid-cols-4'}`}>
+                              {/* Ad Preview Image */}
+                              {adImage && (
+                                <div className="w-full h-32 border border-gray-300 bg-gray-50 overflow-hidden">
+                                  <img 
+                                    src={adImage} 
+                                    alt={`${category.categoryName} placement preview`}
+                                    className="w-full h-full object-cover"
+                                  />
+                                </div>
+                              )}
+                              
+                              {/* Category Info */}
+                              <div className={adImage ? 'md:col-span-2' : 'md:col-span-3'}>
+                                <div className="flex items-center gap-3 mb-3">
+                                  <h4 className="text-lg font-semibold text-black">{category.categoryName}</h4>
+                                </div>
+                                
+                                <p className="text-gray-700 mb-4">
+                                  {category.description.length > 80 
+                                    ? `${category.description.substring(0, 80)}...`
+                                    : category.description
+                                  }
+                                </p>
+
+                                <div className="flex items-center gap-6">
+                                  <div className="flex items-center justify-center gap-2">
+                                    <span className="text-lg font-semibold text-black">
+                                      ${category.price}
+                                    </span>
+                                  </div>
+                                  
+                                  {category.description.length > 80 && (
+                                    <button 
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        toggleCategoryExpansion(category._id);
+                                      }}
+                                      className="text-sm text-gray-600 hover:text-black underline"
+                                    >
+                                      {isExpanded ? 'Show Less' : 'Read More'}
+                                    </button>
+                                  )}
+                                </div>
+                              </div>
+                              
+                              {/* Selection Indicator */}
+                              <div className="text-center">
+                                <div className={`w-10 h-10 border-2 flex items-center justify-center mx-auto mb-2 transition-colors ${
+                                  isSelected ? 'bg-black border-black' : 'border-gray-300'
+                                }`}>
+                                  {isSelected && <Check size={20} className="text-white" />}
+                                </div>
+                                <p className={`text-xs font-medium ${isSelected ? 'text-black' : 'text-gray-500'}`}>
+                                  {isSelected ? 'SELECTED' : 'SELECT'}
+                                </p>
+                              </div>
                             </div>
                           </div>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleCategorySelection(category._id);
-                            }}
-                            className={`ml-4 w-6 h-6 rounded border-2 flex items-center justify-center ${
-                              isSelected
-                                ? 'bg-blue-600 border-blue-600'
-                                : 'border-gray-300'
-                            }`}
-                          >
-                            {isSelected && <Check className="w-4 h-4 text-white" />}
-                          </button>
-                        </div>
-                      </button>
 
-                      {isExpanded && (
-                        <div className="px-4 pb-4 border-t border-gray-200">
-                          <p className="text-sm text-gray-600 mt-3">{category.description}</p>
-                          {category.instructions && (
-                            <div className="mt-3 text-sm text-gray-700">
-                              <strong>Instructions:</strong> {category.instructions}
+                          {/* Expanded Description */}
+                          {isExpanded && (
+                            <div className="px-6 pb-6 border-t border-gray-200">
+                              <p className="text-gray-700 pt-4">{category.description}</p>
                             </div>
                           )}
                         </div>
-                      )}
-                    </div>
-                  );
-                })}
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="p-12 text-center">
+                    <h4 className="text-lg font-semibold text-black mb-2">No Ad Spaces Available</h4>
+                    <p className="text-gray-600">
+                      This website doesn't have any available ad placements right now.
+                    </p>
+                  </div>
+                )}
               </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {selectedCategories.length > 0 && (
-        <div className="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded-lg">
-          <div className="flex justify-between items-center">
-            <span className="font-medium">
-              {selectedCategories.length} categor{selectedCategories.length > 1 ? 'ies' : 'y'} selected
-            </span>
-            <span className="text-xl font-bold">Total: ${totalCost.toFixed(2)}</span>
+            ))}
           </div>
-        </div>
-      )}
-    </div>
-  );
+        ) : (
+          <div className="text-center py-20">
+            <h2 className="text-2xl font-semibold text-black mb-4">No Ad Spaces Found</h2>
+            <p className="text-gray-600 mb-8">
+              The selected websites don't have any available ad placements. Please try selecting different websites.
+            </p>
+          </div>
+        )}
+      </div>
+    );
+  };
 
   const renderStep5 = () => {
     const getSelectedDetails = () => {
@@ -824,97 +1003,86 @@ const UnifiedAdUploadFlow = () => {
     const selectedDetails = getSelectedDetails();
 
     return (
-      <div className="space-y-6">
-        <div className="mb-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Review & Payment</h3>
-          <p className="text-sm text-gray-600">
-            Review your selections before proceeding to payment
+      <div className="max-w-6xl mx-auto px-4 py-12">
+        <div className="text-center mb-8">
+          <h2 className="text-2xl font-semibold text-black mb-2">Review Your Order</h2>
+          <p className="text-gray-600">
+            Complete payment for each ad placement to publish your ad
           </p>
         </div>
 
-        {/* Ad Preview */}
-        <div className="bg-gray-50 rounded-lg p-4">
-          <h4 className="font-semibold text-gray-900 mb-3">Your Advertisement</h4>
-          <div className="grid md:grid-cols-2 gap-4">
+        {/* Ad Summary */}
+        <div className="bg-gray-50 border border-gray-200 p-6 mb-8">
+          <h3 className="text-lg font-semibold text-black mb-4">Ad Summary</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               {filePreview && (
-                <div className="mb-3">
+                <div className="mb-4">
                   {filePreview.type.startsWith('image/') ? (
                     <img
                       src={filePreview.url}
                       alt="Ad preview"
-                      className="w-full h-48 object-cover rounded-lg"
+                      className="w-full h-48 object-cover border border-gray-300"
                     />
                   ) : (
                     <video
                       src={filePreview.url}
                       controls
-                      className="w-full h-48 rounded-lg"
+                      className="w-full h-48 border border-gray-300"
                     />
                   )}
                 </div>
               )}
             </div>
-            <div className="space-y-2 text-sm">
+            <div className="space-y-3 text-sm">
               <div>
-                <span className="font-medium text-gray-700">Business:</span>{' '}
-                <span className="text-gray-900">{businessData.businessName}</span>
+                <span className="font-medium text-black">Business:</span>
+                <p className="text-gray-700">{businessData.businessName}</p>
               </div>
               <div>
-                <span className="font-medium text-gray-700">Website:</span>{' '}
-                <span className="text-gray-900">{businessData.businessLink}</span>
+                <span className="font-medium text-black">Website:</span>
+                <p className="text-gray-700 break-all">{businessData.businessLink}</p>
               </div>
               <div>
-                <span className="font-medium text-gray-700">Location:</span>{' '}
-                <span className="text-gray-900">{businessData.businessLocation}</span>
+                <span className="font-medium text-black">Location:</span>
+                <p className="text-gray-700">{businessData.businessLocation}</p>
               </div>
               <div>
-                <span className="font-medium text-gray-700">Category:</span>{' '}
-                <span className="text-gray-900">{getSelectedCategory()?.label}</span>
+                <span className="font-medium text-black">Category:</span>
+                <p className="text-gray-700">{getSelectedCategory()?.label}</p>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Selected Placements */}
-        <div className="border border-gray-200 rounded-lg p-4">
-          <h4 className="font-semibold text-gray-900 mb-3">Selected Placements</h4>
-          <div className="space-y-2">
-            {selectedDetails.map((detail, index) => (
-              <div
-                key={index}
-                className="flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0"
-              >
-                <div>
-                  <div className="font-medium text-gray-900">{detail.websiteName}</div>
-                  <div className="text-sm text-gray-600">{detail.categoryName}</div>
+        {/* Payment Breakdown */}
+        <div className="border border-black p-6 mb-8">
+          <h3 className="text-lg font-semibold text-black mb-4">Payment Breakdown</h3>
+          
+          <div className="space-y-4">
+            <div className="flex justify-between items-center pb-4 border-b border-gray-200">
+              <span className="text-gray-700">Total Cost:</span>
+              <span className="text-xl font-semibold text-black">${totalCost.toFixed(2)}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Selected Categories */}
+        <div className="space-y-4 mb-8">
+          <h3 className="text-lg font-semibold text-black mb-4">Selected Placements</h3>
+          {selectedDetails.map((detail, index) => (
+            <div key={index} className="border border-gray-300 bg-white p-6">
+              <div className="flex justify-between items-center">
+                <div className="flex-1">
+                  <h4 className="text-lg font-semibold text-black mb-1">{detail.websiteName}</h4>
+                  <p className="text-sm text-gray-600 mb-2">{detail.categoryName}</p>
                 </div>
-                <div className="font-semibold text-gray-900">${detail.price.toFixed(2)}</div>
+                <div className="text-lg font-semibold text-black">
+                  ${detail.price.toFixed(2)}
+                </div>
               </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Total Cost */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-          <div className="flex justify-between items-center">
-            <span className="text-lg font-semibold text-gray-900">Total Cost</span>
-            <span className="text-2xl font-bold text-blue-600">${totalCost.toFixed(2)}</span>
-          </div>
-          <p className="text-sm text-gray-600 mt-2">
-            Payment will be processed after authentication
-          </p>
-        </div>
-
-        {/* Important Notice */}
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-          <div className="flex items-start">
-            <AlertTriangle className="w-5 h-5 text-yellow-600 mr-2 flex-shrink-0 mt-0.5" />
-            <div className="text-sm text-yellow-800">
-              <strong>Important:</strong> You'll be asked to sign in or create an account before payment.
-              Your ad details will be saved and the payment will be processed immediately after authentication.
             </div>
-          </div>
+          ))}
         </div>
       </div>
     );
@@ -1035,7 +1203,6 @@ const UnifiedAdUploadFlow = () => {
             >
               {isSubmitting ? (
                 <>
-                  <Loader className="w-5 h-5 mr-2 animate-spin" />
                   Processing...
                 </>
               ) : (
@@ -1064,134 +1231,139 @@ const UnifiedAdUploadFlow = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-6xl mx-auto px-4">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Create Your Advertisement</h1>
-          <p className="text-gray-600">Follow these steps to launch your ad campaign</p>
-        </div>
+    <div className="min-h-screen bg-white">
+      <header className="border-b border-gray-200 bg-white">
+        <Container>
+          <div className="h-16 flex items-center justify-between">
+            <button 
+              onClick={handleBack}
+              className="flex items-center text-gray-600 hover:text-black transition-colors"
+            >
+              <ArrowLeft size={18} className="mr-2" />
+              <span className="font-medium">Back</span>
+            </button>
+            {currentStep === 1 && (
+              <Badge variant="default">
+                Upload Advertisement
+              </Badge>
+            )}
 
-        {/* Progress Steps */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between max-w-4xl mx-auto">
-            {[
-              { num: 1, label: 'Upload Ad' },
-              { num: 2, label: 'Business Details' },
-              { num: 3, label: 'Select Websites' },
-              { num: 4, label: 'Ad Placements' },
-              { num: 5, label: 'Review & Pay' }
-            ].map((step, index) => (
-              <React.Fragment key={step.num}>
-                <div className="flex flex-col items-center">
-                  <div
-                    className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold text-sm transition-all ${
-                      currentStep === step.num
-                        ? 'bg-blue-600 text-white'
-                        : currentStep > step.num
-                        ? 'bg-green-600 text-white'
-                        : 'bg-gray-200 text-gray-600'
-                    }`}
-                  >
-                    {currentStep > step.num ? (
-                      <Check className="w-5 h-5" />
-                    ) : (
-                      step.num
-                    )}
-                  </div>
-                  <span className="text-xs font-medium text-gray-700 mt-2 hidden md:block">
-                    {step.label}
-                  </span>
-                </div>
-                {index < 4 && (
-                  <div
-                    className={`flex-1 h-1 mx-2 transition-all ${
-                      currentStep > step.num ? 'bg-green-600' : 'bg-gray-200'
-                    }`}
-                  />
-                )}
-              </React.Fragment>
-            ))}
-          </div>
-        </div>
+            {currentStep === 2 && (
+              <Badge variant="default">
+                Business Details
+              </Badge>
+            )}
 
-        {/* Error Alert */}
-        {errors.general && (
-          <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center">
-            <AlertTriangle className="w-5 h-5 mr-2" />
-            {errors.general}
-          </div>
-        )}
+            {currentStep === 3 && (
+              <Badge variant="default">
+                Add Websites
+              </Badge>
+            )}
 
-        {errors.submit && (
-          <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center">
-            <AlertTriangle className="w-5 h-5 mr-2" />
-            {errors.submit}
-          </div>
-        )}
+            {currentStep === 4 && (
+              <Badge variant="default">
+                Add New Ad Placements
+              </Badge>
+            )}
 
-        {/* Step Content */}
-        <div className="bg-white rounded-lg shadow-sm p-8 mb-6">
-          {currentStep === 1 && renderStep1()}
-          {currentStep === 2 && renderStep2()}
-          {currentStep === 3 && renderStep3()}
-          {currentStep === 4 && renderStep4()}
-          {currentStep === 5 && renderStep5()}
-        </div>
-
-        {/* Navigation Buttons */}
-        <div className="flex justify-between items-center">
-          <button
-            onClick={handleBack}
-            disabled={currentStep === 1}
-            className="flex items-center px-6 py-3 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <ArrowLeft className="w-5 h-5 mr-2" />
-            Back
-          </button>
-
-          <div className="flex space-x-4">
-            {currentStep < 5 ? (
-              <button
-                onClick={handleNext}
-                className="flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-              >
-                Next
-                <ArrowRight className="w-5 h-5 ml-2" />
-              </button>
-            ) : (
-              <button
-                onClick={handleProceedToPayment}
-                disabled={isSubmitting}
-                className="flex items-center px-8 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
-              >
-                {isSubmitting ? (
-                  <>
-                    <Loader className="w-5 h-5 mr-2 animate-spin" />
-                    Processing...
-                  </>
-                ) : (
-                  <>
-                    <CreditCard className="w-5 h-5 mr-2" />
-                    Proceed to Payment (${totalCost.toFixed(2)})
-                  </>
-                )}
-              </button>
+            {currentStep === 5 && (
+              <Badge variant="default">
+                Payments
+              </Badge>
             )}
           </div>
-        </div>
+        </Container>
+      </header>
 
-        {/* Helper Text */}
+      {errors.general && (
+        <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center">
+          {errors.general}
+        </div>
+      )}
+
+      {errors.submit && (
+        <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center">
+          {errors.submit}
+        </div>
+      )}
+
+      <div className="bg-white rounded-lg shadow-sm p-8 mb-6">
+        {currentStep === 1 && renderStep1()}
+        {currentStep === 2 && renderStep2()}
+        {currentStep === 3 && renderStep3()}
+        {currentStep === 4 && renderStep4()}
+        {currentStep === 5 && renderStep5()}
+      </div>
+
+      <div className='text-center py-8'>
+        {currentStep === 1 && (
+          <Button
+            onClick={handleNext} 
+            variant="secondary"
+            size="lg"
+            loading={loading}
+            disabled={loading || !file}
+          >
+            {loading ? 'Processing...' : 'Continue to Ad Details'}
+          </Button>
+        )}
+
+        {currentStep === 2 && (
+          <Button
+            onClick={handleNext} 
+            variant="secondary"
+            size="lg"
+            loading={loading}
+            disabled={!isFormValid() || loading}
+          >
+            {loading ? 'Processing...' : 'Continue to Select Websites'}
+          </Button>
+        )}
+
+        {currentStep === 3 && (
+          <Button
+            onClick={handleNext} 
+            variant="secondary"
+            size="lg"
+            loading={loading}
+            disabled={selectedWebsites.length === 0 || loading}
+          >
+            {loading ? 'Processing...' : 'Continue Select Categories'}
+          </Button>
+        )}
+
+        {currentStep === 4 && (
+          <Button
+            onClick={handleNext} 
+            variant="secondary"
+            size="lg"
+            loading={loading}
+            disabled={selectedCategories.length === 0 || loading}
+          >
+            {loading ? 'Processing...' : 'Continue'}
+          </Button>
+        )}
+
         {currentStep === 5 && (
-          <div className="mt-4 text-center">
-            <p className="text-sm text-gray-600">
-              🔒 Secure payment processing • Your data is protected
-            </p>
-          </div>
+          <Button
+            onClick={handleProceedToPayment}
+            disabled={isSubmitting}
+            variant="secondary"
+            size="lg"
+          >
+            {isSubmitting ? (
+              <>
+                Processing...
+              </>
+            ) : (
+              <>
+                Proceed to Payment
+              </>
+            )}
+          </Button>
         )}
       </div>
 
-      {/* Auth Modal */}
       {showAuthModal && renderAuthModal()}
     </div>
   );

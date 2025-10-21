@@ -319,7 +319,7 @@ function SelectWebsitesForExistingAd() {
             variant={selectedWebsites.length === 0 ? "outline" : "secondary"}
             size="lg"
           >
-            {loading ? 'Processing...' : 'Continue'}
+            {loading ? 'Processing...' : 'Continue Select Categories'}
           </Button>
         </div>
       </div>

@@ -11,9 +11,10 @@ import {
 } from 'lucide-react';
 import axios from 'axios';
 
+import LoadingSpinner from '../../components/LoadingSpinner';
+
 import PricingTiers from '../components/PricingTiers';
 
-// Import ad category images
 import AboveTheFold from '../img/aboveTheFold.png';
 import BeneathTitle from '../img/beneathTitle.png';
 import Bottom from '../img/bottom.png';
@@ -40,7 +41,6 @@ const UnifiedWebsiteCreation = () => {
   const [showPassword, setShowPassword] = useState(false);
   const fileInputRef = useRef(null);
 
-  // Step 1: Website Details
   const [websiteData, setWebsiteData] = useState({
     name: '',
     url: '',
@@ -48,18 +48,9 @@ const UnifiedWebsiteCreation = () => {
     imagePreview: null
   });
 
-  // Step 2: Business Categories
   const [selectedBusinessCategories, setSelectedBusinessCategories] = useState([]);
   const [businessCategories, setBusinessCategories] = useState([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
-
-  // Step 3: Ad Space Categories
-  // const [selectedAdCategories, setSelectedAdCategories] = useState({});
-  // const [adCategoryData, setAdCategoryData] = useState({});
-  // const [completedAdCategories, setCompletedAdCategories] = useState([]);
-  // const [activeAdCategory, setActiveAdCategory] = useState(null);
-  // const [searchTerm, setSearchTerm] = useState('');
-  // const [activeFilter, setActiveFilter] = useState('all');
 
   const [selectedAdCategories, setSelectedAdCategories] = useState({});
   const [adCategoryData, setAdCategoryData] = useState({});
@@ -69,7 +60,6 @@ const UnifiedWebsiteCreation = () => {
   const [activeFilter, setActiveFilter] = useState('all');
   const [showFullImage, setShowFullImage] = useState(false);
 
-  // Auth form data
   const [authFormData, setAuthFormData] = useState({
     email: '',
     password: '',
@@ -99,7 +89,6 @@ const UnifiedWebsiteCreation = () => {
     'finance': Shield
   };
 
-  // Ad category details with images
   const adCategoryDetails = {
     aboveTheFold: {
       name: 'Above the Fold',
@@ -247,7 +236,6 @@ const UnifiedWebsiteCreation = () => {
     { id: 'mobile', name: 'Mobile' }
   ];
 
-  // Load business categories on mount
   useEffect(() => {
     fetchBusinessCategories();
   }, []);
@@ -271,7 +259,6 @@ const UnifiedWebsiteCreation = () => {
     }
   };
 
-  // Step 1: Website Details Handlers
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setWebsiteData(prev => ({ ...prev, [name]: value }));
@@ -332,7 +319,6 @@ const UnifiedWebsiteCreation = () => {
     fileInputRef.current?.click();
   };
 
-  // Step 2: Business Categories Handlers
   const handleBusinessCategoryToggle = (categoryId) => {
     if (categoryId === 'any') {
       setSelectedBusinessCategories(prev => 
@@ -351,7 +337,6 @@ const UnifiedWebsiteCreation = () => {
     }
   };
 
-  // Step 3: Ad Categories Handlers
   const handleAdCategorySelect = (category) => {
     setActiveAdCategory(category);
     if (!selectedAdCategories[category]) {
@@ -391,7 +376,6 @@ const UnifiedWebsiteCreation = () => {
     setActiveAdCategory(null);
   };
 
-  // Auth handlers
   const handleAuthInputChange = (e) => {
     const { name, value } = e.target;
     setAuthFormData(prev => ({ ...prev, [name]: value }));
@@ -446,17 +430,15 @@ const UnifiedWebsiteCreation = () => {
     }
   };
 
-  // Final submission
   const handleFinalSubmit = async (token) => {
     setIsSubmitting(true);
     try {
-      // Step 1: Create website with business categories
       const websiteResponse = await axios.post(
         `${API_URL}/api/createWebsite/createWebsiteWithCategories`,
         {
           websiteName: websiteData.name,
           websiteLink: websiteData.url,
-          imageUrl: websiteData.imagePreview || '',
+          imageUrl: '',
           businessCategories: selectedBusinessCategories
         },
         {
@@ -469,14 +451,13 @@ const UnifiedWebsiteCreation = () => {
 
       const websiteId = websiteResponse.data.data._id;
 
-      // Step 2: Upload image if exists
       if (websiteData.image) {
         const formData = new FormData();
         formData.append('file', websiteData.image);
         
         try {
           await axios.post(
-            `${API_URL}/api/upload/${websiteId}`,
+            `${API_URL}/api/createWebsite/upload/${websiteId}`,
             formData,
             {
               headers: {
@@ -490,7 +471,6 @@ const UnifiedWebsiteCreation = () => {
         }
       }
 
-      // Step 3: Create ad categories if any
       if (completedAdCategories.length > 0) {
         const adCategoriesToSubmit = completedAdCategories.map(category => {
           const data = adCategoryData[category] || {};
@@ -524,8 +504,7 @@ const UnifiedWebsiteCreation = () => {
         );
       }
 
-      // Success! Redirect to websites page
-      navigate('/websites');
+      navigate('/');
     } catch (error) {
       console.error('Submission error:', error);
       setErrors({ submit: error.response?.data?.message || 'Failed to create website' });
@@ -533,7 +512,6 @@ const UnifiedWebsiteCreation = () => {
     }
   };
 
-  // Navigation handlers
   const handleNext = () => {
     if (currentStep === 1) {
       if (!websiteData.name || !websiteData.url) {
@@ -555,7 +533,6 @@ const UnifiedWebsiteCreation = () => {
   };
 
   const handleFinish = async () => {
-    // Check if user is authenticated
     const token = localStorage.getItem('token');
     
     if (!token) {
@@ -572,7 +549,6 @@ const UnifiedWebsiteCreation = () => {
     return matchesSearch && matchesFilter;
   });
 
-  // Render functions
   const renderStep1 = () => (
     <div className="min-h-screen bg-white">
       <header className="border-b border-gray-200 bg-white">
@@ -653,14 +629,12 @@ const UnifiedWebsiteCreation = () => {
               
               {errors.general && (
                 <div className="flex items-center gap-2 bg-red-50 border border-red-300 text-red-700 px-4 py-3">
-                  <AlertTriangle className="w-4 h-4" />
                   <span>{errors.general}</span>
                 </div>
               )}
 
               {errors.image && (
                 <div className="flex items-center gap-2 bg-red-50 border border-red-300 text-red-700 px-4 py-3">
-                  <AlertTriangle className="w-4 h-4" />
                   <span>{errors.image}</span>
                 </div>
               )}
@@ -751,7 +725,7 @@ const UnifiedWebsiteCreation = () => {
 
           {loadingCategories ? (
             <div className="flex items-center justify-center min-h-96">
-              <Loader className="w-12 h-12 animate-spin text-black" />
+              <LoadingSpinner />
             </div>
           ) : businessCategories.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -796,7 +770,6 @@ const UnifiedWebsiteCreation = () => {
           ) : (
             <div className="flex items-center justify-center min-h-96">
               <div className="text-center">
-                <Building2 size={64} className="mx-auto mb-6 text-black" />
                 <h2 className="text-2xl font-semibold mb-4 text-black">No Categories Available</h2>
                 <button 
                   onClick={fetchBusinessCategories}
@@ -957,8 +930,22 @@ const UnifiedWebsiteCreation = () => {
           >
             Previous
           </button>
+
+          <button 
+            onClick={handleFinish}
+            disabled={completedAdCategories.length === 0}
+            className="bg-black text-white px-8 py-3 hover:bg-gray-800 transition-colors font-medium disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center"
+          >
+            {isSubmitting ? (
+              <>
+                Creating Website...
+              </>
+            ) : (
+              <>Create Ad Space{completedAdCategories.length > 1 ? 's' : ''}</>
+            )}
+          </button>
           
-          {completedAdCategories.length > 0 ? (
+          {/* {completedAdCategories.length > 0 ? (
             <button 
               onClick={handleFinish}
               disabled={isSubmitting}
@@ -966,11 +953,10 @@ const UnifiedWebsiteCreation = () => {
             >
               {isSubmitting ? (
                 <>
-                  <Loader className="w-5 h-5 mr-2 animate-spin" />
                   Creating Website...
                 </>
               ) : (
-                <>Create {completedAdCategories.length} Ad Space{completedAdCategories.length > 1 ? 's' : ''}</>
+                <>Create Ad Space{completedAdCategories.length > 1 ? 's' : ''}</>
               )}
             </button>
           ) : (
@@ -981,14 +967,13 @@ const UnifiedWebsiteCreation = () => {
             >
               {isSubmitting ? (
                 <>
-                  <Loader className="w-5 h-5 mr-2 animate-spin" />
                   Creating Website...
                 </>
               ) : (
                 'Skip & Create Website'
               )}
             </button>
-          )}
+          )} */}
         </div>
       </div>
 
@@ -1185,7 +1170,6 @@ const UnifiedWebsiteCreation = () => {
                   Name
                 </label>
                 <div className="relative">
-                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                   <input
                     type="text"
                     name="name"
@@ -1204,7 +1188,6 @@ const UnifiedWebsiteCreation = () => {
                 Email
               </label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
                   type="email"
                   name="email"
@@ -1222,7 +1205,6 @@ const UnifiedWebsiteCreation = () => {
                 Password
               </label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   name="password"
@@ -1261,7 +1243,6 @@ const UnifiedWebsiteCreation = () => {
             >
               {isSubmitting ? (
                 <>
-                  <Loader className="w-5 h-5 mr-2 animate-spin" />
                   Processing...
                 </>
               ) : (

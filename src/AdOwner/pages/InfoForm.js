@@ -340,7 +340,7 @@ function BusinessForm() {
               loading={loading}
               className="w-full"
             >
-              {loading ? 'Processing...' : 'Continue to Next Step'}
+              {loading ? 'Processing...' : 'Continue to Select Websites'}
             </Button>
 
             {/* Error Message */}
