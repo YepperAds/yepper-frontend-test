@@ -53,7 +53,6 @@ function SelectWebsitesForExistingAd() {
         setAd(response.data.data);
       }
     } catch (error) {
-      console.error('Error fetching ad details:', error);
       navigate('/my-ads');
     }
   };
@@ -74,7 +73,6 @@ function SelectWebsitesForExistingAd() {
       }
       setLoading(false);
     } catch (error) {
-      console.error('Error fetching websites:', error);
       setError('Failed to fetch websites. Please try again.');
       setWebsites([]);
       setLoading(false);

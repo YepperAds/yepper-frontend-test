@@ -27,7 +27,6 @@ export const saveFileToIndexedDB = async (key, file) => {
       request.onerror = () => reject(request.error);
     });
   } catch (error) {
-    console.error('Error saving file:', error);
     return false;
   }
 };
@@ -43,7 +42,6 @@ export const getFileFromIndexedDB = async (key) => {
       request.onerror = () => reject(request.error);
     });
   } catch (error) {
-    console.error('Error getting file:', error);
     return null;
   }
 };

@@ -54,7 +54,6 @@ function Websites() {
   //       const response = await authenticatedAxios.get('/ad-categories/pending-rejections');
   //       return response.data.pendingAds || [];
   //     } catch (error) {
-  //       console.error('Error fetching pending ads:', error);
   //       return [];
   //     }
   //   },
@@ -68,7 +67,6 @@ function Websites() {
         const response = await authenticatedAxios.get('/ad-categories/active-ads');
         return response.data.activeAds || [];
       } catch (error) {
-        console.error('Error fetching active ads:', error);
         return [];
       }
     },
@@ -142,7 +140,6 @@ function Websites() {
 
   //   const paymentAmount = ad.paymentAmount || 0;
   //   if (walletBalance < paymentAmount) {
-  //     alert('Insufficient balance in your wallet to process this rejection. Please contact support.');
   //     return;
   //   }
 
@@ -191,12 +188,9 @@ function Websites() {
   //     setSelectedAd(null);
   //     setRejectionReason('');
       
-  //     alert('Ad rejected successfully. Refund has been processed.');
       
   //   } catch (error) {
-  //     console.error('Error rejecting ad:', error);
   //     const errorMessage = error.response?.data?.error || 'Failed to reject ad';
-  //     alert(errorMessage);
   //   } finally {
   //     setRejecting(null);
   //   }
@@ -340,17 +334,17 @@ function Websites() {
             </div>
 
             <div className="flex-shrink-0">
-              <Link to='/create-website'>
-                <Button variant="secondary" size="lg" icon={Plus} iconPosition="left">
-                  Add Website
+              <Link to='/wallet'>
+                <Button variant="primary" size="lg">
+                  Add
                 </Button>
               </Link>
             </div>
 
             <div className="flex-shrink-0">
-              <Link to='/withdraw'>
-                <Button variant="secondary" size="lg">
-                  Withdraw Money
+              <Link to='/create-website'>
+                <Button variant="secondary" size="lg" icon={Plus} iconPosition="left">
+                  Add Website
                 </Button>
               </Link>
             </div>
@@ -359,8 +353,8 @@ function Websites() {
           {filteredWebsites && filteredWebsites.length > 0 ? (
             <div className="space-y-8">
               {filteredWebsites.slice().reverse().map((website) => {
-                const { active } = getAdsForWebsite(website._id); // REMOVED: pending
-                const totalAds = active.length; // REMOVED: pending.length
+                const { active } = getAdsForWebsite(website._id); 
+                const totalAds = active.length; 
 
                 return (
                   <div

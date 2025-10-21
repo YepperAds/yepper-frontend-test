@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import toast from 'react-hot-toast';
 import { Button, Input } from '../components/components';
 
 const Login = () => {
@@ -87,14 +86,12 @@ const Login = () => {
             const success = await login(formData.email, formData.password);
             
             if (success) {
-                toast.success('Welcome back!');
-                // Always redirect to home or dashboard after successful login
                 navigate('/');
             } else {
-                toast.error('Invalid email or password. Please try again.');
+                return;
             }
         } catch (error) {
-            toast.error('Login failed. Please try again.');
+            return;
         } finally {
             setIsLoading(false);
         }

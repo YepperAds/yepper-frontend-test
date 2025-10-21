@@ -43,7 +43,6 @@ const AvailableAds = () => {
       const data = await response.json();
       setWebsites(data.websites || []);
     } catch (error) {
-      console.error('Error fetching websites:', error);
     }
   };
 
@@ -55,7 +54,6 @@ const AvailableAds = () => {
       const data = await response.json();
       setCategories(data.categories || []);
     } catch (error) {
-      console.error('Error fetching categories:', error);
     }
   };
 
@@ -67,7 +65,6 @@ const AvailableAds = () => {
       const data = await response.json();
       setWalletBalance(data.balance || 0);
     } catch (error) {
-      console.error('Error fetching wallet balance:', error);
     }
   };
 
@@ -86,7 +83,6 @@ const AvailableAds = () => {
       setAvailableAds(data.availableAds || []);
       setSelectedCategoryData(data.category);
     } catch (error) {
-      console.error('Error fetching available ads:', error);
     } finally {
       setLoading(false);
     }
@@ -123,11 +119,7 @@ const AvailableAds = () => {
       // Refresh available ads
       await fetchAvailableAds();
       
-      alert(`Ad assigned successfully! ${potentialEarning} has been added to your wallet. You have until ${new Date(data.adDetails.rejectionDeadline).toLocaleTimeString()} to review and reject if needed.`);
-      
     } catch (error) {
-      console.error('Error assigning ad:', error);
-      alert(error.message || 'Failed to assign ad');
     } finally {
       setAssigning(null);
     }

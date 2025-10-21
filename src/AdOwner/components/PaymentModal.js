@@ -7,7 +7,7 @@ import { Button, Input, Alert, Heading, Text } from '../../components/components
 
 const PaymentModal = ({ ad, websiteId, onClose }) => {
     const { user, token } = useAuth();
-    const [email, setEmail] = useState('icyatwandoba@gmail.com');
+    const [email, setEmail] = useState('example@gmail.com');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     
@@ -29,9 +29,6 @@ const PaymentModal = ({ ad, websiteId, onClose }) => {
                 setLoading(false);
                 return;
             }
-
-            console.log('Token available:', !!token);
-            console.log('User ID:', userId);
 
             const websiteSelection = ad.websiteStatuses?.find(
                 status => status.websiteId === websiteId
@@ -65,8 +62,6 @@ const PaymentModal = ({ ad, websiteId, onClose }) => {
                 requestConfig.headers.Authorization = `Bearer ${token}`;
             }
 
-            console.log('Request headers:', requestConfig.headers);
-
             const response = await axios.post('http://localhost:5000/api/web-advertise/initiate-payment', {
                 adId: ad._id,
                 websiteId,
@@ -81,8 +76,6 @@ const PaymentModal = ({ ad, websiteId, onClose }) => {
                 setError(response.data.message || 'Payment link generation failed. Please try again.');
             }
         } catch (error) {
-            console.error('Payment initiation error:', error);
-            console.error('Error response:', error.response?.data);
             
             let errorMessage = 'An error occurred. Please try again.';
             

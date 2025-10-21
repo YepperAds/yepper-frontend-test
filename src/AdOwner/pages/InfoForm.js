@@ -51,8 +51,6 @@ function BusinessForm() {
     try {
       localStorage.setItem('adFormData', JSON.stringify(dataToSave));
     } catch (e) {
-      console.error('Failed to save to localStorage:', e);
-      // If it still fails, clear old data
       localStorage.removeItem('adFormData');
     }
   }, [businessData, userId]);
@@ -192,7 +190,6 @@ function BusinessForm() {
         });
       }
     } catch (error) {
-      console.error('Save error:', error);
       setError('Failed to save ad');
     }
   };

@@ -55,7 +55,6 @@ function WebsiteSelection() {
           });
           setFileObject(restoredFile);
         } catch (error) {
-          console.error('Failed to restore file:', error);
         }
       } else if (file instanceof File) {
         setFileObject(file);
@@ -109,7 +108,6 @@ function WebsiteSelection() {
         setFilteredWebsites(relevantWebsites);
         setLoading(false);
       } catch (error) {
-        console.error('Failed to fetch websites:', error);
         setError('Failed to fetch websites. Please try again.');
         setLoading(false);
       }

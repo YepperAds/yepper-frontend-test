@@ -1,7 +1,6 @@
 // NetworkStatus.js
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import toast from 'react-hot-toast';
 
 const NetworkStatus = () => {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
@@ -12,14 +11,12 @@ const NetworkStatus = () => {
     const handleOnline = () => {
       setIsOnline(true);
       if (showRetryButton) {
-        toast.success('Connection restored');
         handleRetry();
       }
     };
 
     const handleOffline = () => {
       setIsOnline(false);
-      toast.error('Connection lost');
     };
 
     window.addEventListener('online', handleOnline);
@@ -48,7 +45,6 @@ const NetworkStatus = () => {
   const handleRetry = () => {
     setShowRetryButton(false);
     retryAuthentication();
-    toast.loading('Reconnecting...', { id: 'retry' });
   };
 
   if (!showRetryButton) return null;

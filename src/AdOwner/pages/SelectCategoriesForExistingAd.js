@@ -1,3 +1,4 @@
+// SelectCategoriesForExistingAd.js
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
@@ -144,7 +145,6 @@ const SelectCategoriesForExistingAd = () => {
         });
       }
     } catch (error) {
-      console.error('Error fetching wallet info:', error);
       setWalletInfo({ balance: 0, hasWallet: false });
     }
   };
@@ -179,7 +179,6 @@ const SelectCategoriesForExistingAd = () => {
       setCategoriesByWebsite(result.filter(Boolean));
       
     } catch (error) {
-      console.error('Failed to fetch categories or websites:', error);
       setError('Failed to load categories. Please try again.');
     } finally {
       setIsLoading(false);
@@ -207,14 +206,11 @@ const SelectCategoriesForExistingAd = () => {
         setPaymentBreakdown(response.data.summary);
         
         if (isReassignment && response.data.summary.paidFromRefunds > 0) {
-          console.error('ERROR: Refunds applied to reassignment payment');
           setError('Error: Refunds cannot be used for reassignment. Please contact support.');
           return;
         }
       }
     } catch (error) {
-      console.error('Error calculating payment breakdown:', error);
-      
       if (error.response?.data?.code === 'REFUND_NOT_ALLOWED_FOR_REASSIGNMENT') {
         setError('Refunds cannot be used for ad reassignment. Only wallet balance and card payments are allowed.');
       }
@@ -310,8 +306,6 @@ const SelectCategoriesForExistingAd = () => {
         setShowPaymentSummary(true);
       }
     } catch (error) {
-      console.error('Error in handleProceedToPayment:', error);
-      
       if (error.response?.data?.code === 'REFUND_NOT_ALLOWED_FOR_REASSIGNMENT') {
         setError('Error: Refunds cannot be used for ad reassignment. Only wallet balance and card payments are allowed.');
       } else {
@@ -356,11 +350,9 @@ const SelectCategoriesForExistingAd = () => {
 
         if (response.data.allPaid) {
           const message = response.data.summary?.message || response.data.message || 'Payment completed successfully!';
-          alert(message);
           navigate('/my-ads');
         } else {
           const message = response.data.summary?.message || response.data.message || 'Redirecting to complete payment...';
-          alert(message);
           
           if (response.data.paymentUrl) {
             window.location.href = response.data.paymentUrl;
@@ -372,8 +364,6 @@ const SelectCategoriesForExistingAd = () => {
         throw new Error(response.data.error || response.data.message || 'Payment failed');
       }
     } catch (error) {
-      console.error('Payment error:', error);
-      
       let errorMessage = 'Payment failed';
       
       if (error.response?.data) {

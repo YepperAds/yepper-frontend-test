@@ -20,6 +20,8 @@ function DirectAdvertise() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
+  const [authError, setAuthError] = useState(null);
+  const [authSuccess, setAuthSuccess] = useState(null);
   const [websiteInfo, setWebsiteInfo] = useState(null);
   const [categoryInfo, setCategoryInfo] = useState(null);
   const [file, setFile] = useState(null);
@@ -127,11 +129,11 @@ function DirectAdvertise() {
         if (parsed.step === 2) {
           setBusinessData(parsed.businessData || {});
           
-          setSuccess('You are successfully signed in! Now continue with paying for your advertisement...');
-          setError(null);
+          setAuthSuccess('You are successfully signed in! Now continue with paying for your advertisement...');
+          setAuthError(null);
           
           setTimeout(() => {
-            setSuccess(null);
+            setAuthSuccess(null);
             createAdAndProceed();
           }, 2000);
         }
@@ -180,22 +182,29 @@ function DirectAdvertise() {
       return;
     }
 
-    setFile(selectedFile);
-    setError(null);
+    // Allow re-uploading the same file by clearing previous state
+    setFile(null);
+    setFilePreview(null);
+    
+    // Small delay to ensure state is cleared
+    setTimeout(async () => {
+      setFile(selectedFile);
+      setError(null);
 
-    try {
-      await saveFileToIndexedDB(FILE_STORAGE_KEY, selectedFile);
-    } catch (dbError) {
-    }
+      try {
+        await saveFileToIndexedDB(FILE_STORAGE_KEY, selectedFile);
+      } catch (dbError) {
+      }
 
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setFilePreview({
-        url: reader.result,
-        type: selectedFile.type
-      });
-    };
-    reader.readAsDataURL(selectedFile);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFilePreview({
+          url: reader.result,
+          type: selectedFile.type
+        });
+      };
+      reader.readAsDataURL(selectedFile);
+    }, 50);
   };
 
   const handleDrop = (e) => {
@@ -205,6 +214,8 @@ function DirectAdvertise() {
 
   const handleFileChange = (e) => {
     processFile(e.target.files[0]);
+    // Reset the input value to allow re-selecting the same file
+    e.target.value = '';
   };
 
   const handleInputChange = (e) => {
@@ -216,7 +227,7 @@ function DirectAdvertise() {
   const handleAuthInputChange = (e) => {
     const { name, value } = e.target;
     setAuthData(prev => ({ ...prev, [name]: value }));
-    setError(null);
+    setAuthError(null);
   };
 
   const validateForm = () => {
@@ -234,6 +245,15 @@ function DirectAdvertise() {
     }
     if (!businessData.adDescription) {
       setError('Advertisement description is required');
+      return false;
+    }
+    if (!businessData.businessCategory) {
+      setError('Business category is required');
+      return false;
+    }
+    // Validate that a file has been uploaded
+    if (!file) {
+      setError('Please upload an image, video, or PDF for your advertisement');
       return false;
     }
     return true;
@@ -285,22 +305,22 @@ function DirectAdvertise() {
 
   const handleAuth = async (e) => {
     e.preventDefault();
-    setError(null);
+    setAuthError(null);
     setIsLoading(true);
 
     try {
       if (authMode === 'login') {
         if (!authData.email || !authData.password) {
-          setError('Email and password are required');
+          setAuthError('Email and password are required');
           setIsLoading(false);
           return;
         }
         await login(authData.email, authData.password);
-        setSuccess('Authentication successful!');
+        setAuthSuccess('Authentication successful!');
         await createAdAndProceed();
       } else {
         if (!authData.name || !authData.email || !authData.password) {
-          setError('All fields are required');
+          setAuthError('All fields are required');
           setIsLoading(false);
           return;
         }
@@ -309,14 +329,14 @@ function DirectAdvertise() {
         const result = await signup(authData.email, authData.password, authData.name, returnUrl);
         
         if (result.requiresVerification) {
-          setSuccess('Registration successful! Please check your email to verify your account. After verification, you\'ll be redirected back here to complete your advertisement.');
+          setAuthSuccess('Registration successful! Please check your email to verify your account. After verification, you\'ll be redirected back here to complete your advertisement.');
           setIsLoading(false);
           return;
         }
       }
       
     } catch (err) {
-      setError(err.message || 'Authentication failed');
+      setAuthError(err.message || 'Authentication failed');
       setIsLoading(false);
     }
   };
@@ -369,7 +389,7 @@ function DirectAdvertise() {
       }
       
     } catch (error) {
-      setError(error.response?.data?.message || 'Failed to create advertisement');
+      setAuthError(error.response?.data?.message || 'Failed to create advertisement');
     } finally {
       setIsLoading(false);
     }
@@ -407,6 +427,8 @@ function DirectAdvertise() {
     setStep(1);
     setError(null);
     setSuccess(null);
+    setAuthError(null);
+    setAuthSuccess(null);
   };
 
   if (isLoading && !websiteInfo) {
@@ -449,17 +471,21 @@ function DirectAdvertise() {
       <div className="container mx-auto px-6 py-12">
         <div className="max-w-4xl mx-auto">
           
-          {/* Alerts */}
-          {error && (
-            <div className="mb-6 border border-red-600 bg-red-50 p-4">
-              <p className="text-red-700 text-sm">{error}</p>
-            </div>
-          )}
+          {/* Alerts - Only show when NOT in step 2 */}
+          {step !== 2 && (
+            <>
+              {error && (
+                <div className="mb-6 border border-red-600 bg-red-50 p-4">
+                  <p className="text-red-700 text-sm">{error}</p>
+                </div>
+              )}
 
-          {success && (
-            <div className="mb-6 border border-green-600 bg-green-50 p-4">
-              <p className="text-green-700 text-sm">{success}</p>
-            </div>
+              {success && (
+                <div className="mb-6 border border-green-600 bg-green-50 p-4">
+                  <p className="text-green-700 text-sm">{success}</p>
+                </div>
+              )}
+            </>
           )}
 
           <div className="border border-black bg-white p-8 mb-8">
@@ -520,7 +546,7 @@ function DirectAdvertise() {
                 {/* File Upload */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Upload Ad Media
+                    Upload Ad Media <span className="text-red-500">*</span>
                   </label>
                   <div
                     onDrop={handleDrop}
@@ -544,6 +570,7 @@ function DirectAdvertise() {
                               e.stopPropagation();
                               setFile(null);
                               setFilePreview(null);
+                              deleteFileFromIndexedDB(FILE_STORAGE_KEY);
                             }}
                             className="text-gray-400 hover:text-gray-600"
                           >
@@ -668,7 +695,7 @@ function DirectAdvertise() {
 
           {/* Step 2: Authentication */}
           {step === 2 && (
-            <div className="border border-black bg-white p-8">
+            <div className="border border-black bg-white p-8 relative">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-semibold">
                   {isAuthenticated ? 'Review & Create Ad' : 'Sign In to Continue'}
@@ -683,6 +710,32 @@ function DirectAdvertise() {
                   </button>
                 )}
               </div>
+              
+              {/* Auth-specific alerts - appears as modal overlay */}
+              {(authError || authSuccess) && (
+                <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 p-8">
+                  <div className="bg-white border-2 border-black p-6 max-w-md w-full shadow-2xl">
+                    {authError && (
+                      <div className="border border-red-600 bg-red-50 p-4">
+                        <p className="text-red-700 text-sm">{authError}</p>
+                      </div>
+                    )}
+                    {authSuccess && (
+                      <div className="border border-green-600 bg-green-50 p-4">
+                        <p className="text-green-700 text-sm">{authSuccess}</p>
+                      </div>
+                    )}
+                    {authError && (
+                      <button
+                        onClick={() => setAuthError(null)}
+                        className="mt-4 w-full bg-black text-white py-2 font-semibold hover:bg-gray-800 transition-colors"
+                      >
+                        Close
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
               
               {!isAuthenticated ? (
                 <div className="space-y-6">
@@ -894,4 +947,4 @@ async function deleteFileFromIndexedDB(key) {
   });
 }
 
-export default DirectAdvertise;
+export default DirectAdvertise; 

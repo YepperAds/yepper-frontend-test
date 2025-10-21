@@ -259,7 +259,7 @@ export const LoadingSpinner = ({ size = 'md', className = '' }) => {
 // Alert Component
 export const Alert = ({ children, variant = 'info', className = '', ...props }) => {
   const variants = {
-    info: 'bg-gray-900 border-blue-200 text-white',
+    info: 'bg-black border-blue-200 text-white',
     success: 'bg-green-50 border-green-200 text-green-800',
     warning: 'bg-yellow-50 border-yellow-200 text-yellow-800',
     error: 'bg-red-50 border-red-200 text-red-800'

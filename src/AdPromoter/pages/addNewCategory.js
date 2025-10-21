@@ -78,7 +78,6 @@ const AddNewCategory = ({ onSubmitSuccess }) => {
         setUser(response.data.user); // Set user data from your API
         setLoading(false);
       } catch (error) {
-        console.error('Authentication failed:', error);
         localStorage.removeItem('token'); // Remove invalid token
       }
     };
@@ -376,8 +375,6 @@ const AddNewCategory = ({ onSubmitSuccess }) => {
   
         onSubmitSuccess();
     } catch (error) {
-        console.error('Failed to submit categories:', error);
-        // NEW: Handle authentication errors
         if (error.response?.status === 401) {
           localStorage.removeItem('token');
           navigate('/login');

@@ -3,7 +3,6 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { Toaster } from 'react-hot-toast';
 // import Dost from './Dost';
 import { AuthProvider } from './context/AuthContext';
 import Home from './pages/Home';
@@ -31,6 +30,9 @@ import Wallet from './AdPromoter/pages/Wallet';
 import AdReports from './AdPromoter/pages/AdReports';
 import AvailableAdsForWebOwners from './AdPromoter/pages/AvailableAdsForWebOwners';
 import WithdrawalDashboard from './AdPromoter/pages/WithdrawalDashboard';
+import WithdrawalAdmin from './AdPromoter/pages/WithdrawalAdmin';
+import WithdrawalHistory from './AdPromoter/pages/WithdrawalHistory';
+import UnifiedWebsiteCreation from './AdPromoter/pages/UnifiedWebsiteCreation';
 
 // AdOwner
 import UploadAdForWeb from './AdOwner/pages/UploadAdForWeb';
@@ -45,6 +47,7 @@ import AdDetails from './AdOwner/pages/AdDetails';
 import SelectWebsitesForExistingAd from './AdOwner/pages/SelectWebsitesForExistingAd';
 import SelectCategoriesForExistingAd from './AdOwner/pages/SelectCategoriesForExistingAd';
 import DirectAdvertise from './AdOwner/pages/DirectAdvertise';
+import UnifiedAdUploadFlow from './AdOwner/pages/UnifiedAdUploadFlow';
 
 // Create a client
 const queryClient = new QueryClient({
@@ -71,12 +74,14 @@ function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/verify-email" element={<VerifyEmail />} />
-              <Route path="/auth/success" element={<AuthSuccess />} />
+              <Route path="/success" element={<AuthSuccess />} />
               <Route path="/verify-success" element={<VerifySuccess />} />
               <Route path="/verify-error" element={<VerifyError />} />
               <Route path="/email-verification" element={<EmailVerification />} />
               <Route path="/check-email" element={<CheckEmail />} />
               <Route path="/payment/callback" element={<PaymentCallback />} />
+              <Route path="/add" element={<UnifiedWebsiteCreation />} />
+              <Route path="/add-ad" element={<UnifiedAdUploadFlow />} />
 
               {/* AdPromoter */}
               <Route path="/websites" element={
@@ -133,9 +138,21 @@ function App() {
                 </ProtectedRoute>
               } />
 
-              <Route path="/withdraw" element={
+              <Route path="/wallet/:walletType/withdraw" element={
                 <ProtectedRoute>
                   <WithdrawalDashboard />
+                </ProtectedRoute>
+              } />
+
+              <Route path="/wallet/:walletType/withdrawals" element={
+                <ProtectedRoute>
+                  <WithdrawalHistory />
+                </ProtectedRoute>
+              } />
+
+              <Route path="/admin/withdrawals" element={
+                <ProtectedRoute>
+                  <WithdrawalAdmin />
                 </ProtectedRoute>
               } />
 
@@ -207,7 +224,6 @@ function App() {
               } />
 
             </Routes>
-            <Toaster position="top-right" />
           </div>
         </Router>
       </AuthProvider>

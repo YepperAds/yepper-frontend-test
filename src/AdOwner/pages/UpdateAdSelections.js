@@ -47,7 +47,6 @@ const UpdateAdSelections = () => {
             setAd(adRes.data.ad);
             setWebsites(websitesRes.data.websites || []);
         } catch (error) {
-            console.error('Error fetching data:', error);
             setError('Failed to load data');
         } finally {
             setLoading(false);
@@ -124,7 +123,6 @@ const UpdateAdSelections = () => {
                 });
             }
         } catch (error) {
-            console.error('Update error:', error);
             setError(error.response?.data?.message || 'Failed to update ad');
         } finally {
             setUpdating(false);

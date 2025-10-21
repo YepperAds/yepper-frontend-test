@@ -35,7 +35,6 @@ const PaymentCallback = () => {
           setMessage('Payment verification failed');
         }
       } catch (error) {
-        console.error('Payment verification error:', error);
         setStatus('failed');
         setMessage(error.response?.data?.message || 'Payment verification failed');
       }

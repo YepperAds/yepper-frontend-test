@@ -1,3 +1,4 @@
+// CategoryInfoModal.js
 import { X } from 'lucide-react';
 
 import AboveTheFoldContainer from '../descriptions/aboveTheFold';
@@ -18,10 +19,6 @@ import StickySidebarContainer from '../descriptions/stickySidebar';
 
 const CategoryInfoModal = ({ isOpen, onClose, category }) => {
     if (!isOpen) return null;
-
-    // Add debugging log to see what category is being passed
-    console.log('Current category:', category);
-
     // Create a normalized mapping that handles different case variations
     const CategoryComponents = {
         'aboveTheFold': AboveTheFoldContainer,
@@ -44,9 +41,6 @@ const CategoryInfoModal = ({ isOpen, onClose, category }) => {
     };
 
     const CategoryComponent = CategoryComponents[category];
-
-    // Add debugging log to see if component is found
-    console.log('Found component:', !!CategoryComponent);
 
     return (
         <div className="fixed inset-0 backdrop-blur-lg bg-black/60 flex items-center justify-center z-50 overflow-y-auto">

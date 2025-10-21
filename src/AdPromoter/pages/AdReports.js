@@ -52,7 +52,6 @@ const AdReports = () => {
       });
       setWalletBalance(response.data.wallet?.balance || 0);
     } catch (error) {
-      console.error('Error fetching wallet balance:', error);
     }
   };
 
@@ -72,7 +71,6 @@ const AdReports = () => {
       setFilteredPendingAds(pendingResponse.data.pendingAds || []);
       setFilteredActiveAds(activeResponse.data.activeAds || []);
     } catch (error) {
-      console.error('Error fetching ad reports:', error);
     } finally {
       setLoading(false);
     }
@@ -114,7 +112,6 @@ const AdReports = () => {
 
     const paymentAmount = ad.paymentAmount || 0;
     if (walletBalance < paymentAmount) {
-      alert('Insufficient balance in your wallet to process this rejection. Please contact support.');
       return;
     }
 
@@ -144,12 +141,8 @@ const AdReports = () => {
       setSelectedAd(null);
       setRejectionReason('');
       
-      alert('Ad rejected successfully. Refund has been processed internally.');
-      
     } catch (error) {
-      console.error('Error rejecting ad:', error);
       const errorMessage = error.response?.data?.error || 'Failed to reject ad';
-      alert(errorMessage);
       
       if (errorMessage.includes('Insufficient balance')) {
         fetchWalletBalance();

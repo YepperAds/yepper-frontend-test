@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import toast from 'react-hot-toast';
 import { Button, Input } from '../components/components';
 
 const Register = () => {
@@ -128,7 +127,6 @@ const Register = () => {
     const hasErrors = Object.values(newErrors).some(error => error !== '');
     
     if (hasErrors) {
-      toast.error('Please fix the errors below');
       setIsLoading(false);
       return;
     }
@@ -143,14 +141,11 @@ const Register = () => {
             maskedEmail: result.maskedEmail
           }
         });
-        toast.success('Account created! Please check your email to verify and sign in.');
       } else if (result.success) {
-        toast.success('Account created successfully!');
         navigate('/');
       }
     } catch (error) {
-      console.error('Signup error:', error);
-      toast.error(error.message || 'Failed to create account. Please try again.');
+      return;
     } finally {
       setIsLoading(false);
     }

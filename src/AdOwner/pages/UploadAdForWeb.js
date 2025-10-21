@@ -30,7 +30,6 @@ function Select() {
         setUser(response.data.user);
         setLoading(false);
       } catch (error) {
-        console.error('Authentication failed:', error);
         localStorage.removeItem('token');
         navigate('/login');
       }
@@ -116,7 +115,6 @@ function Select() {
       });
     } catch (error) {
       setError('An error occurred during upload');
-      console.error(error);
     } finally {
       setLoading(false);
     }

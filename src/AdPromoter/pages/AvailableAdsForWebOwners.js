@@ -50,7 +50,6 @@ function AvailableAdsForWebOwners() {
         setAvailableAds(response.data.data);
       }
     } catch (error) {
-      console.error('Error fetching available ads:', error);
     } finally {
       setLoading(false);
     }
@@ -67,7 +66,6 @@ function AvailableAdsForWebOwners() {
         setCategories(response.data.categories);
       }
     } catch (error) {
-      console.error('Error fetching categories:', error);
     }
   };
 
@@ -119,12 +117,11 @@ function AvailableAdsForWebOwners() {
       );
 
       if (response.data.success) {
-        alert('Ad selected successfully! Payment will be processed automatically.');
         setShowModal(false);
         fetchAvailableAds(); // Refresh the list
       }
     } catch (error) {
-      alert('Error selecting ad: ' + (error.response?.data?.error || 'Unknown error'));
+      return;
     }
   };
 

@@ -18,7 +18,6 @@ import {
     XCircle,
     RefreshCw
 } from 'lucide-react';
-import { toast } from 'react-hot-toast';
 import CodeDisplay from '../components/codeDisplay';
 import AddNewCategory from './addNewCategory';
 import { Button, Card, CardContent, Heading, Text, Input, Badge, Grid, Container } from '../../components/components';
@@ -83,7 +82,6 @@ const WebsiteDetails = () => {
                 const response = await authenticatedAxios.get(`/createWebsite/${userId}`);
                 return response.data;
             } catch (error) {
-                console.error('Error fetching websites:', error.response?.data || error.message);
                 throw error;
             }
         },
@@ -110,7 +108,6 @@ const WebsiteDetails = () => {
             setCategories(categoriesResponse.data.categories);
             setLoading(false);
         } catch (error) {
-            console.error('Error fetching website data:', error);
             setFetchError(error.message || 'Failed to load website data');
             setLoading(false);
         }
@@ -129,7 +126,6 @@ const WebsiteDetails = () => {
             setPendingAds(pendingResponse.data.pendingAds || []);
             setActiveAds(activeResponse.data.activeAds || []);
         } catch (error) {
-            console.error('Error fetching ads:', error);
             setPendingAds([]);
             setActiveAds([]);
         } finally {
@@ -144,7 +140,6 @@ const WebsiteDetails = () => {
             const response = await authenticatedAxios.get('/ad-categories/wallet');
             setWalletBalance(response.data.wallet?.balance || 0);
         } catch (error) {
-            console.error('Error fetching wallet:', error);
         }
     };
 
@@ -213,12 +208,8 @@ const WebsiteDetails = () => {
             setSelectedAd(null);
             setRejectionReason('');
             
-            toast.success('Ad rejected successfully. Refund has been processed.');
-            
         } catch (error) {
-            console.error('Error rejecting ad:', error);
             const errorMessage = error.response?.data?.error || 'Failed to reject ad';
-            toast.error(errorMessage);
         } finally {
             setRejecting(null);
         }
@@ -245,7 +236,6 @@ const WebsiteDetails = () => {
             
             setIsEditingWebsiteName(false);
         } catch (error) {
-            console.error('Error updating website name:', error);
         }
     };
 
@@ -329,7 +319,6 @@ const WebsiteDetails = () => {
             const parsedCount = parseInt(newUserCount, 10);
             
             if (isNaN(parsedCount) || parsedCount < 0) {
-                toast.error('Please enter a valid positive number');
                 return;
             }
 
@@ -347,12 +336,9 @@ const WebsiteDetails = () => {
             setEditingUserCount(null);
             setNewUserCount('');
 
-            toast.success('User count updated successfully');
         } catch (error) {
-            console.error('Error updating user count:', error);
             
             const errorMessage = error.response?.data?.message || 'Failed to update user count';
-            toast.error(errorMessage);
         }
     };
 
@@ -395,10 +381,7 @@ const WebsiteDetails = () => {
             setIsLanguageModalOpen(false);
             setCurrentCategory(null);
             
-            toast.success('Default language updated successfully!');
         } catch (error) {
-            console.error('Error updating language:', error);
-            toast.error('Failed to update default language');
         }
     };
 

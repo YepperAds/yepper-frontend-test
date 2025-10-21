@@ -1,551 +1,386 @@
-// WithdrawalDashboard.js
-import React, { useState, useEffect } from 'react';
-import { 
-  Wallet, 
-  CreditCard, 
-  Smartphone, 
-  Building2, 
-  Bitcoin,
-  Download,
-  Clock,
-  CheckCircle,
-  XCircle,
-  AlertCircle,
-  Eye,
-  EyeOff,
-  DollarSign,
-  TrendingUp,
-  Calendar
-} from 'lucide-react';
+// WithdrawalRequest.js
+import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import axios from 'axios';
+import { Button, Container } from '../../components/components';
+import LoadingSpinner from '../../components/LoadingSpinner';
 
-const WithdrawalDashboard = () => {
-  const [activeTab, setActiveTab] = useState('overview');
-  const [walletInfo, setWalletInfo] = useState(null);
-  const [withdrawalMethods, setWithdrawalMethods] = useState({});
-  const [showWithdrawalForm, setShowWithdrawalForm] = useState(false);
-  const [selectedMethod, setSelectedMethod] = useState('');
-  const [withdrawalAmount, setWithdrawalAmount] = useState('');
-  const [accountDetails, setAccountDetails] = useState({});
-  const [loading, setLoading] = useState(false);
+const WithdrawalRequest = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [walletType, setWalletType] = useState('webOwner');
+  const [wallet, setWallet] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [showBalance, setShowBalance] = useState(true);
+  
+  const [formData, setFormData] = useState({
+    amount: '',
+    bankName: '',
+    accountNumber: '',
+    accountName: '',
+    country: '',
+    routingNumber: '',
+    swiftCode: ''
+  });
+
+  const [formErrors, setFormErrors] = useState({});
+
+  const getAuthToken = () => {
+    return localStorage.getItem('token') || sessionStorage.getItem('token');
+  };
+
+  const getAuthHeaders = () => {
+    const token = getAuthToken();
+    return {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    };
+  };
 
   useEffect(() => {
-    fetchWalletInfo();
-    fetchWithdrawalMethods();
-  }, []);
-
-  const fetchWalletInfo = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/withdrawals/wallet-info', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const data = await response.json();
-      
-      if (data.success) {
-        setWalletInfo(data);
-      } else {
-        setError(data.message);
-      }
-    } catch (err) {
-      setError('Failed to fetch wallet information');
+    const pathSegments = location.pathname.split('/');
+    if (pathSegments.includes('advertiser')) {
+      setWalletType('advertiser');
+    } else {
+      setWalletType('webOwner');
     }
-  };
+    
+    fetchWalletData();
+  }, [location]);
 
-  const fetchWithdrawalMethods = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/withdrawals/methods', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const data = await response.json();
-      
-      if (data.success) {
-        setWithdrawalMethods(data.methods);
-      }
-    } catch (err) {
-      console.error('Failed to fetch withdrawal methods');
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => setSuccess(''), 5000);
+      return () => clearTimeout(timer);
     }
-  };
+  }, [success]);
 
-  const handleWithdrawalSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
-    setSuccess('');
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => setError(''), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
 
+  const fetchWalletData = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/withdrawals/request', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          amount: parseFloat(withdrawalAmount),
-          method: selectedMethod,
-          accountDetails
-        })
-      });
-
-      const data = await response.json();
-      
-      if (data.success) {
-        setSuccess('Withdrawal request submitted successfully!');
-        setShowWithdrawalForm(false);
-        setWithdrawalAmount('');
-        setAccountDetails({});
-        setSelectedMethod('');
-        fetchWalletInfo(); // Refresh wallet info
-      } else {
-        setError(data.message);
+      const token = getAuthToken();
+      if (!token) {
+        navigate('/login');
+        return;
       }
-    } catch (err) {
-      setError('Failed to submit withdrawal request');
+
+      const response = await axios.get(
+        `http://localhost:5000/api/ad-categories/wallet/${walletType}/balance`,
+        { headers: getAuthHeaders() }
+      );
+
+      setWallet(response.data.wallet);
+    } catch (error) {
+      if (error.response?.status === 401) {
+        navigate('/login');
+        return;
+      }
+      setError('Failed to load wallet information');
     } finally {
       setLoading(false);
     }
   };
 
-  const cancelWithdrawal = async (withdrawalId) => {
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+    
+    // Clear error for this field
+    if (formErrors[name]) {
+      setFormErrors(prev => ({
+        ...prev,
+        [name]: ''
+      }));
+    }
+  };
+
+  const validateForm = () => {
+    const errors = {};
+
+    if (!formData.amount || parseFloat(formData.amount) <= 0) {
+      errors.amount = 'Please enter a valid amount';
+    } else if (parseFloat(formData.amount) > wallet?.balance) {
+      errors.amount = 'Amount exceeds available balance';
+    }
+
+    if (!formData.bankName.trim()) {
+      errors.bankName = 'Bank name is required';
+    }
+
+    if (!formData.accountNumber.trim()) {
+      errors.accountNumber = 'Account number is required';
+    }
+
+    if (!formData.accountName.trim()) {
+      errors.accountName = 'Account name is required';
+    }
+
+    if (!formData.country.trim()) {
+      errors.country = 'Country is required';
+    }
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setSuccess('');
+
+    if (!validateForm()) {
+      return;
+    }
+
+    setSubmitting(true);
+
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/withdrawals/${withdrawalId}/cancel`, {
-        method: 'PATCH',
-        headers: { 'Authorization': `Bearer ${token}` }
+      const response = await axios.post(
+        `http://localhost:5000/api/ad-categories/wallet/${walletType}/withdrawal-request`,
+        formData,
+        { headers: getAuthHeaders() }
+      );
+
+      setSuccess('Withdrawal request submitted successfully! You will be notified once it is processed.');
+      
+      // Reset form
+      setFormData({
+        amount: '',
+        bankName: '',
+        accountNumber: '',
+        accountName: '',
+        country: '',
+        routingNumber: '',
+        swiftCode: ''
       });
 
-      const data = await response.json();
-      
-      if (data.success) {
-        setSuccess('Withdrawal cancelled successfully');
-        fetchWalletInfo();
-      } else {
-        setError(data.message);
-      }
-    } catch (err) {
-      setError('Failed to cancel withdrawal');
+      // Navigate to withdrawal history after 2 seconds
+      setTimeout(() => {
+        navigate(`/wallet/${walletType}/withdrawals`);
+      }, 2000);
+
+    } catch (error) {
+      setError(error.response?.data?.error || 'Failed to submit withdrawal request');
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  const renderAccountDetailsForm = () => {
-    if (!selectedMethod || !withdrawalMethods[selectedMethod]) return null;
-
-    const method = withdrawalMethods[selectedMethod];
-    
-    return (
-      <div className="space-y-4">
-        <h4 className="font-semibold text-gray-900">Account Details</h4>
-        {method.requiredFields.map((field) => (
-          <div key={field.field}>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              {field.label} {field.required && <span className="text-red-500">*</span>}
-            </label>
-            {field.type === 'select' ? (
-              <select
-                value={accountDetails[field.field] || ''}
-                onChange={(e) => setAccountDetails(prev => ({
-                  ...prev,
-                  [field.field]: e.target.value
-                }))}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                required={field.required}
-              >
-                <option value="">Select {field.label}</option>
-                {field.options?.map(option => (
-                  <option key={option} value={option}>{option}</option>
-                ))}
-              </select>
-            ) : (
-              <input
-                type={field.type}
-                value={accountDetails[field.field] || ''}
-                onChange={(e) => setAccountDetails(prev => ({
-                  ...prev,
-                  [field.field]: e.target.value
-                }))}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder={`Enter ${field.label.toLowerCase()}`}
-                required={field.required}
-              />
-            )}
-          </div>
-        ))}
-      </div>
-    );
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD'
+    }).format(amount || 0);
   };
 
-  const getStatusIcon = (status) => {
-    switch (status) {
-      case 'pending':
-        return <Clock className="w-4 h-4 text-yellow-500" />;
-      case 'processing':
-        return <AlertCircle className="w-4 h-4 text-blue-500" />;
-      case 'completed':
-        return <CheckCircle className="w-4 h-4 text-green-500" />;
-      case 'failed':
-      case 'cancelled':
-        return <XCircle className="w-4 h-4 text-red-500" />;
-      default:
-        return <Clock className="w-4 h-4 text-gray-500" />;
-    }
-  };
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'processing':
-        return 'bg-blue-100 text-blue-800';
-      case 'completed':
-        return 'bg-green-100 text-green-800';
-      case 'failed':
-      case 'cancelled':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getMethodIcon = (method) => {
-    switch (method) {
-      case 'bank_transfer':
-        return <Building2 className="w-5 h-5" />;
-      case 'mobile_money':
-        return <Smartphone className="w-5 h-5" />;
-      case 'paypal':
-        return <CreditCard className="w-5 h-5" />;
-      case 'crypto':
-        return <Bitcoin className="w-5 h-5" />;
-      default:
-        return <Wallet className="w-5 h-5" />;
-    }
-  };
-
-  if (!walletInfo) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-      </div>
-    );
+  if (loading) {
+    return <LoadingSpinner />;
   }
 
   return (
-    <div className="max-w-6xl mx-auto p-6">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Wallet & Withdrawals</h1>
-        <p className="text-gray-600">Manage your earnings and withdraw funds</p>
+    <>
+      <header className="border-b border-gray-200 bg-white">
+        <Container>
+          <div className="h-16 flex items-center justify-between">
+            <button 
+              onClick={() => navigate(-1)} 
+              className="flex items-center text-gray-600 hover:text-black transition-colors"
+            >
+              <ArrowLeft size={18} className="mr-2" />
+              <span className="font-medium">Back</span>
+            </button>
+            <Badge variant="default">Request to Withdraw</Badge>
+          </div>
+        </Container>
+      </header>
+
+      <div className="min-h-screen bg-white">
+        <div className="max-w-3xl mx-auto px-4 py-12">
+          
+          {/* Balance Card */}
+          <div className="border border-black bg-white p-6 mb-8">
+            <h3 className="text-sm font-semibold text-black mb-2 uppercase tracking-wide">Available Balance</h3>
+            <p className="text-3xl font-bold text-black">{formatCurrency(wallet?.balance)}</p>
+          </div>
+
+          {/* Withdrawal Form */}
+          <form onSubmit={handleSubmit} className="border border-black bg-white p-8">
+            <h2 className="text-2xl font-bold text-black mb-6">Request Withdrawal</h2>
+
+            {/* Amount */}
+            <div className="mb-6">
+              <label className="block text-sm font-semibold text-black mb-2">
+                Withdrawal Amount *
+              </label>
+              <input
+                type="number"
+                name="amount"
+                value={formData.amount}
+                onChange={handleInputChange}
+                step="0.01"
+                min="0"
+                max={wallet?.balance || 0}
+                placeholder="0.00"
+                className={`w-full px-4 py-3 border ${formErrors.amount ? 'border-red-600' : 'border-black'} bg-white text-black placeholder-gray-500 focus:outline-none focus:ring-0`}
+              />
+              {formErrors.amount && (
+                <p className="text-red-600 text-sm mt-1">{formErrors.amount}</p>
+              )}
+            </div>
+
+            {/* Bank Name */}
+            <div className="mb-6">
+              <label className="block text-sm font-semibold text-black mb-2">
+                Bank Name *
+              </label>
+              <input
+                type="text"
+                name="bankName"
+                value={formData.bankName}
+                onChange={handleInputChange}
+                placeholder="Enter bank name"
+                className={`w-full px-4 py-3 border ${formErrors.bankName ? 'border-red-600' : 'border-black'} bg-white text-black placeholder-gray-500 focus:outline-none focus:ring-0`}
+              />
+              {formErrors.bankName && (
+                <p className="text-red-600 text-sm mt-1">{formErrors.bankName}</p>
+              )}
+            </div>
+
+            {/* Account Number */}
+            <div className="mb-6">
+              <label className="block text-sm font-semibold text-black mb-2">
+                Account Number *
+              </label>
+              <input
+                type="text"
+                name="accountNumber"
+                value={formData.accountNumber}
+                onChange={handleInputChange}
+                placeholder="Enter account number"
+                className={`w-full px-4 py-3 border ${formErrors.accountNumber ? 'border-red-600' : 'border-black'} bg-white text-black placeholder-gray-500 focus:outline-none focus:ring-0`}
+              />
+              {formErrors.accountNumber && (
+                <p className="text-red-600 text-sm mt-1">{formErrors.accountNumber}</p>
+              )}
+            </div>
+
+            {/* Account Name */}
+            <div className="mb-6">
+              <label className="block text-sm font-semibold text-black mb-2">
+                Account Name *
+              </label>
+              <input
+                type="text"
+                name="accountName"
+                value={formData.accountName}
+                onChange={handleInputChange}
+                placeholder="Enter account holder name"
+                className={`w-full px-4 py-3 border ${formErrors.accountName ? 'border-red-600' : 'border-black'} bg-white text-black placeholder-gray-500 focus:outline-none focus:ring-0`}
+              />
+              {formErrors.accountName && (
+                <p className="text-red-600 text-sm mt-1">{formErrors.accountName}</p>
+              )}
+            </div>
+
+            {/* Country */}
+            <div className="mb-6">
+              <label className="block text-sm font-semibold text-black mb-2">
+                Country *
+              </label>
+              <input
+                type="text"
+                name="country"
+                value={formData.country}
+                onChange={handleInputChange}
+                placeholder="Enter country"
+                className={`w-full px-4 py-3 border ${formErrors.country ? 'border-red-600' : 'border-black'} bg-white text-black placeholder-gray-500 focus:outline-none focus:ring-0`}
+              />
+              {formErrors.country && (
+                <p className="text-red-600 text-sm mt-1">{formErrors.country}</p>
+              )}
+            </div>
+
+            {/* Routing Number */}
+            <div className="mb-6">
+              <label className="block text-sm font-semibold text-black mb-2">
+                Routing Number (Optional)
+              </label>
+              <input
+                type="text"
+                name="routingNumber"
+                value={formData.routingNumber}
+                onChange={handleInputChange}
+                placeholder="Enter routing number"
+                className="w-full px-4 py-3 border border-black bg-white text-black placeholder-gray-500 focus:outline-none focus:ring-0"
+              />
+            </div>
+
+            {/* SWIFT Code */}
+            <div className="mb-8">
+              <label className="block text-sm font-semibold text-black mb-2">
+                SWIFT Code (Optional)
+              </label>
+              <input
+                type="text"
+                name="swiftCode"
+                value={formData.swiftCode}
+                onChange={handleInputChange}
+                placeholder="Enter SWIFT code"
+                className="w-full px-4 py-3 border border-black bg-white text-black placeholder-gray-500 focus:outline-none focus:ring-0"
+              />
+            </div>
+
+            {/* Submit Button */}
+            <div className="flex gap-4">
+              <Button
+                type="submit"
+                variant="primary"
+                size="lg"
+                disabled={submitting}
+                className="flex-1"
+              >
+                {submitting ? 'Submitting...' : 'Submit Withdrawal Request'}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="lg"
+                onClick={() => navigate(-1)}
+                disabled={submitting}
+              >
+                Cancel
+              </Button>
+            </div>
+          </form>
+        </div>
       </div>
 
-      {/* Alerts */}
-      {error && (
-        <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4 flex items-center">
-          <XCircle className="w-5 h-5 text-red-500 mr-3" />
-          <span className="text-red-700">{error}</span>
-        </div>
-      )}
-
+      {/* Success Toast */}
       {success && (
-        <div className="mb-6 bg-green-50 border border-green-200 rounded-lg p-4 flex items-center">
-          <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
-          <span className="text-green-700">{success}</span>
+        <div className="fixed bottom-6 right-6 border border-black bg-white p-4 shadow-lg animate-slide-up max-w-sm z-50">
+          <p className="text-sm text-black font-medium">{success}</p>
         </div>
       )}
 
-      {/* Wallet Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div className="bg-white rounded-xl shadow-md p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center">
-              <Wallet className="w-8 h-8 text-blue-500" />
-              <h3 className="text-lg font-semibold text-gray-900 ml-3">Total Balance</h3>
-            </div>
-            <button
-              onClick={() => setShowBalance(!showBalance)}
-              className="text-gray-500 hover:text-gray-700"
-            >
-              {showBalance ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-            </button>
-          </div>
-          <p className="text-3xl font-bold text-gray-900">
-            {showBalance ? `${walletInfo.wallet.balance.toFixed(2)}` : '••••'}
-          </p>
-        </div>
-
-        <div className="bg-white rounded-xl shadow-md p-6">
-          <div className="flex items-center mb-4">
-            <Download className="w-8 h-8 text-green-500" />
-            <h3 className="text-lg font-semibold text-gray-900 ml-3">Available</h3>
-          </div>
-          <p className="text-3xl font-bold text-green-600">
-            ${walletInfo.wallet.availableForWithdrawal.toFixed(2)}
-          </p>
-        </div>
-
-        <div className="bg-white rounded-xl shadow-md p-6">
-          <div className="flex items-center mb-4">
-            <Clock className="w-8 h-8 text-yellow-500" />
-            <h3 className="text-lg font-semibold text-gray-900 ml-3">Pending</h3>
-          </div>
-          <p className="text-3xl font-bold text-yellow-600">
-            ${walletInfo.wallet.pendingWithdrawals.toFixed(2)}
-          </p>
-        </div>
-
-        <div className="bg-white rounded-xl shadow-md p-6">
-          <div className="flex items-center mb-4">
-            <TrendingUp className="w-8 h-8 text-purple-500" />
-            <h3 className="text-lg font-semibold text-gray-900 ml-3">Total Earned</h3>
-          </div>
-          <p className="text-3xl font-bold text-purple-600">
-            ${walletInfo.wallet.totalEarned.toFixed(2)}
-          </p>
-        </div>
-      </div>
-
-      {/* Navigation Tabs */}
-      <div className="border-b border-gray-200 mb-6">
-        <nav className="-mb-px flex space-x-8">
-          {[
-            { id: 'overview', label: 'Overview', icon: Wallet },
-            { id: 'withdraw', label: 'Withdraw', icon: Download },
-            { id: 'history', label: 'History', icon: Calendar }
-          ].map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center py-4 px-1 border-b-2 font-medium text-sm ${
-                activeTab === tab.id
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-            >
-              <tab.icon className="w-5 h-5 mr-2" />
-              {tab.label}
-            </button>
-          ))}
-        </nav>
-      </div>
-
-      {/* Tab Content */}
-      {activeTab === 'overview' && (
-        <div className="space-y-6">
-          {/* Recent Transactions */}
-          <div className="bg-white rounded-xl shadow-md">
-            <div className="p-6 border-b border-gray-200">
-              <h3 className="text-xl font-semibold text-gray-900">Recent Transactions</h3>
-            </div>
-            <div className="divide-y divide-gray-200">
-              {walletInfo.recentTransactions && walletInfo.recentTransactions.length > 0 ? (
-                walletInfo.recentTransactions.map((transaction, index) => (
-                  <div key={index} className="p-6 flex items-center justify-between">
-                    <div className="flex items-center">
-                      <div className={`p-2 rounded-full ${
-                        transaction.type === 'credit' ? 'bg-green-100' : 'bg-red-100'
-                      }`}>
-                        <DollarSign className={`w-4 h-4 ${
-                          transaction.type === 'credit' ? 'text-green-600' : 'text-red-600'
-                        }`} />
-                      </div>
-                      <div className="ml-4">
-                        <p className="font-medium text-gray-900">{transaction.description}</p>
-                        <p className="text-sm text-gray-500">
-                          {new Date(transaction.createdAt).toLocaleDateString()}
-                        </p>
-                      </div>
-                    </div>
-                    <span className={`font-semibold ${
-                      transaction.type === 'credit' ? 'text-green-600' : 'text-red-600'
-                    }`}>
-                      {transaction.type === 'credit' ? '+' : '-'}${Math.abs(transaction.amount).toFixed(2)}
-                    </span>
-                  </div>
-                ))
-              ) : (
-                <div className="p-6 text-center text-gray-500">
-                  No recent transactions
-                </div>
-              )}
-            </div>
-          </div>
+      {/* Error Toast */}
+      {error && (
+        <div className="fixed bottom-6 right-6 border border-red-600 bg-white p-4 shadow-lg animate-slide-up max-w-sm z-50">
+          <p className="text-sm text-red-600 font-medium">{error}</p>
         </div>
       )}
-
-      {activeTab === 'withdraw' && (
-        <div className="space-y-6">
-          {!showWithdrawalForm ? (
-            <div className="bg-white rounded-xl shadow-md p-6">
-              <div className="text-center mb-6">
-                <h3 className="text-2xl font-semibold text-gray-900 mb-2">Withdraw Funds</h3>
-                <p className="text-gray-600">Available for withdrawal: <span className="font-semibold text-green-600">${walletInfo.wallet.availableForWithdrawal.toFixed(2)}</span></p>
-              </div>
-
-              {walletInfo.wallet.availableForWithdrawal > 0 ? (
-                <div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                    {Object.entries(withdrawalMethods).map(([method, details]) => (
-                      <button
-                        key={method}
-                        onClick={() => {
-                          setSelectedMethod(method);
-                          setShowWithdrawalForm(true);
-                        }}
-                        className="p-6 border-2 border-gray-200 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition-all duration-200 group"
-                      >
-                        <div className="flex flex-col items-center text-center">
-                          <div className="p-3 bg-gray-100 rounded-full group-hover:bg-blue-100 mb-4">
-                            {getMethodIcon(method)}
-                          </div>
-                          <h4 className="font-semibold text-gray-900 mb-2">{details.name}</h4>
-                          <p className="text-sm text-gray-500 mb-2">Fee: {details.fee}</p>
-                          <p className="text-xs text-gray-400">{details.processingTime}</p>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              ) : (
-                <div className="text-center text-gray-500">
-                  <p>No funds available for withdrawal</p>
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="bg-white rounded-xl shadow-md p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-semibold text-gray-900">
-                  Withdraw via {withdrawalMethods[selectedMethod]?.name}
-                </h3>
-                <button
-                  onClick={() => {
-                    setShowWithdrawalForm(false);
-                    setSelectedMethod('');
-                    setWithdrawalAmount('');
-                    setAccountDetails({});
-                  }}
-                  className="text-gray-500 hover:text-gray-700"
-                >
-                  <XCircle className="w-6 h-6" />
-                </button>
-              </div>
-
-              <form onSubmit={handleWithdrawalSubmit} className="space-y-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Withdrawal Amount <span className="text-red-500">*</span>
-                  </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <DollarSign className="h-5 w-5 text-gray-400" />
-                    </div>
-                    <input
-                      type="number"
-                      step="0.01"
-                      min="1"
-                      max={walletInfo.wallet.availableForWithdrawal}
-                      value={withdrawalAmount}
-                      onChange={(e) => setWithdrawalAmount(e.target.value)}
-                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      placeholder="0.00"
-                      required
-                    />
-                  </div>
-                  <p className="text-sm text-gray-500 mt-1">
-                    Fee: {withdrawalMethods[selectedMethod]?.fee} | 
-                    Processing Time: {withdrawalMethods[selectedMethod]?.processingTime}
-                  </p>
-                </div>
-
-                {renderAccountDetailsForm()}
-
-                <div className="flex gap-4">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowWithdrawalForm(false);
-                      setSelectedMethod('');
-                      setWithdrawalAmount('');
-                      setAccountDetails({});
-                    }}
-                    className="flex-1 py-3 px-4 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="flex-1 py-3 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {loading ? 'Processing...' : 'Submit Request'}
-                  </button>
-                </div>
-              </form>
-            </div>
-          )}
-        </div>
-      )}
-
-      {activeTab === 'history' && (
-        <div className="bg-white rounded-xl shadow-md">
-          <div className="p-6 border-b border-gray-200">
-            <h3 className="text-xl font-semibold text-gray-900">Withdrawal History</h3>
-          </div>
-          <div className="divide-y divide-gray-200">
-            {walletInfo.withdrawals && walletInfo.withdrawals.length > 0 ? (
-              walletInfo.withdrawals.map((withdrawal) => (
-                <div key={withdrawal._id} className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center">
-                      <div className="p-2 bg-gray-100 rounded-full mr-4">
-                        {getMethodIcon(withdrawal.method)}
-                      </div>
-                      <div>
-                        <p className="font-medium text-gray-900">
-                          ${withdrawal.amount.toFixed(2)} via {withdrawalMethods[withdrawal.method]?.name}
-                        </p>
-                        <p className="text-sm text-gray-500">
-                          Requested on {new Date(withdrawal.requestedAt).toLocaleDateString()}
-                        </p>
-                        {withdrawal.failureReason && (
-                          <p className="text-sm text-red-600">
-                            Reason: {withdrawal.failureReason}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(withdrawal.status)}`}>
-                        <div className="flex items-center gap-1">
-                          {getStatusIcon(withdrawal.status)}
-                          {withdrawal.status.charAt(0).toUpperCase() + withdrawal.status.slice(1)}
-                        </div>
-                      </span>
-                      {withdrawal.status === 'pending' && (
-                        <button
-                          onClick={() => cancelWithdrawal(withdrawal._id)}
-                          className="text-sm text-red-600 hover:text-red-800 font-medium"
-                        >
-                          Cancel
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="p-6 text-center text-gray-500">
-                No withdrawal history
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-    </div>
+    </>
   );
 };
 
-export default WithdrawalDashboard;
+export default WithdrawalRequest;

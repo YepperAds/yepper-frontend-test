@@ -1,10 +1,12 @@
-// Wallet.js
+// Wallet.js - Updated version with Withdraw functionality
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Wallet as WalletIcon,
   ArrowLeft,
-  Search
+  Search,
+  Download,
+  History
 } from 'lucide-react';
 import axios from 'axios';
 import { Button, Grid, Container, Badge } from '../../components/components';
@@ -13,7 +15,7 @@ import LoadingSpinner from '../../components/LoadingSpinner';
 const Wallet = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [walletType, setWalletType] = useState('webOwner'); // 'webOwner' or 'advertiser'
+  const [walletType, setWalletType] = useState('webOwner');
   const [user, setUser] = useState(null);
   const [wallet, setWallet] = useState(null);
   const [transactions, setTransactions] = useState([]);
@@ -101,7 +103,6 @@ const Wallet = () => {
       });
       setUser(response.data.user);
     } catch (error) {
-      console.error('Error fetching user info:', error);
       if (error.response?.status === 401) {
         navigate('/login');
       }
@@ -122,7 +123,6 @@ const Wallet = () => {
 
       setWallet(response.data.wallet);
     } catch (error) {
-      console.error('Error fetching wallet:', error);
       if (error.response?.status === 401) {
         navigate('/login');
         return;
@@ -161,7 +161,6 @@ const Wallet = () => {
         total: response.data.total || 0
       });
     } catch (error) {
-      console.error('Error fetching transactions:', error);
       if (error.response?.status !== 404) {
         setError('Failed to load transaction history');
       }
@@ -267,7 +266,7 @@ const Wallet = () => {
                 <Search size={20} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                 <input 
                   type="text"
-                  placeholder="Search..."
+                  placeholder="Search transactions..."
                   value={searchQuery}
                   onChange={handleSearch}
                   className="w-full pl-10 pr-4 py-3 border border-black bg-white text-black placeholder-gray-500 focus:outline-none focus:ring-0 transition-all duration-200"
@@ -275,14 +274,37 @@ const Wallet = () => {
               </div>
             </div>
 
-            {/* Switch Wallet Button */}
-            <div className="flex-shrink-0">
+            {/* Action Buttons */}
+            <div className="flex gap-3 flex-shrink-0">
+              {/* Only show Withdraw button for webOwner */}
+              {walletType === 'webOwner' && (
+                <>
+                  <Button
+                    variant="primary"
+                    size="lg"
+                    onClick={() => navigate(`/wallet/${walletType}/withdraw`)}
+                    disabled={!wallet || wallet.balance <= 0}
+                  >
+                    <Download size={18} className="mr-2" />
+                    Withdraw
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    onClick={() => navigate(`/wallet/${walletType}/withdrawals`)}
+                  >
+                    <History size={18} className="mr-2" />
+                    Withdrawal History
+                  </Button>
+                </>
+              )}
+              
               <Button
                 variant="secondary"
                 size="lg"
                 onClick={switchWalletType}
               >
-                Switch to {walletType === 'webOwner' ? 'Advertiser Wallet' : 'Publisher Wallet'}
+                Switch to {walletType === 'webOwner' ? 'Advertiser' : 'Publisher'}
               </Button>
             </div>
           </div>

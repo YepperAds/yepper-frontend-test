@@ -1,10 +1,8 @@
-// EmailVerification.js - New component for the verification waiting page
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Mail, RefreshCw, CheckCircle } from 'lucide-react';
 import { Button } from '../components/components';
 import axios from 'axios';
-import toast from 'react-hot-toast';
 
 const EmailVerification = () => {
   const location = useLocation();
@@ -45,11 +43,10 @@ const EmailVerification = () => {
       );
 
       if (response.data.success) {
-        toast.success('Verification email sent!');
         setResendCooldown(60); // 60 second cooldown
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to resend email');
+      return;
     } finally {
       setIsResending(false);
     }

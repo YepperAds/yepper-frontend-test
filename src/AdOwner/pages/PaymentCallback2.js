@@ -15,7 +15,6 @@ const PaymentCallback2 = () => {
   const addDebug = (message, data = null) => {
     const timestamp = new Date().toLocaleTimeString();
     setDebugInfo(prev => [...prev, { timestamp, message, data }]);
-    console.log(`[${timestamp}] ${message}`, data);
   };
 
   // Helper function to get auth token

@@ -1,4 +1,3 @@
-// FIXED: VerifyError.js component for handling errors
 import React from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { XCircle, ArrowLeft } from 'lucide-react';

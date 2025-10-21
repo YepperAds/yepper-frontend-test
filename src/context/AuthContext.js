@@ -1,4 +1,4 @@
-// AuthContext.js - Updated with returnUrl support
+// AuthContext.js
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 
@@ -31,7 +31,6 @@ export const AuthProvider = ({ children }) => {
       (response) => response,
       (error) => {
         if (error.response?.status === 401) {
-          console.log('Token expired or invalid, logging out...');
           handleInvalidToken();
         }
         return Promise.reject(error);
@@ -60,34 +59,27 @@ export const AuthProvider = ({ children }) => {
     }
 
     try {
-      console.log('Fetching current user...');
       const response = await axios.get(`${API_URL}/api/auth/me`);
       
       if (response.data.success && response.data.user) {
-        console.log('User authenticated successfully:', response.data.user.email);
         setUser(response.data.user);
         setIsAuthenticated(true);
       } else {
-        console.log('Invalid response format:', response.data);
         handleInvalidToken();
       }
     } catch (error) {
-      console.error('Get current user error:', error);
       
       if (error.response) {
         const status = error.response.status;
         
         if (status === 401) {
-          console.log('Token is invalid or expired, removing...');
           handleInvalidToken();
         } else if (status >= 500) {
           // Server error - retry once after a delay
           if (retryCount < 1) {
-            console.log('Server error, retrying in 2 seconds...');
             setTimeout(() => getCurrentUser(retryCount + 1), 2000);
             return;
           } else {
-            console.log('Server still unavailable after retry');
             setIsLoading(false);
           }
         } else {
@@ -96,15 +88,12 @@ export const AuthProvider = ({ children }) => {
       } else if (error.request) {
         // Network error (server not responding)
         if (retryCount < 2) {
-          console.log(`Network error, retrying in ${(retryCount + 1) * 2} seconds...`);
           setTimeout(() => getCurrentUser(retryCount + 1), (retryCount + 1) * 2000);
           return;
         } else {
-          console.log('Network still unavailable after retries');
           setIsLoading(false);
         }
       } else {
-        console.log('Unexpected error, keeping token');
         setIsLoading(false);
       }
     } finally {
@@ -115,7 +104,6 @@ export const AuthProvider = ({ children }) => {
   };
 
   const handleInvalidToken = () => {
-    console.log('Handling invalid token - clearing auth state');
     localStorage.removeItem('token');
     delete axios.defaults.headers.common['Authorization'];
     setUser(null);
@@ -124,7 +112,6 @@ export const AuthProvider = ({ children }) => {
 
   const setAuthToken = (token) => {
     if (token) {
-      console.log('Setting auth token');
       localStorage.setItem('token', token);
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     } else {
@@ -144,7 +131,6 @@ export const AuthProvider = ({ children }) => {
         throw new Error('Invalid token received');
       }
     } catch (error) {
-      console.error('Auto-login error:', error);
       handleInvalidToken();
       throw new Error('Auto-login failed');
     }
@@ -179,7 +165,6 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      console.log('Attempting login...');
       const response = await axios.post(`${API_URL}/api/auth/login`, {
         email,
         password
@@ -191,14 +176,12 @@ export const AuthProvider = ({ children }) => {
         throw new Error('Invalid response from server');
       }
 
-      console.log('Login successful, setting auth state');
       setAuthToken(token);
       setUser(user);
       setIsAuthenticated(true);
 
       return { success: true, user };
     } catch (error) {
-      console.error('Login error:', error);
       const errorMessage = error.response?.data?.message || 'Login failed';
       const errorData = error.response?.data;
       
@@ -214,29 +197,16 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
-    console.log('Logging out user');
     handleInvalidToken();
   };
 
   const retryAuthentication = () => {
     const token = localStorage.getItem('token');
     if (token && !isAuthenticated) {
-      console.log('Retrying authentication...');
       setIsLoading(true);
       getCurrentUser();
     }
   };
-
-  // Debug logging
-  useEffect(() => {
-    console.log('Auth state changed:', {
-      isAuthenticated,
-      hasUser: !!user,
-      userEmail: user?.email,
-      isLoading,
-      hasToken: !!localStorage.getItem('token')
-    });
-  }, [isAuthenticated, user, isLoading]);
 
   const value = {
     user,

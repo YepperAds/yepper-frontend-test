@@ -72,7 +72,6 @@ const CategoryCreation = () => {
         setUser(response.data.user); // Set user data from your API
         setLoading(false);
       } catch (error) {
-        console.error('Authentication failed:', error);
         localStorage.removeItem('token'); // Remove invalid token
       }
     };
@@ -98,7 +97,6 @@ const CategoryCreation = () => {
                 });
                 // Handle the website details...
             } catch (error) {
-                console.error('Failed to fetch website details:', error);
                 navigate('/create-website');
             }
         };
@@ -379,11 +377,9 @@ const CategoryCreation = () => {
           };
         });
 
-      console.log('Categories to submit:', categoriesToSubmit); // Debug log
 
       const token = localStorage.getItem('token');
       if (!token) {
-        console.error('No authentication token found');
         navigate('/login');
         return;
       }
@@ -403,7 +399,6 @@ const CategoryCreation = () => {
             );
             return { ...response.data, name: category.categoryName };
           } catch (error) {
-            console.error(`Failed to create category ${category.categoryName}:`, error.response?.data);
             throw error;
           }
         })
@@ -427,18 +422,13 @@ const CategoryCreation = () => {
         },
       });
     } catch (error) {
-      console.error('Failed to submit categories:', error);
       
       // Handle specific error types
       if (error.response?.status === 401) {
         localStorage.removeItem('token');
         navigate('/login');
       } else if (error.response?.status === 400) {
-        console.error('Validation error:', error.response.data);
-        // Show user-friendly error message
-        alert(`Validation failed: ${error.response.data.message || 'Please check your form data'}`);
       } else {
-        alert('Failed to create categories. Please try again.');
       }
     }
   };

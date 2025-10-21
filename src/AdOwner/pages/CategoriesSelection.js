@@ -78,7 +78,6 @@ const Categories = () => {
           });
           setFileObject(restoredFile);
         } catch (error) {
-          console.error('Failed to restore file:', error);
         }
       } else if (file instanceof File) {
         setFileObject(file);
@@ -158,7 +157,6 @@ const Categories = () => {
         });
         setUser(response.data.user);
       } catch (error) {
-        console.error('Failed to fetch user info:', error);
         navigate('/login');
       }
     };
@@ -183,7 +181,6 @@ const Categories = () => {
           
           if (!categoriesResponse.ok) {
             if (categoriesResponse.status === 401) {
-              console.error('Authentication required. Please log in.');
               navigate('/login');
               return;
             }
@@ -204,7 +201,6 @@ const Categories = () => {
         setCategoriesByWebsite(result.filter(Boolean));
         
       } catch (error) {
-        console.error('Failed to fetch categories or websites:', error);
         setError('Failed to load categories. Please try again.');
       } finally {
         setIsLoading(false);
@@ -213,7 +209,6 @@ const Categories = () => {
 
     const token = getAuthToken();
     if (!token) {
-      console.error('No authentication token found');
       navigate('/login');
       return;
     }
@@ -319,8 +314,6 @@ const Categories = () => {
       }
       
     } catch (error) {
-      console.error('Error during ad creation:', error);
-      
       if (error.response?.status === 401) {
         localStorage.removeItem('token');
         sessionStorage.removeItem('token');
@@ -366,7 +359,6 @@ const Categories = () => {
         window.location.href = response.data.paymentUrl;
       }
     } catch (error) {
-      console.error('Bulk payment initiation error:', error);
       setError(error.response?.data?.error || 'Failed to initiate payment. Please try again.');
     }
   };
