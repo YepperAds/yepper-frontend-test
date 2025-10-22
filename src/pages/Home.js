@@ -309,9 +309,11 @@ const Home = () => {
                     <p className="text-base text-gray-700 mb-6 leading-relaxed">
                       Turn your website into a smart ad platform. Add your ad spaces, set your categories, and Yepper automatically connects you with trusted advertisers who fit your content. You stay in control, we handle the rest.
                     </p>
-                    <button className="text-black font-semibold hover:underline">
-                      → Start as a Web Owner
-                    </button>
+                    <Link to='/add-website'>
+                      <button className="text-black font-semibold hover:underline">
+                        → Start as a Web Owner
+                      </button>
+                    </Link>
                   </div>
 
                   <div className="bg-white border border-gray-200 p-8">
@@ -319,9 +321,12 @@ const Home = () => {
                     <p className="text-base text-gray-700 mb-6 leading-relaxed">
                       Reach real audiences on quality websites across East Africa. Pick your categories, upload your ad, and Yepper instantly matches it to the most relevant spaces, no calls, no waiting. Just simple, transparent reach.
                     </p>
-                    <button className="text-black font-semibold hover:underline">
-                      → Start as an Advertiser
-                    </button>
+                    <Link to='/advertise'>
+                      <button className="text-black font-semibold hover:underline">
+                        → Start as an Advertiser
+                      </button>
+                    </Link>
+                    
                   </div>
                 </div>
               </div>
@@ -457,7 +462,7 @@ const Home = () => {
           <Grid cols={2} gap={8} className="max-w-4xl mx-auto flex items-start justify-center py-8">
             {/* Left Column - Website Section */}
             <div className="flex flex-col items-center space-y-6">
-              <Link to='/add' className="w-full">
+              <Link to='/add-website' className="w-full">
                 <Button 
                   variant="primary" 
                   size="lg" 
@@ -580,7 +585,7 @@ const Home = () => {
             
             {/* Right Column - Ads Section */}
             <div className="flex flex-col items-center space-y-6">
-              <Link to="/add-ad" className="w-full">
+              <Link to="/advertise" className="w-full">
                 <Button 
                   variant="primary" 
                   size="lg" 
@@ -808,9 +813,11 @@ const Home = () => {
                   <p className="text-base text-gray-700 mb-6 leading-relaxed">
                     Turn your website into a smart ad platform. Add your ad spaces, set your categories, and Yepper automatically connects you with trusted advertisers who fit your content. You stay in control, we handle the rest.
                   </p>
-                  <button className="text-black font-semibold hover:underline">
-                    → Start as a Web Owner
-                  </button>
+                  <Link to='/add-website'>
+                    <button className="text-black font-semibold hover:underline">
+                      → Start as a Web Owner
+                    </button>
+                  </Link>
                 </div>
 
                 <div className="bg-white border border-gray-200 p-8">
@@ -818,9 +825,11 @@ const Home = () => {
                   <p className="text-base text-gray-700 mb-6 leading-relaxed">
                     Reach real audiences on quality websites across East Africa. Pick your categories, upload your ad, and Yepper instantly matches it to the most relevant spaces, no calls, no waiting. Just simple, transparent reach.
                   </p>
-                  <button className="text-black font-semibold hover:underline">
-                    → Start as an Advertiser
-                  </button>
+                  <Link to='/advertise'>
+                    <button className="text-black font-semibold hover:underline">
+                      → Start as an Advertiser
+                    </button>
+                  </Link>
                 </div>
               </div>
             </div>

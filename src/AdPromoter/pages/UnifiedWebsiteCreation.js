@@ -1246,7 +1246,7 @@ const UnifiedWebsiteCreation = () => {
                   Processing...
                 </>
               ) : (
-                authMode === 'login' ? 'Sign In' : 'Create Account'
+                authMode === 'login' ? 'Sign In & Continue' : 'Create Account & Continue'
               )}
             </button>
 

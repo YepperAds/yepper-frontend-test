@@ -1090,10 +1090,10 @@ const UnifiedAdUploadFlow = () => {
 
   const renderAuthModal = () => (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg max-w-md w-full p-6">
-        <div className="flex justify-between items-center mb-6">
-          <h3 className="text-xl font-bold text-gray-900">
-            {verificationSent ? 'Check Your Email' : authMode === 'login' ? 'Sign In to Continue' : 'Create Account'}
+      <div className="bg-white border border-black max-w-md w-full p-6">
+        <div className="flex justify-between items-center mb-6 border-b border-black pb-4">
+          <h3 className="text-xl font-bold text-black">
+            {verificationSent ? 'Check Your Email' : authMode === 'login' ? 'Sign In' : 'Create Account'}
           </h3>
           <button
             onClick={() => {
@@ -1101,7 +1101,7 @@ const UnifiedAdUploadFlow = () => {
               setVerificationSent(false);
               setErrors({});
             }}
-            className="text-gray-400 hover:text-gray-600"
+            className="text-gray-600 hover:text-black"
           >
             <X className="w-6 h-6" />
           </button>
@@ -1110,17 +1110,17 @@ const UnifiedAdUploadFlow = () => {
         {verificationSent ? (
           <div className="space-y-4">
             <div className="flex items-center justify-center mb-4">
-              <Mail className="w-16 h-16 text-blue-500" />
+              <Mail className="w-16 h-16 text-black" />
             </div>
             <p className="text-center text-gray-700">
               We've sent a verification email to <strong>{maskedEmail}</strong>
             </p>
             <p className="text-center text-sm text-gray-600">
-              Click the link in the email to verify your account and complete your ad submission and payment.
+              Click the link in the email to verify your account and complete the website creation.
             </p>
             <button
               onClick={handleResendVerification}
-              className="w-full text-blue-600 hover:text-blue-700 text-sm font-medium"
+              className="w-full text-black hover:text-gray-700 text-sm font-medium border-t border-black pt-4 mt-4"
             >
               Resend verification email
             </button>
@@ -1133,13 +1133,12 @@ const UnifiedAdUploadFlow = () => {
                   Name
                 </label>
                 <div className="relative">
-                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                   <input
                     type="text"
                     name="name"
                     value={authFormData.name}
                     onChange={handleAuthInputChange}
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    className="w-full pl-10 pr-4 py-3 border border-black bg-white focus:outline-none focus:ring-0"
                     placeholder="Your name"
                     required
                   />
@@ -1158,7 +1157,7 @@ const UnifiedAdUploadFlow = () => {
                   name="email"
                   value={authFormData.email}
                   onChange={handleAuthInputChange}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="w-full pl-10 pr-4 py-3 border border-black bg-white focus:outline-none focus:ring-0"
                   placeholder="your@email.com"
                   required
                 />
@@ -1170,20 +1169,19 @@ const UnifiedAdUploadFlow = () => {
                 Password
               </label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   name="password"
                   value={authFormData.password}
                   onChange={handleAuthInputChange}
-                  className="w-full pl-10 pr-12 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="w-full pl-10 pr-12 py-3 border border-black bg-white focus:outline-none focus:ring-0"
                   placeholder="••••••••"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-black"
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
@@ -1191,7 +1189,7 @@ const UnifiedAdUploadFlow = () => {
             </div>
 
             {errors.auth && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+              <div className="bg-red-50 border border-red-300 text-red-700 px-4 py-3 text-sm">
                 {errors.auth}
               </div>
             )}
@@ -1199,25 +1197,25 @@ const UnifiedAdUploadFlow = () => {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center"
+              className="w-full bg-black text-white py-3 hover:bg-gray-800 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center font-medium"
             >
               {isSubmitting ? (
                 <>
                   Processing...
                 </>
               ) : (
-                authMode === 'login' ? 'Sign In & Pay' : 'Create Account & Pay'
+                authMode === 'login' ? 'Sign In & Continue' : 'Create Account & Continue'
               )}
             </button>
 
-            <div className="text-center">
+            <div className="text-center border-t border-gray-200 pt-4">
               <button
                 type="button"
                 onClick={() => {
                   setAuthMode(authMode === 'login' ? 'signup' : 'login');
                   setErrors({});
                 }}
-                className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+                className="text-black hover:text-gray-700 text-sm font-medium"
               >
                 {authMode === 'login'
                   ? "Don't have an account? Sign up"

@@ -80,8 +80,8 @@ function App() {
               <Route path="/email-verification" element={<EmailVerification />} />
               <Route path="/check-email" element={<CheckEmail />} />
               <Route path="/payment/callback" element={<PaymentCallback />} />
-              <Route path="/add" element={<UnifiedWebsiteCreation />} />
-              <Route path="/add-ad" element={<UnifiedAdUploadFlow />} />
+              <Route path="/add-website" element={<UnifiedWebsiteCreation />} />
+              <Route path="/advertise" element={<UnifiedAdUploadFlow />} />
 
               {/* AdPromoter */}
               <Route path="/websites" element={

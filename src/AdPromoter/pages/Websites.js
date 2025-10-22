@@ -334,17 +334,17 @@ function Websites() {
             </div>
 
             <div className="flex-shrink-0">
-              <Link to='/wallet'>
-                <Button variant="primary" size="lg">
-                  Add
+              <Link to='/create-website'>
+                <Button variant="secondary" size="lg" icon={Plus} iconPosition="left">
+                  Add Website
                 </Button>
               </Link>
             </div>
 
             <div className="flex-shrink-0">
-              <Link to='/create-website'>
+              <Link to='/upload-ad'>
                 <Button variant="secondary" size="lg" icon={Plus} iconPosition="left">
-                  Add Website
+                  Advertise
                 </Button>
               </Link>
             </div>

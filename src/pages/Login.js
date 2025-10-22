@@ -108,8 +108,7 @@ const Login = () => {
                     <h2 className="text-3xl font-bold text-black">Sign in to your account</h2>
                 </div>
 
-                {/* Google Button */}
-                <Button
+                {/* <Button
                     type="button"
                     onClick={handleGoogleLogin}
                     variant="primary"
@@ -126,7 +125,6 @@ const Login = () => {
                     Continue with Google
                 </Button>
 
-                {/* Separator */}
                 <div className="mb-6">
                     <div className="relative">
                         <div className="absolute inset-0 flex items-center">
@@ -136,7 +134,7 @@ const Login = () => {
                             <span className="px-2 bg-white text-gray-600">or</span>
                         </div>
                     </div>
-                </div>
+                </div> */}
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="space-y-2">

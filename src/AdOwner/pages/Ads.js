@@ -237,6 +237,18 @@ const Ads = () => {
                             Add New Ad
                         </Button>
                     </div>
+
+                    <div className="flex-shrink-0">
+                        <Button
+                            onClick={() => navigate('/upload-ad')}
+                            variant="secondary"
+                            size="lg"
+                            icon={Plus}
+                            iconPosition="left"
+                        >
+                            Add Website
+                        </Button>
+                    </div>
                 </div>
                 
                 {/* Campaigns Grid */}
