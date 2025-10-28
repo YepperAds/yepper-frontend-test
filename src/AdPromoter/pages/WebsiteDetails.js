@@ -25,6 +25,7 @@ import LoadingSpinner from '../../components/LoadingSpinner';
 import { useAuth } from '../../context/AuthContext';
 import AdModalData from '../components/adModalData'
 import DeleteCategoryModal from '../components/DeleteCategoryModal';
+import AdCustomizationModal from '../components/AdCustomizationModal';
 
 const WebsiteDetails = () => {
     const navigate = useNavigate();
@@ -57,7 +58,10 @@ const WebsiteDetails = () => {
     const [showRejectModal, setShowRejectModal] = useState(false);
     const [selectedAd, setSelectedAd] = useState(null);
     const [walletBalance, setWalletBalance] = useState(0);
-
+    const [customizationModal, setCustomizationModal] = useState({
+        isOpen: false,
+        categoryId: null
+    });
     const authenticatedAxios = axios.create({
         baseURL: 'http://localhost:5000/api',
         headers: {
@@ -186,6 +190,26 @@ const WebsiteDetails = () => {
         const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
         
         return `${minutes}m ${seconds}s`;
+    };
+
+    const handleOpenCustomization = (categoryId) => {
+        setCustomizationModal({
+            isOpen: true,
+            categoryId: categoryId
+        });
+    };
+
+    const handleCloseCustomization = () => {
+        setCustomizationModal({
+            isOpen: false,
+            categoryId: null
+        });
+    };
+
+    const handleCustomizationSave = (settings) => {
+        // Refresh the category data to show updated customization
+        fetchWebsiteData();
+        alert('Ad customization saved successfully!');
     };
 
     const handleRejectAd = async () => {
@@ -885,156 +909,117 @@ const WebsiteDetails = () => {
                     
                     {activeTab === 'customize' && (
                         <div>
-                            {/* Introduction */}
-                            <Card className="mb-8">
-                                <CardContent className="p-6">
-                                    <Heading level={2} className="mb-4 flex items-center">
-                                        <Palette className="w-6 h-6 mr-3" />
-                                        Customize Your Ads
-                                    </Heading>
-                                    <Text className="mb-4">
-                                        Copy any code below and add it to your website's CSS to change how your ads look.
-                                    </Text>
-                                    <div className="bg-gray-50 border border-gray-200 p-3">
-                                        <Text variant="small">
-                                            <strong>Tip:</strong> Always add <code className="bg-gray-200 px-1 rounded">!important</code> to make sure your styles work.
-                                        </Text>
-                                    </div>
-                                </CardContent>
-                            </Card>
-
-                            {/* Customization Examples */}
-                            <div className="space-y-6 mb-8">
-                                {customizations.map((example, index) => (
-                                    <Card key={index}>
-                                        <CardContent className="p-6">
-                                            <div className="flex items-center justify-between mb-3">
-                                                <Heading level={3}>{example.title}</Heading>
-                                                <Text variant="small" className="text-gray-600">{example.description}</Text>
-                                            </div>
-                                            <CodeBlock code={example.code} label={example.title} />
-                                        </CardContent>
-                                    </Card>
-                                ))}
+                            <div className="mb-8 text-center">
+                            <Heading level={2} className="mb-3">Customize Your Ad Spaces</Heading>
+                            <Text variant="muted" className="max-w-2xl mx-auto">
+                                Design how ads appear on your website. Each ad space can have its own unique styling 
+                                to match your site's design perfectly.
+                            </Text>
                             </div>
 
-                            {/* How to Use */}
-                            <Card className="mb-8">
-                                <CardContent className="p-6">
-                                    <Heading level={3} className="mb-4 flex items-center">
-                                        <Code className="w-5 h-5 mr-2" />
-                                        How to Use This Code
-                                    </Heading>
-                                    <div className="space-y-6">
+                            {categories.length > 0 ? (
+                            <Grid cols={2} gap={6}>
+                                {categories.map((category) => (
+                                <Card key={category._id} className="border-gray-200">
+                                    <CardContent className="p-6">
+                                    <div className="flex items-start justify-between mb-4">
                                         <div>
-                                            <Heading level={4} className="mb-2">Method 1: Add to your CSS file</Heading>
-                                            <CodeBlock 
-                                                code={`/* Paste the code in your main CSS file */
-.yepper-ad-item {
-    /* Your custom styles here */
-}`}
-                                                label="css-method"
-                                            />
+                                        <Badge variant="primary" className="mb-2">
+                                            {category.spaceType}
+                                        </Badge>
+                                        <Heading level={4} className="mb-1">
+                                            {category.categoryName}
+                                        </Heading>
+                                        <Text variant="small" className="text-gray-600">
+                                            {category.customization ? 'Customized' : 'Default styling'}
+                                        </Text>
                                         </div>
-                                        <div>
-                                            <Heading level={4} className="mb-2">Method 2: Add to your HTML</Heading>
-                                            <CodeBlock 
-                                                code={`<style>
-    /* Paste the code here */
-    .yepper-ad-item {
-        /* Your custom styles here */
-    }
-</style>`}
-                                                label="html-method"
-                                            />
-                                        </div>
+                                        <Palette className="text-gray-400" size={24} />
                                     </div>
-                                </CardContent>
-                            </Card>
 
-                            {/* Ad HTML Structure */}
-                            <Card className="mb-8">
-                                <CardContent className="p-6">
-                                    <Heading level={3} className="mb-4">How Your Ad HTML Looks</Heading>
-                                    <Text className="mb-4">This is the basic structure of your ads. Use these class names to style them:</Text>
-                                    <CodeBlock 
-                                        code={`<div class="yepper-ad-wrapper">
-    <div class="yepper-ad-container">
-        <div class="yepper-ad-item">
-            
-            <!-- Top section -->
-            <div class="yepper-ad-header">
-                <span class="yepper-ad-header-logo">Ad by Yepper</span>
-                <span class="yepper-ad-header-badge">Sponsored</span>
-            </div>
-            
-            <!-- Main content -->
-            <div class="yepper-ad-content">
-                <div class="yepper-ad-image-wrapper">
-                    <img class="yepper-ad-image" src="ad-image.jpg" alt="Ad">
-                </div>
-                <h3 class="yepper-ad-business-name">Business Name</h3>
-                <p class="yepper-ad-description">Ad description text</p>
-                <button class="yepper-ad-cta">Click Here</button>
-            </div>
-            
-            <!-- Bottom section -->
-            <div class="yepper-ad-footer">
-                <span class="yepper-ad-footer-brand">Powered by Yepper</span>
-                <span class="yepper-ad-footer-business">Business Info</span>
-            </div>
-            
-        </div>
-    </div>
-</div>`}
-                                        label="ad-html-structure"
-                                    />
-                                </CardContent>
-                            </Card>
-
-                            {/* Common Classes */}
-                            <Card>
-                                <CardContent className="p-6">
-                                    <Heading level={3} className="mb-4">Classes You Can Style</Heading>
-                                    <Grid cols={2} gap={4}>
-                                        {[
-                                            { class: '.yepper-ad-wrapper', desc: 'Outer wrapper container' },
-                                            { class: '.yepper-ad-container', desc: 'Inner container' },
-                                            { class: '.yepper-ad-item', desc: 'Main ad card' },
-                                            { class: '.yepper-ad-header', desc: 'Top section ("Ad by Yepper")' },
-                                            { class: '.yepper-ad-header-logo', desc: 'Yepper branding text' },
-                                            { class: '.yepper-ad-header-badge', desc: 'Sponsored badge' },
-                                            { class: '.yepper-ad-content', desc: 'Main content area' },
-                                            { class: '.yepper-ad-image-wrapper', desc: 'Image container' },
-                                            { class: '.yepper-ad-image', desc: 'The actual ad image' },
-                                            { class: '.yepper-ad-business-name', desc: 'Business title (h3)' },
-                                            { class: '.yepper-ad-description', desc: 'Ad description text (p)' },
-                                            { class: '.yepper-ad-cta', desc: 'Click button' },
-                                            { class: '.yepper-ad-footer', desc: 'Bottom section' },
-                                            { class: '.yepper-ad-footer-brand', desc: 'Powered by Yepper text' },
-                                            { class: '.yepper-ad-footer-business', desc: 'Business info text' }
-                                        ].map((item, index) => (
-                                            <div key={index} className="border border-gray-200 p-3">
-                                                <div className="flex items-center justify-between">
-                                                    <code className="text-black font-mono text-sm bg-gray-100 px-2 py-1 rounded">
-                                                        {item.class}
-                                                    </code>
-                                                    <button
-                                                        onClick={() => copyToClipboard(item.class, item.class)}
-                                                        className="p-1 hover:bg-gray-100 transition-colors border border-gray-300"
-                                                    >
-                                                        {copiedText === item.class ? (
-                                                            <Check size={14} className="text-green-600" />
-                                                        ) : (
-                                                            <Copy size={14} className="text-gray-600" />
-                                                        )}
-                                                    </button>
-                                                </div>
-                                                <Text variant="small" className="mt-1">{item.desc}</Text>
+                                    {/* Preview of current customization */}
+                                    {category.customization && (
+                                        <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+                                        <div className="grid grid-cols-2 gap-2 text-xs">
+                                            <div>
+                                            <Text variant="small" className="text-gray-500">Size</Text>
+                                            <Text variant="small" className="font-medium">
+                                                {category.customization.width}×{category.customization.height}px
+                                            </Text>
                                             </div>
-                                        ))}
-                                    </Grid>
-                                </CardContent>
+                                            <div>
+                                            <Text variant="small" className="text-gray-500">Layout</Text>
+                                            <Text variant="small" className="font-medium capitalize">
+                                                {category.customization.orientation || 'horizontal'}
+                                            </Text>
+                                            </div>
+                                            <div>
+                                            <Text variant="small" className="text-gray-500">Border Radius</Text>
+                                            <Text variant="small" className="font-medium">
+                                                {category.customization.borderRadius || 16}px
+                                            </Text>
+                                            </div>
+                                            <div>
+                                            <Text variant="small" className="text-gray-500">Effects</Text>
+                                            <Text variant="small" className="font-medium">
+                                                {category.customization.glassmorphism ? 'Glass' : 'Solid'}
+                                            </Text>
+                                            </div>
+                                        </div>
+                                        </div>
+                                    )}
+
+                                    <Button
+                                        onClick={() => handleOpenCustomization(category._id)}
+                                        variant="secondary"
+                                        size="sm"
+                                        icon={Palette}
+                                        iconPosition="left"
+                                        className="w-full"
+                                    >
+                                        {category.customization ? 'Edit Customization' : 'Customize Ad Space'}
+                                    </Button>
+                                    </CardContent>
+                                </Card>
+                                ))}
+                            </Grid>
+                            ) : (
+                            <Card className="p-12 text-center">
+                                <Palette className="w-16 h-16 mx-auto mb-4 text-gray-400" />
+                                <Heading level={3} className="mb-3">No Ad Spaces to Customize</Heading>
+                                <Text variant="muted" className="mb-6">
+                                Create an ad space first, then you can customize how ads appear.
+                                </Text>
+                                <Button
+                                onClick={handleOpenCategoriesForm}
+                                variant="secondary"
+                                icon={Plus}
+                                iconPosition="left"
+                                >
+                                Create Ad Space
+                                </Button>
+                            </Card>
+                            )}
+
+                            {/* Quick Customization Tips */}
+                            <Card className="mt-8 bg-blue-50 border-blue-200">
+                            <CardContent className="p-6">
+                                <div className="flex items-start gap-4">
+                                <div className="p-3 bg-blue-100 rounded-lg">
+                                    <AlertCircle className="text-blue-600" size={24} />
+                                </div>
+                                <div>
+                                    <Heading level={4} className="mb-2">Customization Tips</Heading>
+                                    <ul className="space-y-2 text-sm text-gray-700">
+                                    <li>• <strong>Orientation Presets:</strong> Choose from horizontal, vertical, square, and more</li>
+                                    <li>• <strong>Flexible Sizing:</strong> Adjust width and height independently for perfect fit</li>
+                                    <li>• <strong>Glassmorphism:</strong> Enable for modern, translucent effects</li>
+                                    <li>• <strong>Responsive:</strong> All customizations automatically adapt to mobile devices</li>
+                                    <li>• <strong>Live Preview:</strong> See changes in real-time before saving</li>
+                                    </ul>
+                                </div>
+                                </div>
+                            </CardContent>
                             </Card>
                         </div>
                     )}
@@ -1154,6 +1139,14 @@ const WebsiteDetails = () => {
                         </div>
                     </div>
                 </div>
+            )}
+
+            {customizationModal.isOpen && (
+                <AdCustomizationModal
+                    categoryId={customizationModal.categoryId}
+                    onClose={handleCloseCustomization}
+                    onSave={handleCustomizationSave}
+                />
             )}
 
             {categoryToDelete && (
