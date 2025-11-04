@@ -1000,27 +1000,6 @@ const WebsiteDetails = () => {
                                 </Button>
                             </Card>
                             )}
-
-                            {/* Quick Customization Tips */}
-                            <Card className="mt-8 bg-blue-50 border-blue-200">
-                            <CardContent className="p-6">
-                                <div className="flex items-start gap-4">
-                                <div className="p-3 bg-blue-100 rounded-lg">
-                                    <AlertCircle className="text-blue-600" size={24} />
-                                </div>
-                                <div>
-                                    <Heading level={4} className="mb-2">Customization Tips</Heading>
-                                    <ul className="space-y-2 text-sm text-gray-700">
-                                    <li>• <strong>Orientation Presets:</strong> Choose from horizontal, vertical, square, and more</li>
-                                    <li>• <strong>Flexible Sizing:</strong> Adjust width and height independently for perfect fit</li>
-                                    <li>• <strong>Glassmorphism:</strong> Enable for modern, translucent effects</li>
-                                    <li>• <strong>Responsive:</strong> All customizations automatically adapt to mobile devices</li>
-                                    <li>• <strong>Live Preview:</strong> See changes in real-time before saving</li>
-                                    </ul>
-                                </div>
-                                </div>
-                            </CardContent>
-                            </Card>
                         </div>
                     )}
                 </Container>

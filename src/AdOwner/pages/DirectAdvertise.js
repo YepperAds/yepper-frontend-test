@@ -182,11 +182,9 @@ function DirectAdvertise() {
       return;
     }
 
-    // Allow re-uploading the same file by clearing previous state
     setFile(null);
     setFilePreview(null);
     
-    // Small delay to ensure state is cleared
     setTimeout(async () => {
       setFile(selectedFile);
       setError(null);
@@ -214,7 +212,6 @@ function DirectAdvertise() {
 
   const handleFileChange = (e) => {
     processFile(e.target.files[0]);
-    // Reset the input value to allow re-selecting the same file
     e.target.value = '';
   };
 
@@ -251,7 +248,6 @@ function DirectAdvertise() {
       setError('Business category is required');
       return false;
     }
-    // Validate that a file has been uploaded
     if (!file) {
       setError('Please upload an image, video, or PDF for your advertisement');
       return false;
@@ -437,6 +433,69 @@ function DirectAdvertise() {
 
   return (
     <div className="min-h-screen bg-white">
+      {/* Fixed Alert Messages - Always visible at top */}
+      {(error || success || authError || authSuccess) && (
+        <div className="fixed top-0 left-0 right-0 z-50 px-6 pt-6">
+          <div className="max-w-4xl mx-auto">
+            {error && (
+              <div className="mb-4 border-2 border-red-600 bg-red-50 p-4 shadow-lg">
+                <div className="flex items-start justify-between">
+                  <p className="text-red-700 text-sm flex-1">{error}</p>
+                  <button
+                    onClick={() => setError(null)}
+                    className="ml-4 text-red-700 hover:text-red-900"
+                  >
+                    <X size={18} />
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {success && (
+              <div className="mb-4 border-2 border-green-600 bg-green-50 p-4 shadow-lg">
+                <div className="flex items-start justify-between">
+                  <p className="text-green-700 text-sm flex-1">{success}</p>
+                  <button
+                    onClick={() => setSuccess(null)}
+                    className="ml-4 text-green-700 hover:text-green-900"
+                  >
+                    <X size={18} />
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {authError && (
+              <div className="mb-4 border-2 border-red-600 bg-red-50 p-4 shadow-lg">
+                <div className="flex items-start justify-between">
+                  <p className="text-red-700 text-sm flex-1">{authError}</p>
+                  <button
+                    onClick={() => setAuthError(null)}
+                    className="ml-4 text-red-700 hover:text-red-900"
+                  >
+                    <X size={18} />
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {authSuccess && (
+              <div className="mb-4 border-2 border-green-600 bg-green-50 p-4 shadow-lg">
+                <div className="flex items-start justify-between">
+                  <p className="text-green-700 text-sm flex-1">{authSuccess}</p>
+                  <button
+                    onClick={() => setAuthSuccess(null)}
+                    className="ml-4 text-green-700 hover:text-green-900"
+                  >
+                    <X size={18} />
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       <div className="border-b border-gray-200 bg-gray-50">
         <div className="container mx-auto px-6 py-6">
           <div className="max-w-4xl mx-auto flex items-center justify-between">
@@ -470,24 +529,6 @@ function DirectAdvertise() {
       {/* Main Content */}
       <div className="container mx-auto px-6 py-12">
         <div className="max-w-4xl mx-auto">
-          
-          {/* Alerts - Only show when NOT in step 2 */}
-          {step !== 2 && (
-            <>
-              {error && (
-                <div className="mb-6 border border-red-600 bg-red-50 p-4">
-                  <p className="text-red-700 text-sm">{error}</p>
-                </div>
-              )}
-
-              {success && (
-                <div className="mb-6 border border-green-600 bg-green-50 p-4">
-                  <p className="text-green-700 text-sm">{success}</p>
-                </div>
-              )}
-            </>
-          )}
-
           <div className="border border-black bg-white p-8 mb-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div>
@@ -596,73 +637,82 @@ function DirectAdvertise() {
                 </div>
 
                 {/* Business Name */}
-                <div className="relative">
+                <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Business Name <span className="text-red-500">*</span>
                   </label>
-                  <input
-                    type="text"
-                    name="businessName"
-                    value={businessData.businessName}
-                    onChange={handleInputChange}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black focus:border-black"
-                    required
-                  />
-                  <Building2 size={16} className="absolute left-3 top-11 text-gray-400" />
+                  <div className="relative">
+                    <input
+                      type="text"
+                      name="businessName"
+                      placeholder="Your Business Name"
+                      value={businessData.businessName}
+                      onChange={handleInputChange}
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black focus:border-black"
+                      required
+                    />
+                    <Building2 size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                  </div>
                 </div>
 
                 {/* Business Category */}
-                <div className="relative">
+                <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Business Category <span className="text-red-500">*</span>
                   </label>
-                  <select
-                    name="businessCategory"
-                    value={businessData.businessCategory}
-                    onChange={handleInputChange}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-black focus:border-black"
-                    required
-                  >
-                    <option value="">Select a category</option>
-                    {businessCategories.map(cat => (
-                      <option key={cat.value} value={cat.value}>{cat.label}</option>
-                    ))}
-                  </select>
-                  <FileText size={16} className="absolute left-3 top-11 text-gray-400" />
+                  <div className="relative">
+                    <select
+                      name="businessCategory"
+                      value={businessData.businessCategory}
+                      onChange={handleInputChange}
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-black focus:border-black"
+                      required
+                    >
+                      <option value="">Select a category</option>
+                      {businessCategories.map(cat => (
+                        <option key={cat.value} value={cat.value}>{cat.label}</option>
+                      ))}
+                    </select>
+                    <FileText size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                  </div>
                 </div>
 
                 {/* Business Link */}
-                <div className="relative">
+                <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Business Website <span className="text-red-500">*</span>
                   </label>
-                  <input
-                    type="url"
-                    name="businessLink"
-                    value={businessData.businessLink}
-                    onChange={handleInputChange}
-                    placeholder="https://www.yourbusiness.com"
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black focus:border-black"
-                    required
-                  />
-                  <LinkIcon size={16} className="absolute left-3 top-11 text-gray-400" />
+                  <div className="relative">
+                    <input
+                      type="url"
+                      name="businessLink"
+                      value={businessData.businessLink}
+                      onChange={handleInputChange}
+                      placeholder="https://www.yourbusiness.com"
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black focus:border-black"
+                      required
+                    />
+                    <LinkIcon size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                  </div>
                 </div>
 
                 {/* Business Location */}
-                <div className="relative">
+                <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Business Location <span className="text-red-500">*</span>
                   </label>
-                  <input
-                    type="text"
-                    name="businessLocation"
-                    value={businessData.businessLocation}
-                    onChange={handleInputChange}
-                    placeholder="City, State, or Country"
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black focus:border-black"
-                    required
-                  />
-                  <MapPin size={16} className="absolute left-3 top-11 text-gray-400" />
+                  <div className="relative">
+                    <input
+                      type="text"
+                      name="businessLocation"
+                      value={businessData.businessLocation}
+                      onChange={handleInputChange}
+                      placeholder="City, State, or Country"
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black focus:border-black"
+                      required
+                    />
+                    <MapPin size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                  </div>
                 </div>
 
                 {/* Ad Description */}
@@ -695,7 +745,7 @@ function DirectAdvertise() {
 
           {/* Step 2: Authentication */}
           {step === 2 && (
-            <div className="border border-black bg-white p-8 relative">
+            <div className="border border-black bg-white p-8">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-semibold">
                   {isAuthenticated ? 'Review & Create Ad' : 'Sign In to Continue'}
@@ -710,32 +760,6 @@ function DirectAdvertise() {
                   </button>
                 )}
               </div>
-              
-              {/* Auth-specific alerts - appears as modal overlay */}
-              {(authError || authSuccess) && (
-                <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 p-8">
-                  <div className="bg-white border-2 border-black p-6 max-w-md w-full shadow-2xl">
-                    {authError && (
-                      <div className="border border-red-600 bg-red-50 p-4">
-                        <p className="text-red-700 text-sm">{authError}</p>
-                      </div>
-                    )}
-                    {authSuccess && (
-                      <div className="border border-green-600 bg-green-50 p-4">
-                        <p className="text-green-700 text-sm">{authSuccess}</p>
-                      </div>
-                    )}
-                    {authError && (
-                      <button
-                        onClick={() => setAuthError(null)}
-                        className="mt-4 w-full bg-black text-white py-2 font-semibold hover:bg-gray-800 transition-colors"
-                      >
-                        Close
-                      </button>
-                    )}
-                  </div>
-                </div>
-              )}
               
               {!isAuthenticated ? (
                 <div className="space-y-6">
@@ -947,4 +971,4 @@ async function deleteFileFromIndexedDB(key) {
   });
 }
 
-export default DirectAdvertise; 
+export default DirectAdvertise;

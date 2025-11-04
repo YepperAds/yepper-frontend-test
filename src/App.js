@@ -3,10 +3,11 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-// import Dost from './Dost';
 import { AuthProvider } from './context/AuthContext';
 import Home from './pages/Home';
 import ProtectedRoute from './components/ProtectedRoute';
+
+import MarketingSection from './pages/MarketingSection';
 
 // User Auth
 import Login from './pages/Login';
@@ -68,7 +69,7 @@ function App() {
           <div>
             <Routes>
               <Route path="/" element={<Home />} />
-              {/* <Route path="/dost" element={<Dost />} /> */}
+              <Route path="/about-yepper" element={<MarketingSection />} />
 
               {/* User Auth */}
               <Route path="/login" element={<Login />} />

@@ -46,6 +46,14 @@ const Navbar = () => {
           </Link>
           
           <div className="flex items-center space-x-4">
+            <Link to="/about-yepper">
+              <Button 
+                variant='ghost'
+                className="h-9 flex items-center space-x-2 focus:outline-none focus:ring-0"
+              >
+                <span>Read about Yepper</span>
+              </Button>
+            </Link>
             {isAuthenticated ? (
               <div className="relative">
                 {/* Avatar Button */}
@@ -141,7 +149,7 @@ const Navbar = () => {
                 {/* Register Button */}
                 <Link to="/register">
                   <Button 
-                    variant='ghost'
+                    variant='secondary'
                     className="h-9 flex items-center space-x-2 focus:outline-none focus:ring-0"
                   >
                     <span>Register</span>
@@ -149,6 +157,7 @@ const Navbar = () => {
                 </Link>
               </div>
             )}
+            
           </div>
         </div>
       </div>

@@ -1,6 +1,6 @@
 // AdCustomizationModal.js
 import React, { useState, useEffect } from 'react';
-import { X, Save, Eye, Code, Monitor, Smartphone, Tablet } from 'lucide-react';
+import { X, Save, Monitor, Smartphone, Tablet } from 'lucide-react';
 import axios from 'axios';
 
 const AdCustomizationModal = ({ categoryId, onClose, onSave }) => {
@@ -62,7 +62,7 @@ const AdCustomizationModal = ({ categoryId, onClose, onSave }) => {
       setSaving(true);
       const token = localStorage.getItem('token');
       
-      await axios.put(
+      const response = await axios.put(
         `http://localhost:5000/api/ad-categories/categoriees/${categoryId}/customization`,
         { customization: settings },
         { headers: { Authorization: `Bearer ${token}` } }
@@ -72,7 +72,18 @@ const AdCustomizationModal = ({ categoryId, onClose, onSave }) => {
       onClose();
     } catch (error) {
       console.error('Error saving customization:', error);
-      alert('Failed to save customization');
+      
+      if (error.response) {
+        console.error('Response data:', error.response.data);
+        console.error('Response status:', error.response.status);
+        alert(`Failed to save: ${error.response.data.message || error.response.data.error || 'Server error'}`);
+      } else if (error.request) {
+        console.error('No response received:', error.request);
+        alert('No response from server. Please check your connection.');
+      } else {
+        console.error('Error details:', error.message);
+        alert('Failed to save customization. Please try again.');
+      }
     } finally {
       setSaving(false);
     }
@@ -230,8 +241,8 @@ const AdCustomizationModal = ({ categoryId, onClose, onSave }) => {
   if (loading) {
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="bg-white rounded-xl p-8">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+        <div className="bg-white p-8">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black mx-auto"></div>
         </div>
       </div>
     );
@@ -239,24 +250,34 @@ const AdCustomizationModal = ({ categoryId, onClose, onSave }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl max-w-6xl w-full max-h-[90vh] overflow-hidden flex flex-col">
-        <div className="p-6 border-b flex items-center justify-between">
-          <h2 className="text-2xl font-bold">Customize Ad Space</h2>
-          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg">
+      <div className="bg-white max-w-6xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+        {/* Header */}
+        <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+          <h2 className="text-2xl font-bold text-black">Customize Ad Space</h2>
+          <button 
+            onClick={onClose} 
+            className="p-2 hover:bg-gray-100 transition-colors"
+            aria-label="Close"
+          >
             <X size={24} />
           </button>
         </div>
 
+        {/* Content */}
         <div className="flex-1 overflow-auto p-6">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Controls Panel */}
             <div className="lg:col-span-1">
-              <div className="flex gap-2 mb-6 border-b">
+              {/* Tabs */}
+              <div className="flex gap-0 mb-6 border-b border-gray-200">
                 {['layout', 'style', 'content'].map(tab => (
                   <button
                     key={tab}
                     onClick={() => setActiveTab(tab)}
-                    className={`px-4 py-2 font-medium capitalize ${
-                      activeTab === tab ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-600'
+                    className={`px-4 py-2 text-sm font-medium capitalize transition-colors ${
+                      activeTab === tab 
+                        ? 'text-black border-b-2 border-black' 
+                        : 'text-gray-600 hover:text-black'
                     }`}
                   >
                     {tab}
@@ -264,19 +285,20 @@ const AdCustomizationModal = ({ categoryId, onClose, onSave }) => {
                 ))}
               </div>
 
+              {/* Layout Tab */}
               {activeTab === 'layout' && (
                 <div className="space-y-6">
                   <div>
-                    <label className="block text-sm font-medium mb-3">Orientation Presets</label>
+                    <label className="block text-sm font-medium text-black mb-3">Orientation Presets</label>
                     <div className="grid grid-cols-2 gap-2">
                       {orientationPresets.map(preset => (
                         <button
                           key={preset.value}
                           onClick={() => handlePresetSelect(preset)}
-                          className={`p-3 border-2 rounded-lg text-xs font-medium ${
+                          className={`p-3 border text-xs font-medium transition-colors ${
                             settings.orientation === preset.value
-                              ? 'border-blue-500 bg-blue-50 text-blue-700'
-                              : 'border-gray-200 hover:border-gray-300'
+                              ? 'border-black bg-gray-50 text-black'
+                              : 'border-gray-200 hover:border-gray-400 text-gray-700'
                           }`}
                         >
                           {preset.name}
@@ -286,40 +308,44 @@ const AdCustomizationModal = ({ categoryId, onClose, onSave }) => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium mb-2">Width: {settings.width}px</label>
+                    <label className="block text-sm font-medium text-black mb-2">
+                      Width: {settings.width}px
+                    </label>
                     <input
                       type="range"
                       min="160"
                       max="1200"
                       value={settings.width}
                       onChange={(e) => updateSetting('width', parseInt(e.target.value))}
-                      className="w-full"
+                      className="w-full accent-black"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium mb-2">Height: {settings.height}px</label>
+                    <label className="block text-sm font-medium text-black mb-2">
+                      Height: {settings.height}px
+                    </label>
                     <input
                       type="range"
                       min="90"
                       max="800"
                       value={settings.height}
                       onChange={(e) => updateSetting('height', parseInt(e.target.value))}
-                      className="w-full"
+                      className="w-full accent-black"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium mb-3">Image Position</label>
+                    <label className="block text-sm font-medium text-black mb-3">Image Position</label>
                     <div className="grid grid-cols-2 gap-2">
                       {['top', 'left'].map(pos => (
                         <button
                           key={pos}
                           onClick={() => updateSetting('imagePosition', pos)}
-                          className={`p-2 border-2 rounded-lg text-sm capitalize ${
+                          className={`p-2 border text-sm capitalize transition-colors ${
                             settings.imagePosition === pos
-                              ? 'border-blue-500 bg-blue-50 text-blue-700'
-                              : 'border-gray-200'
+                              ? 'border-black bg-gray-50 text-black'
+                              : 'border-gray-200 hover:border-gray-400 text-gray-700'
                           }`}
                         >
                           {pos}
@@ -330,38 +356,43 @@ const AdCustomizationModal = ({ categoryId, onClose, onSave }) => {
                 </div>
               )}
 
+              {/* Style Tab */}
               {activeTab === 'style' && (
                 <div className="space-y-6">
                   <div>
-                    <label className="block text-sm font-medium mb-2">Border Radius: {settings.borderRadius}px</label>
+                    <label className="block text-sm font-medium text-black mb-2">
+                      Border Radius: {settings.borderRadius}px
+                    </label>
                     <input
                       type="range"
                       min="0"
                       max="40"
                       value={settings.borderRadius}
                       onChange={(e) => updateSetting('borderRadius', parseInt(e.target.value))}
-                      className="w-full"
+                      className="w-full accent-black"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium mb-2">Padding: {settings.padding}px</label>
+                    <label className="block text-sm font-medium text-black mb-2">
+                      Padding: {settings.padding}px
+                    </label>
                     <input
                       type="range"
                       min="0"
                       max="40"
                       value={settings.padding}
                       onChange={(e) => updateSetting('padding', parseInt(e.target.value))}
-                      className="w-full"
+                      className="w-full accent-black"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium mb-2">Shadow</label>
+                    <label className="block text-sm font-medium text-black mb-2">Shadow</label>
                     <select
                       value={settings.shadow}
                       onChange={(e) => updateSetting('shadow', e.target.value)}
-                      className="w-full p-2 border rounded-lg"
+                      className="w-full px-3 py-2 border border-gray-300 bg-white text-sm focus:outline-none focus:ring-1 focus:ring-black focus:border-black"
                     >
                       {shadowOptions.map(opt => (
                         <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -369,15 +400,15 @@ const AdCustomizationModal = ({ categoryId, onClose, onSave }) => {
                     </select>
                   </div>
 
-                  <div className="flex items-center justify-between">
-                    <label className="text-sm font-medium">Glassmorphism</label>
+                  <div className="flex items-center justify-between py-2">
+                    <label className="text-sm font-medium text-black">Glassmorphism</label>
                     <button
                       onClick={() => updateSetting('glassmorphism', !settings.glassmorphism)}
-                      className={`w-12 h-6 rounded-full transition-colors ${
-                        settings.glassmorphism ? 'bg-blue-500' : 'bg-gray-300'
+                      className={`relative w-12 h-6 transition-colors ${
+                        settings.glassmorphism ? 'bg-black' : 'bg-gray-300'
                       }`}
                     >
-                      <div className={`w-4 h-4 bg-white rounded-full transition-transform ${
+                      <div className={`absolute top-1 w-4 h-4 bg-white transition-transform ${
                         settings.glassmorphism ? 'translate-x-7' : 'translate-x-1'
                       }`} />
                     </button>
@@ -385,60 +416,71 @@ const AdCustomizationModal = ({ categoryId, onClose, onSave }) => {
                 </div>
               )}
 
+              {/* Content Tab */}
               {activeTab === 'content' && (
                 <div className="space-y-6">
-                  <div className="flex items-center justify-between">
-                    <label className="text-sm font-medium">Show Image</label>
+                  <div className="flex items-center justify-between py-2">
+                    <label className="text-sm font-medium text-black">Show Image</label>
                     <button
                       onClick={() => updateSetting('showImage', !settings.showImage)}
-                      className={`w-12 h-6 rounded-full ${settings.showImage ? 'bg-blue-500' : 'bg-gray-300'}`}
+                      className={`relative w-12 h-6 transition-colors ${
+                        settings.showImage ? 'bg-black' : 'bg-gray-300'
+                      }`}
                     >
-                      <div className={`w-4 h-4 bg-white rounded-full transition-transform ${
+                      <div className={`absolute top-1 w-4 h-4 bg-white transition-transform ${
                         settings.showImage ? 'translate-x-7' : 'translate-x-1'
                       }`} />
                     </button>
                   </div>
 
-                  <div className="flex items-center justify-between">
-                    <label className="text-sm font-medium">Show Description</label>
+                  <div className="flex items-center justify-between py-2">
+                    <label className="text-sm font-medium text-black">Show Description</label>
                     <button
                       onClick={() => updateSetting('showDescription', !settings.showDescription)}
-                      className={`w-12 h-6 rounded-full ${settings.showDescription ? 'bg-blue-500' : 'bg-gray-300'}`}
+                      className={`relative w-12 h-6 transition-colors ${
+                        settings.showDescription ? 'bg-black' : 'bg-gray-300'
+                      }`}
                     >
-                      <div className={`w-4 h-4 bg-white rounded-full transition-transform ${
+                      <div className={`absolute top-1 w-4 h-4 bg-white transition-transform ${
                         settings.showDescription ? 'translate-x-7' : 'translate-x-1'
                       }`} />
                     </button>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium mb-2">Title Size: {settings.titleSize}px</label>
+                    <label className="block text-sm font-medium text-black mb-2">
+                      Title Size: {settings.titleSize}px
+                    </label>
                     <input
                       type="range"
                       min="12"
                       max="32"
                       value={settings.titleSize}
                       onChange={(e) => updateSetting('titleSize', parseInt(e.target.value))}
-                      className="w-full"
+                      className="w-full accent-black"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium mb-2">Description Size: {settings.descriptionSize}px</label>
+                    <label className="block text-sm font-medium text-black mb-2">
+                      Description Size: {settings.descriptionSize}px
+                    </label>
                     <input
                       type="range"
                       min="10"
                       max="20"
                       value={settings.descriptionSize}
                       onChange={(e) => updateSetting('descriptionSize', parseInt(e.target.value))}
-                      className="w-full"
+                      className="w-full accent-black"
                     />
                   </div>
                 </div>
               )}
             </div>
 
+            {/* Preview Panel */}
             <div className="lg:col-span-2">
+              {/* Device Selector */}
               <div className="mb-4 flex gap-2">
                 {[
                   { name: 'desktop', icon: Monitor },
@@ -448,32 +490,50 @@ const AdCustomizationModal = ({ categoryId, onClose, onSave }) => {
                   <button
                     key={device.name}
                     onClick={() => setPreviewDevice(device.name)}
-                    className={`p-2 rounded-lg ${
-                      previewDevice === device.name ? 'bg-blue-100 text-blue-600' : 'text-gray-600 hover:bg-gray-100'
+                    className={`p-2 transition-colors ${
+                      previewDevice === device.name 
+                        ? 'bg-gray-100 text-black' 
+                        : 'text-gray-600 hover:bg-gray-50'
                     }`}
+                    aria-label={`Preview on ${device.name}`}
                   >
                     <device.icon size={20} />
                   </button>
                 ))}
               </div>
 
-              <div className="bg-gradient-to-br from-purple-100 to-blue-100 rounded-lg p-8 overflow-auto">
+              {/* Preview Area */}
+              <div className="bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-200 p-8 overflow-auto min-h-[400px]">
                 {generateAdPreview()}
               </div>
             </div>
           </div>
         </div>
 
-        <div className="p-6 border-t flex gap-3 justify-end">
-          <button onClick={onClose} className="px-6 py-2 border rounded-lg hover:bg-gray-50">
+        {/* Footer */}
+        <div className="px-6 py-4 border-t border-gray-200 flex gap-3 justify-end">
+          <button 
+            onClick={onClose} 
+            className="px-6 py-2 text-sm font-medium border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
+          >
             Cancel
           </button>
           <button
             onClick={handleSave}
             disabled={saving}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
+            className="px-6 py-2 text-sm font-medium bg-black text-white hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
           >
-            {saving ? 'Saving...' : <><Save size={18} /> Save Customization</>}
+            {saving ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                Saving...
+              </>
+            ) : (
+              <>
+                <Save size={16} />
+                Save Customization
+              </>
+            )}
           </button>
         </div>
       </div>
