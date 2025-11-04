@@ -1,7 +1,7 @@
 // Home.js
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowRight, ArrowLeft } from 'lucide-react';
+import { ArrowRight, ArrowLeft, X } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { Button, Grid } from '../components/components';
@@ -135,85 +135,128 @@ const Home = () => {
 
   if (showAssistant) {
     return (
-      <>
+      <div className="flex flex-col h-screen overflow-hidden">
         <Navbar />
-        <div className="flex h-screen overflow-hidden">
+        
+        {/* Close Assistant Button */}
+        <div className="bg-white border-b border-gray-200 px-4 py-2 flex items-center justify-end">
+          <button
+            onClick={() => setShowAssistant(false)}
+            className="flex items-center space-x-2 px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+          >
+            <X size={18} />
+            <span className="text-sm font-medium">Close Assistant</span>
+          </button>
+        </div>
+
+        <div className="flex flex-1 overflow-hidden">
           {/* Main Chat Area */}
           <div className="flex-1 overflow-hidden">
             <MarketingAssistant user={user} isAuthenticated={isAuthenticated} />
           </div>
 
           {/* Right Sidebar with Cards */}
-          <div className="w-80 bg-gray-50 border-l border-gray-200 overflow-y-auto p-4 space-y-7 flex flex-col items-center justify-center">
-            {isAuthenticated ?(
-              <>
-                <div className="space-y-2 bg-gray-300 w-full">
-                  <Link to='/add-website' className="w-full">
+          <div className="w-80 bg-gray-50 border-l border-gray-200 overflow-y-auto flex flex-col">
+            {isAuthenticated ? (
+              <div className="flex-1 flex flex-col p-4 space-y-4">
+                {/* Websites Section */}
+                <div className="flex-1 flex flex-col min-h-0">
+                  <Link to='/add-website' className="mb-2">
                     <Button 
                       variant="primary" 
                       size="sm" 
-                      className="h-12 w-full flex items-center justify-center space-x-2 text-sm"
+                      className="h-10 w-full flex items-center justify-center space-x-2 text-sm"
                     >
                       <span>Run Ads on Websites</span>
                       <ArrowRight size={16} />
                     </Button>
                   </Link>
                   
-                  <div className="w-full">
+                  <div className="flex-1 min-h-0 overflow-hidden">
                     <WebsiteCard filteredWebsites={filteredWebsites} searchQuery={searchQuery} compact={true} />
                   </div>
                 </div>
 
-                <div className="space-y-2 bg-gray-300 w-full">
-                  <Link to="/advertise" className="w-full">
+                {/* Ads Section */}
+                <div className="flex-1 flex flex-col min-h-0">
+                  <Link to="/advertise" className="mb-2">
                     <Button 
                       variant="primary" 
                       size="sm" 
-                      className="h-12 w-full flex items-center justify-center space-x-2 text-sm"
+                      className="h-10 w-full flex items-center justify-center space-x-2 text-sm"
                     >
                       <span>Advertise Products</span>
                       <ArrowRight size={16} />
                     </Button>
                   </Link>
                   
-                  <div className="w-full">
+                  <div className="flex-1 min-h-0 overflow-hidden">
                     <AdsCard filteredAds={filteredAds} searchQuery={searchQuery} compact={true} />
                   </div>
                 </div>
-              </>
+              </div>
             ) : (
-              <>
-                <div className="space-y-2 bg-gray-300 w-full">
-                  <Link to='/add-website' className="w-full">
+              <div className="flex-1 flex flex-col p-4 space-y-4">
+                {/* Websites Section */}
+                <div className="flex-1 flex flex-col">
+                  <Link to='/add-website' className="mb-2">
                     <Button 
                       variant="primary" 
-                      size="lg" 
-                      className="h-12 w-full flex items-center justify-center space-x-2 text-sm"
+                      size="sm" 
+                      className="h-10 w-full flex items-center justify-center space-x-2 text-sm"
                     >
                       <span>Run Ads on Websites</span>
                       <ArrowRight size={16} />
                     </Button>
                   </Link>
+                  <div className="flex-1 flex items-center justify-center">
+                    <div className="text-center p-6 border-2 border-black bg-white w-full">
+                      <Link to='/websites'>
+                        <Button 
+                          variant="secondary" 
+                          size="sm" 
+                          className="h-8 w-full flex items-center justify-center space-x-2 text-xs"
+                        >
+                          <span>Visit Website Dashboard</span>
+                          <ArrowRight size={14} />
+                        </Button>
+                      </Link>
+                    </div>
+                  </div>
                 </div>
                 
-                {/* Right Column - Ads Section */}
-                <div className="space-y-2 bg-gray-300 w-full">
-                  <Link to="/advertise" className="w-full">
+                {/* Ads Section */}
+                <div className="flex-1 flex flex-col">
+                  <Link to="/advertise" className="mb-2">
                     <Button 
                       variant="primary" 
-                      size="lg" 
-                      className="h-12 w-full flex items-center justify-center space-x-2 text-sm"
+                      size="sm" 
+                      className="h-10 w-full flex items-center justify-center space-x-2 text-sm"
                     >
                       <span>Advertise Products</span>
                       <ArrowRight size={16} />
                     </Button>
                   </Link>
+                  <div className="flex-1 flex items-center justify-center">
+                    <div className="text-center p-6 border-2 border-black bg-white w-full">
+                      <Link to='/ads'>
+                        <Button 
+                          variant="secondary" 
+                          size="sm" 
+                          className="h-8 w-full flex items-center justify-center space-x-2 text-xs"
+                        >
+                          <span>Visit Business Dashboard</span>
+                          <ArrowRight size={14} />
+                        </Button>
+                      </Link>
+                    </div>
+                  </div>
                 </div>
-              </>
+              </div>
             )}
           </div>
         </div>
-      </>
+      </div>
     );
   }
 

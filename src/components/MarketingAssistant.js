@@ -1,3 +1,4 @@
+// MarketingAssistant.js
 import React, { useState, useEffect, useRef } from 'react';
 
 const MarketingAssistant = ({ user, isAuthenticated }) => {
@@ -28,7 +29,7 @@ const MarketingAssistant = ({ user, isAuthenticated }) => {
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
-      textareaRef.current.style.height = Math.min(textareaRef.current.scrollHeight, 200) + 'px';
+      textareaRef.current.style.height = Math.min(textareaRef.current.scrollHeight, 120) + 'px';
     }
   }, [inputValue]);
 
@@ -299,7 +300,7 @@ Would you like me to dive deeper into any specific aspect of your marketing chal
   );
 
   return (
-    <div className="flex h-screen bg-white">
+    <div className="flex h-full bg-white">
       {/* Delete Confirmation Modal */}
       {deleteModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
@@ -342,22 +343,19 @@ Would you like me to dive deeper into any specific aspect of your marketing chal
 
           <div className={`${
             isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-          } fixed lg:relative lg:translate-x-0 z-40 w-64 bg-white border-r border-gray-200 flex flex-col transition-transform duration-300`}>
-            <div className="p-4 border-b border-gray-200">
+          } fixed lg:relative lg:translate-x-0 z-40 w-64 bg-white border-r border-gray-200 flex flex-col transition-transform duration-300 h-full`}>
+            <div className="p-4 border-b border-gray-200 flex-shrink-0">
               <button
                 onClick={startNewConversation}
                 className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
               >
                 <PlusIcon />
-                New Strategy Session
+                <span className="text-sm">New Strategy Session</span>
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto">
+            <div className="flex-1 overflow-y-auto min-h-0">
               <div className="p-4">
-                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
-                  My Strategy Sessions
-                </h3>
                 {conversations.length === 0 ? (
                   <p className="text-sm text-gray-400 text-center py-8">
                     No conversations yet. Start a new strategy session!
@@ -406,9 +404,9 @@ Would you like me to dive deeper into any specific aspect of your marketing chal
               </div>
             </div>
 
-            <div className="p-4 border-t border-gray-200">
+            <div className="p-4 border-t border-gray-200 flex-shrink-0">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-black text-white rounded-full flex items-center justify-center text-sm font-semibold">
+                <div className="w-8 h-8 bg-black text-white rounded-full flex items-center justify-center text-sm font-semibold flex-shrink-0">
                   {user?.name?.charAt(0).toUpperCase() || 'U'}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -422,15 +420,15 @@ Would you like me to dive deeper into any specific aspect of your marketing chal
       )}
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col">
-        <div className="flex-1 overflow-y-auto px-6 py-8 bg-white">
+      <div className="flex-1 flex flex-col min-w-0 h-full">
+        <div className="flex-1 overflow-y-auto px-4 py-6 bg-white min-h-0">
           <div className="max-w-4xl mx-auto">
             {messages.length === 0 ? (
-              <div className="text-center py-12">
+              <div className="text-center py-8">
                 <h2 className="text-2xl font-bold text-black mb-2">
                   Welcome to Yepper
                 </h2>
-                <p className="text-gray-600 mb-8 max-w-md mx-auto">
+                <p className="text-gray-600 mb-6 max-w-md mx-auto text-sm">
                   Your AI-powered assistant for crafting winning marketing strategies. Ask me anything about marketing, branding, campaigns, or growth tactics.
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-w-2xl mx-auto">
@@ -443,7 +441,7 @@ Would you like me to dive deeper into any specific aspect of your marketing chal
                     <button
                       key={idx}
                       onClick={() => setInputValue(suggestion)}
-                      className="text-left p-4 border border-gray-200 rounded-lg hover:border-gray-300 hover:bg-gray-50 transition-all"
+                      className="text-left p-3 border border-gray-200 rounded-lg hover:border-gray-300 hover:bg-gray-50 transition-all"
                     >
                       <p className="text-sm text-gray-700">{suggestion}</p>
                     </button>
@@ -451,19 +449,19 @@ Would you like me to dive deeper into any specific aspect of your marketing chal
                 </div>
               </div>
             ) : (
-              <div className="space-y-6">
+              <div className="space-y-4">
                 {messages.map((message, idx) => (
                   <div key={idx}>
                     {message.role === 'user' ? (
                       <div className="flex justify-end">
-                        <div className="max-w-xl bg-black text-white rounded-2xl px-5 py-3">
+                        <div className="max-w-xl bg-black text-white rounded-2xl px-4 py-2.5">
                           <p className="text-sm leading-relaxed whitespace-pre-wrap">
                             {message.content}
                           </p>
                         </div>
                       </div>
                     ) : (
-                      <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                      <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
                         <div 
                           className="prose prose-sm max-w-none"
                           style={{
@@ -510,7 +508,7 @@ Would you like me to dive deeper into any specific aspect of your marketing chal
                             
                             if (trimmedLine.startsWith('**') && trimmedLine.endsWith('**')) {
                               return (
-                                <h3 key={pIdx} className="text-base font-bold mt-5 mb-3 text-black first:mt-0">
+                                <h3 key={pIdx} className="text-base font-bold mt-4 mb-2 text-black first:mt-0">
                                   {trimmedLine.slice(2, -2)}
                                 </h3>
                               );
@@ -537,7 +535,7 @@ Would you like me to dive deeper into any specific aspect of your marketing chal
                             }
                             
                             return (
-                              <p key={pIdx} className="text-black text-sm leading-relaxed mb-3">
+                              <p key={pIdx} className="text-black text-sm leading-relaxed mb-2">
                                 {renderFormatted(trimmedLine)}
                               </p>
                             );
@@ -549,7 +547,7 @@ Would you like me to dive deeper into any specific aspect of your marketing chal
                 ))}
                 
                 {isLoading && (
-                  <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                  <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
                     <div className="flex items-center gap-2 text-gray-400">
                       <div className="w-2 h-2 bg-gray-400 rounded-full animate-pulse"></div>
                       <div className="w-2 h-2 bg-gray-400 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
@@ -566,30 +564,28 @@ Would you like me to dive deeper into any specific aspect of your marketing chal
         </div>
 
         {error && (
-          <div className="px-6 py-3 bg-red-50 border-t border-red-200">
-            <div className="max-w-5xl mx-auto flex items-center gap-2 text-red-700">
+          <div className="px-4 py-2 bg-red-50 border-t border-red-200 flex-shrink-0">
+            <div className="max-w-4xl mx-auto flex items-center gap-2 text-red-700">
               <AlertIcon />
               <p className="text-sm">{error}</p>
             </div>
           </div>
         )}
 
-        <div className="bg-white border-t border-gray-200 px-6 py-6">
-          <div className="max-w-5xl mx-auto">
+        <div className="bg-white border-t border-gray-200 px-4 py-4 flex-shrink-0">
+          <div className="max-w-4xl mx-auto">
             <div className="bg-white border-2 border-gray-300 rounded-xl focus-within:border-black transition-all">
-              <div className="flex items-end gap-3 p-4">
+              <div className="flex items-end gap-2 p-3">
                 <textarea
                   ref={textareaRef}
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
                   onKeyPress={handleKeyPress}
                   placeholder="Describe your marketing challenge..."
-                  className="flex-1 bg-transparent text-black placeholder-gray-400 outline-none resize-none leading-relaxed"
+                  className="flex-1 bg-transparent text-black placeholder-gray-400 outline-none resize-none leading-relaxed text-sm"
                   style={{ 
-                    fontFamily: 'system-ui, -apple-system, sans-serif',
-                    fontSize: '15px',
                     minHeight: '24px',
-                    maxHeight: '200px'
+                    maxHeight: '120px'
                   }}
                   rows={1}
                   disabled={isLoading}
@@ -597,7 +593,7 @@ Would you like me to dive deeper into any specific aspect of your marketing chal
                 <button
                   onClick={handleSendMessage}
                   disabled={!inputValue.trim() || isLoading}
-                  className="bg-black text-white px-5 py-2.5 rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-30 disabled:cursor-not-allowed flex-shrink-0 text-sm font-medium"
+                  className="bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-30 disabled:cursor-not-allowed flex-shrink-0 text-sm font-medium"
                 >
                   Submit Brief
                 </button>
