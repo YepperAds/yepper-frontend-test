@@ -8,7 +8,7 @@ const MarketingAssistant = ({ user, isAuthenticated }) => {
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Start closed by default
   const [detectedIntent, setDetectedIntent] = useState(null);
   const [intentSuggestions, setIntentSuggestions] = useState([]);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -334,16 +334,17 @@ Would you like me to dive deeper into any specific aspect of your marketing chal
       {/* Sidebar - Conversations */}
       {isAuthenticated && (
         <>
+          {/* Toggle button - always visible */}
           <button
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="fixed top-4 left-4 z-50 lg:hidden bg-black text-white p-2 rounded-lg"
+            className="fixed top-14 left-4 z-50 bg-black text-white p-2 rounded-lg hover:bg-gray-800 transition-colors"
           >
             {isSidebarOpen ? <XIcon /> : <MenuIcon />}
           </button>
 
           <div className={`${
             isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-          } fixed lg:relative lg:translate-x-0 z-40 w-64 bg-white border-r border-gray-200 flex flex-col transition-transform duration-300 h-full`}>
+          } fixed z-40 w-64 bg-white border-r border-gray-200 flex flex-col transition-transform duration-300 h-full`}>
             <div className="p-4 border-b border-gray-200 flex-shrink-0">
               <button
                 onClick={startNewConversation}

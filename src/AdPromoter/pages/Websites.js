@@ -265,13 +265,14 @@ function Websites() {
       <header className="border-b border-gray-200 bg-white">
         <Container>
           <div className="h-16 flex items-center justify-between">
-            <button 
-              onClick={() => navigate(-1)} 
-              className="flex items-center text-gray-600 hover:text-black transition-colors"
-            >
-              <ArrowLeft size={18} className="mr-2" />
-              <span className="font-medium">Back</span>
-            </button>
+            <Link to='/'>
+              <button 
+                className="flex items-center text-gray-600 hover:text-black transition-colors"
+              >
+                <ArrowLeft size={18} className="mr-2" />
+                <span className="font-medium">Back</span>
+              </button>
+            </Link>
             <Badge variant="default">Website</Badge>
           </div>
         </Container>
@@ -297,13 +298,14 @@ function Websites() {
       <header className="border-b border-gray-200 bg-white">
         <Container>
           <div className="h-16 flex items-center justify-between">
-            <button 
-              onClick={() => navigate(-1)} 
-              className="flex items-center text-gray-600 hover:text-black transition-colors"
-            >
-              <ArrowLeft size={18} className="mr-2" />
-              <span className="font-medium">Back</span>
-            </button>
+            <Link to='/'>
+              <button 
+                className="flex items-center text-gray-600 hover:text-black transition-colors"
+              >
+                <ArrowLeft size={18} className="mr-2" />
+                <span className="font-medium">Back</span>
+              </button>
+            </Link>
             <Badge variant="default">Website</Badge>
           </div>
         </Container>
