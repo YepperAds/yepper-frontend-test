@@ -322,14 +322,18 @@ function Websites() {
                   placeholder="Search websites..."
                   value={searchQuery}
                   onChange={handleSearch}
-                  className="w-full pl-10 pr-4 py-3 border border-black bg-white text-black placeholder-gray-500 focus:outline-none focus:ring-0 transition-all duration-200"
+                  className="w-full pl-10 pr-4 py-3 border border-black bg-white rounded-full text-black placeholder-gray-500 focus:outline-none focus:ring-0 transition-all duration-200"
                 />
               </div>
             </div>
 
             <div className="flex-shrink-0">
               <Link to='/wallet'>
-                <Button variant="primary" size="lg">
+                <Button 
+                  variant="primary" 
+                  size="md"
+                  className='w-full flex items-center justify-center space-x-2 text-sm'
+                >
                   Wallet
                 </Button>
               </Link>
@@ -337,7 +341,7 @@ function Websites() {
 
             <div className="flex-shrink-0">
               <Link to='/create-website'>
-                <Button variant="secondary" size="lg" icon={Plus} iconPosition="left">
+                <Button variant="secondary" size="md" icon={Plus} iconPosition="left">
                   Add Website
                 </Button>
               </Link>
@@ -345,7 +349,7 @@ function Websites() {
 
             <div className="flex-shrink-0">
               <Link to='/upload-ad'>
-                <Button variant="secondary" size="lg" icon={Plus} iconPosition="left">
+                <Button variant="secondary" size="md" icon={Plus} iconPosition="left">
                   Advertise
                 </Button>
               </Link>

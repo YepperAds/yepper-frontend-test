@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Save, Monitor, Smartphone, Tablet } from 'lucide-react';
 import axios from 'axios';
+import CSSEditor from './CSSEditor'
 
 const AdCustomizationModal = ({ categoryId, onClose, onSave }) => {
   const [settings, setSettings] = useState({
@@ -34,6 +35,8 @@ const AdCustomizationModal = ({ categoryId, onClose, onSave }) => {
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState('layout');
   const [previewDevice, setPreviewDevice] = useState('desktop');
+  const [customCSS, setCustomCSS] = useState('');
+  const [cssError, setCssError] = useState('');
 
   useEffect(() => {
     fetchCategoryCustomization();
@@ -49,6 +52,9 @@ const AdCustomizationModal = ({ categoryId, onClose, onSave }) => {
       
       if (response.data.customization) {
         setSettings(prev => ({ ...prev, ...response.data.customization }));
+        if (response.data.customization.customCSS) {
+          setCustomCSS(response.data.customization.customCSS);
+        }
       }
       setLoading(false);
     } catch (error) {
@@ -57,33 +63,114 @@ const AdCustomizationModal = ({ categoryId, onClose, onSave }) => {
     }
   };
 
+  const validateCustomCSS = (css) => {
+    // Check for class removals or display:none on essential elements
+    const forbiddenPatterns = [
+      /display\s*:\s*none\s*!important/i,
+      /visibility\s*:\s*hidden\s*!important/i,
+      /opacity\s*:\s*0\s*!important/i,
+    ];
+
+    for (const pattern of forbiddenPatterns) {
+      if (pattern.test(css)) {
+        return { 
+          valid: false, 
+          error: 'Cannot hide essential elements with !important. Use the toggles instead.' 
+        };
+      }
+    }
+
+    // Basic CSS syntax validation
+    const braceCount = (css.match(/{/g) || []).length - (css.match(/}/g) || []).length;
+    if (braceCount !== 0) {
+      return { 
+        valid: false, 
+        error: 'Unbalanced curly braces in CSS' 
+      };
+    }
+
+    return { valid: true };
+  };
+
   const handleSave = async () => {
     try {
       setSaving(true);
       const token = localStorage.getItem('token');
       
+      if (customCSS.trim()) {
+        const validation = validateCustomCSS(customCSS);
+        if (!validation.valid) {
+          setCssError(validation.error);
+          setSaving(false);
+          return;
+        }
+      }
+      
+      const customizationData = { ...settings, customCSS: customCSS.trim() };
+      
       const response = await axios.put(
         `http://localhost:5000/api/ad-categories/categoriees/${categoryId}/customization`,
-        { customization: settings },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { customization: customizationData },
+        { 
+          headers: { 
+            Authorization: `Bearer ${token}`,
+            'Cache-Control': 'no-cache'
+          } 
+        }
       );
       
-      if (onSave) onSave(settings);
-      onClose();
-    } catch (error) {
-      console.error('Error saving customization:', error);
-      
-      if (error.response) {
-        console.error('Response data:', error.response.data);
-        console.error('Response status:', error.response.status);
-        alert(`Failed to save: ${error.response.data.message || error.response.data.error || 'Server error'}`);
-      } else if (error.request) {
-        console.error('No response received:', error.request);
-        alert('No response from server. Please check your connection.');
-      } else {
-        console.error('Error details:', error.message);
-        alert('Failed to save customization. Please try again.');
+      if (response.data.success) {
+        // Force reload all ad scripts
+        const event = new CustomEvent('yepperAdRefresh', { 
+          detail: { categoryId, timestamp: Date.now() } 
+        });
+        window.dispatchEvent(event);
+        
+        // Notify parent window
+        if (window.opener) {
+          window.opener.postMessage({ 
+            type: 'YEPPER_AD_REFRESH', 
+            categoryId: categoryId,
+            timestamp: Date.now()
+          }, '*');
+        }
+        
+        // Broadcast to all tabs
+        const broadcast = new BroadcastChannel('yepper_ads');
+        broadcast.postMessage({ 
+          type: 'CUSTOMIZATION_UPDATED', 
+          categoryId,
+          timestamp: Date.now() 
+        });
+        broadcast.close();
+        
+        if (onSave) onSave(customizationData);
+        
+        const successMsg = document.createElement('div');
+        successMsg.style.cssText = `
+          position: fixed;
+          top: 20px;
+          right: 20px;
+          background: #10b981;
+          color: white;
+          padding: 12px 24px;
+          border-radius: 8px;
+          font-weight: 600;
+          z-index: 10000;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        `;
+        successMsg.textContent = '✓ Saved! Reload the page to see changes.';
+        document.body.appendChild(successMsg);
+        
+        setTimeout(() => {
+          successMsg.remove();
+          onClose();
+        }, 2000);
       }
+      
+    } catch (error) {
+      console.error('Error saving:', error);
+      alert(error.response?.data?.message || 'Failed to save customization');
     } finally {
       setSaving(false);
     }
@@ -91,6 +178,49 @@ const AdCustomizationModal = ({ categoryId, onClose, onSave }) => {
 
   const updateSetting = (key, value) => {
     setSettings(prev => ({ ...prev, [key]: value }));
+  };
+
+  const handleCSSChange = (value) => {
+    setCustomCSS(value);
+    setCssError('');
+  };
+
+  const getDefaultCSS = () => {
+    return `.ad-container {
+  /* Layout */
+  width: 100%;
+  max-width: ${settings.width}px;
+  height: ${settings.height}px;
+  padding: ${settings.padding}px;
+  
+  /* Styling */
+  background: ${settings.backgroundColor};
+  border: ${settings.borderWidth}px solid ${settings.borderColor};
+  border-radius: ${settings.borderRadius}px;
+  box-shadow: ${shadowOptions.find(s => s.value === settings.shadow)?.css || 'none'};
+  
+  /* Add your custom styles below */
+  
+}
+
+.ad-title {
+  font-size: ${settings.titleSize}px;
+  color: ${settings.titleColor};
+  
+}
+
+.ad-description {
+  font-size: ${settings.descriptionSize}px;
+  color: ${settings.descriptionColor};
+  
+}
+
+.ad-cta {
+  font-size: ${settings.ctaSize}px;
+  background: ${settings.ctaBackground};
+  color: ${settings.ctaColor};
+  
+}`;
   };
 
   const orientationPresets = [
@@ -143,98 +273,103 @@ const AdCustomizationModal = ({ categoryId, onClose, onSave }) => {
     };
 
     return (
-      <div style={adStyle}>
-        <div style={{
-          background: 'rgba(255, 255, 255, 0.1)',
-          padding: '8px 16px',
-          fontSize: '11px',
-          fontWeight: '500',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
-        }}>
-          <span style={{ opacity: 0.7 }}>Yepper Ad</span>
-          <span style={{
-            background: 'rgba(255, 255, 255, 0.2)',
-            padding: '3px 8px',
-            borderRadius: '12px',
-            fontSize: '9px'
-          }}>Sponsored</span>
-        </div>
-
-        <div style={{
-          display: 'flex',
-          flexDirection: settings.imagePosition === 'left' ? 'row' : 'column',
-          gap: '16px',
-          flex: 1,
-          padding: '16px'
-        }}>
-          {settings.showImage && (
-            <div style={{
-              flex: settings.imagePosition === 'left' ? '0 0 40%' : '0 0 auto',
+      <>
+        {customCSS && (
+          <style dangerouslySetInnerHTML={{ __html: customCSS }} />
+        )}
+        <div style={adStyle} className="ad-container">
+          <div style={{
+            background: 'rgba(255, 255, 255, 0.1)',
+            padding: '8px 16px',
+            fontSize: '11px',
+            fontWeight: '500',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
+          }}>
+            <span style={{ opacity: 0.7 }}>Yepper Ad</span>
+            <span style={{
+              background: 'rgba(255, 255, 255, 0.2)',
+              padding: '3px 8px',
               borderRadius: '12px',
-              overflow: 'hidden',
-              backgroundColor: 'rgba(255, 255, 255, 0.1)',
-              minHeight: settings.imagePosition === 'top' ? '150px' : 'auto'
-            }}>
+              fontSize: '9px'
+            }}>Sponsored</span>
+          </div>
+
+          <div style={{
+            display: 'flex',
+            flexDirection: settings.imagePosition === 'left' ? 'row' : 'column',
+            gap: '16px',
+            flex: 1,
+            padding: '16px'
+          }}>
+            {settings.showImage && (
               <div style={{
-                width: '100%',
-                height: '100%',
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'white',
-                fontSize: '12px'
-              }}>
-                Ad Image
+                flex: settings.imagePosition === 'left' ? '0 0 40%' : '0 0 auto',
+                borderRadius: '12px',
+                overflow: 'hidden',
+                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                minHeight: settings.imagePosition === 'top' ? '150px' : 'auto'
+              }} className="ad-image">
+                <div style={{
+                  width: '100%',
+                  height: '100%',
+                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'white',
+                  fontSize: '12px'
+                }}>
+                  Ad Image
+                </div>
               </div>
+            )}
+
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }} className="ad-content">
+              <h3 style={{
+                fontSize: `${settings.titleSize}px`,
+                fontWeight: '600',
+                color: settings.titleColor,
+                margin: '0 0 10px 0',
+                lineHeight: 1.3
+              }} className="ad-title">
+                Your Business Name
+              </h3>
+
+              {settings.showDescription && (
+                <p style={{
+                  fontSize: `${settings.descriptionSize}px`,
+                  color: settings.descriptionColor,
+                  margin: '0 0 16px 0',
+                  lineHeight: 1.5
+                }} className="ad-description">
+                  This is a sample ad description that shows how your ad will appear to visitors.
+                </p>
+              )}
+
+              {settings.showCTA && (
+                <button style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  background: settings.ctaBackground,
+                  color: settings.ctaColor,
+                  padding: '10px 18px',
+                  borderRadius: '10px',
+                  fontSize: `${settings.ctaSize}px`,
+                  fontWeight: '500',
+                  border: `1px solid ${settings.borderColor}`,
+                  cursor: 'pointer',
+                  alignSelf: 'flex-start'
+                }} className="ad-cta">
+                  Learn More →
+                </button>
+              )}
             </div>
-          )}
-
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-            <h3 style={{
-              fontSize: `${settings.titleSize}px`,
-              fontWeight: '600',
-              color: settings.titleColor,
-              margin: '0 0 10px 0',
-              lineHeight: 1.3
-            }}>
-              Your Business Name
-            </h3>
-
-            {settings.showDescription && (
-              <p style={{
-                fontSize: `${settings.descriptionSize}px`,
-                color: settings.descriptionColor,
-                margin: '0 0 16px 0',
-                lineHeight: 1.5
-              }}>
-                This is a sample ad description that shows how your ad will appear to visitors.
-              </p>
-            )}
-
-            {settings.showCTA && (
-              <button style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                background: settings.ctaBackground,
-                color: settings.ctaColor,
-                padding: '10px 18px',
-                borderRadius: '10px',
-                fontSize: `${settings.ctaSize}px`,
-                fontWeight: '500',
-                border: `1px solid ${settings.borderColor}`,
-                cursor: 'pointer',
-                alignSelf: 'flex-start'
-              }}>
-                Learn More →
-              </button>
-            )}
           </div>
         </div>
-      </div>
+      </>
     );
   };
 
@@ -249,8 +384,8 @@ const AdCustomizationModal = ({ categoryId, onClose, onSave }) => {
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white max-w-6xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white w-full max-h-[90vh] overflow-hidden flex flex-col">
         {/* Header */}
         <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
           <h2 className="text-2xl font-bold text-black">Customize Ad Space</h2>
@@ -270,7 +405,7 @@ const AdCustomizationModal = ({ categoryId, onClose, onSave }) => {
             <div className="lg:col-span-1">
               {/* Tabs */}
               <div className="flex gap-0 mb-6 border-b border-gray-200">
-                {['layout', 'style', 'content'].map(tab => (
+                {['layout', 'style', 'content', 'code'].map(tab => (
                   <button
                     key={tab}
                     onClick={() => setActiveTab(tab)}
@@ -474,6 +609,26 @@ const AdCustomizationModal = ({ categoryId, onClose, onSave }) => {
                       className="w-full accent-black"
                     />
                   </div>
+                </div>
+              )}
+
+              {/* Code Tab */}
+              {activeTab === 'code' && (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <label className="block text-sm font-medium text-black">Custom CSS Editor</label>
+                    <button
+                      onClick={() => setCustomCSS(getDefaultCSS())}
+                      className="px-3 py-1.5 text-xs bg-blue-600 text-white hover:bg-blue-700 transition-colors rounded"
+                    >
+                      Load Template
+                    </button>
+                  </div>
+                  
+                  <CSSEditor 
+                    value={customCSS} 
+                    onChange={handleCSSChange}
+                  />
                 </div>
               )}
             </div>

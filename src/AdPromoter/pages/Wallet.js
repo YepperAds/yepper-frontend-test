@@ -269,7 +269,7 @@ const Wallet = () => {
                   placeholder="Search transactions..."
                   value={searchQuery}
                   onChange={handleSearch}
-                  className="w-full pl-10 pr-4 py-3 border border-black bg-white text-black placeholder-gray-500 focus:outline-none focus:ring-0 transition-all duration-200"
+                  className="w-full pl-10 pr-4 py-3 border border-black bg-white rounded-full text-black placeholder-gray-500 focus:outline-none focus:ring-0 transition-all duration-200"
                 />
               </div>
             </div>
@@ -281,7 +281,7 @@ const Wallet = () => {
                 <>
                   <Button
                     variant="primary"
-                    size="lg"
+                    size="md"
                     onClick={() => navigate(`/wallet/${walletType}/withdraw`)}
                     disabled={!wallet || wallet.balance <= 0}
                   >
@@ -290,7 +290,7 @@ const Wallet = () => {
                   </Button>
                   <Button
                     variant="outline"
-                    size="lg"
+                    size="md"
                     onClick={() => navigate(`/wallet/${walletType}/withdrawals`)}
                   >
                     <History size={18} className="mr-2" />
@@ -301,7 +301,7 @@ const Wallet = () => {
               
               <Button
                 variant="secondary"
-                size="lg"
+                size="md"
                 onClick={switchWalletType}
               >
                 Switch to {walletType === 'webOwner' ? 'Advertiser' : 'Publisher'}

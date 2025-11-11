@@ -8,6 +8,7 @@ import Home from './pages/Home';
 import ProtectedRoute from './components/ProtectedRoute';
 
 import MarketingSection from './pages/MarketingSection';
+import Dost from './Dost'
 
 // User Auth
 import Login from './pages/Login';
@@ -70,6 +71,8 @@ function App() {
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/about-yepper" element={<MarketingSection />} />
+
+              <Route path="/dost" element={<Dost />} />
 
               {/* User Auth */}
               <Route path="/login" element={<Login />} />

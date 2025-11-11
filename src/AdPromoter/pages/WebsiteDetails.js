@@ -585,7 +585,7 @@ const WebsiteDetails = () => {
                                 <Button
                                     onClick={handleOpenCategoriesForm}
                                     variant="secondary"
-                                    size="lg"
+                                    size="md"
                                     icon={Plus}
                                     iconPosition="left"
                                 >

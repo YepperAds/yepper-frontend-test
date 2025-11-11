@@ -532,18 +532,24 @@ function DirectAdvertise() {
           <div className="border border-black bg-white p-8 mb-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div>
-                <h3 className="text-lg font-semibold mb-3">Website Details</h3>
-                <p className="text-base font-medium mb-1">{websiteInfo?.websiteName}</p>
-                <a 
-                  href={websiteInfo?.websiteLink} 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                  className="text-sm text-gray-600 hover:text-black underline"
-                >
-                  {websiteInfo?.websiteLink}
-                </a>
-                <div className="mt-4 pt-4 border-t border-gray-200">
-                  <p className="text-xs font-medium text-gray-500 mb-2">ACCEPTED CATEGORIES</p>
+                <div className='flex gap-2 items-center'>
+                  {websiteInfo?.imageUrl ? (
+                    <img 
+                      src={websiteInfo?.imageUrl} 
+                      alt={websiteInfo?.websiteName}
+                      className="w-10 h-10 object-contain mr-3"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = '/global.png';
+                      }}
+                    />
+                  ) : (
+                    <Globe size={40} className="mr-3 text-black" />
+                  )}
+                  <p className="text-base font-medium">{websiteInfo?.websiteName}</p>
+                </div>
+                <div className="mt-4 pt-4 border-t border-gray-200 flex gap-2 items-center">
+                  <p className="text-xs font-medium text-gray-500">ACCEPTED CATEGORIES</p>
                   <div className="flex flex-wrap gap-2">
                     {websiteInfo?.businessCategories?.includes('any') ? (
                       <span className="px-2 py-1 border border-gray-300 bg-gray-50 text-gray-700 text-xs">
@@ -562,14 +568,13 @@ function DirectAdvertise() {
               
               <div>
                 <h3 className="text-lg font-semibold mb-3">Category Details</h3>
-                <p className="text-base font-medium mb-2">{categoryInfo?.categoryName}</p>
-                <p className="text-sm text-gray-600 mb-4">{categoryInfo?.description}</p>
+                <p className="text-base mb-2"><span className='font-medium'>{categoryInfo?.categoryName}:</span> {categoryInfo?.description}</p>
                 <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
+                  <div className="flex gap-2 text-sm">
                     <span className="text-gray-600">Price:</span>
                     <span className="font-semibold">${categoryInfo?.price}</span>
                   </div>
-                  <div className="flex justify-between text-sm">
+                  <div className="flex gap-2 text-sm">
                     <span className="text-gray-600">Tier:</span>
                     <span className="font-medium capitalize">{categoryInfo?.tier}</span>
                   </div>

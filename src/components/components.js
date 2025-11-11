@@ -15,7 +15,7 @@ export const Button = ({
   iconPosition = 'right',
   ...props 
 }) => {
-  const baseStyles = 'inline-flex items-center justify-center font-medium transition-all duration-200 focus:outline-none focus:ring-0 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
+  const baseStyles = 'inline-flex items-center justify-center rounded-3xl font-medium transition-all duration-200 focus:outline-none focus:ring-0 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
   
   const variants = {
     primary: 'border border-black bg-white text-black hover:bg-gray-100 focus:outline-none focus:ring-0',

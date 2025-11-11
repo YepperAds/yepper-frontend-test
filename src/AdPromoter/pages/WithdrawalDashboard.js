@@ -2,7 +2,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
-import { Button, Container } from '../../components/components';
+import { ArrowLeft } from 'lucide-react';
+import { Button, Container, Badge } from '../../components/components';
 import LoadingSpinner from '../../components/LoadingSpinner';
 
 const WithdrawalRequest = () => {

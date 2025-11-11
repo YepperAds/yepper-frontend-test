@@ -178,8 +178,8 @@ const Home = () => {
                     <Link to='/add-website' className="mb-2">
                       <Button 
                         variant="primary" 
-                        size="sm" 
-                        className="h-10 w-full flex items-center justify-center space-x-2 text-sm"
+                        size="lg" 
+                        className="w-full flex items-center justify-center space-x-2 text-sm"
                       >
                         <span>Run Ads on Websites</span>
                         <ArrowRight size={16} />
@@ -195,8 +195,8 @@ const Home = () => {
                     <Link to="/advertise" className="mb-2">
                       <Button 
                         variant="primary" 
-                        size="sm" 
-                        className="h-10 w-full flex items-center justify-center space-x-2 text-sm"
+                        size="lg" 
+                        className="w-full flex items-center justify-center space-x-2 text-sm"
                       >
                         <span>Advertise Products</span>
                         <ArrowRight size={16} />
@@ -215,8 +215,8 @@ const Home = () => {
                     <Link to='/add-website' className="mb-2">
                       <Button 
                         variant="primary" 
-                        size="sm" 
-                        className="h-10 w-full flex items-center justify-center space-x-2 text-sm"
+                        size="lg" 
+                        className="w-full flex items-center justify-center space-x-2 text-sm"
                       >
                         <span>Run Ads on Websites</span>
                         <ArrowRight size={16} />
@@ -227,8 +227,8 @@ const Home = () => {
                         <Link to='/websites'>
                           <Button 
                             variant="secondary" 
-                            size="sm" 
-                            className="h-8 w-full flex items-center justify-center space-x-2 text-xs"
+                            size="lg" 
+                            className="w-full flex items-center justify-center space-x-2 text-xs"
                           >
                             <span>Visit Website Dashboard</span>
                             <ArrowRight size={14} />
@@ -243,8 +243,8 @@ const Home = () => {
                     <Link to="/advertise" className="mb-2">
                       <Button 
                         variant="primary" 
-                        size="sm" 
-                        className="h-10 w-full flex items-center justify-center space-x-2 text-sm"
+                        size="lg" 
+                        className="w-full flex items-center justify-center space-x-2 text-sm"
                       >
                         <span>Advertise Products</span>
                         <ArrowRight size={16} />
@@ -255,8 +255,8 @@ const Home = () => {
                         <Link to='/ads'>
                           <Button 
                             variant="secondary" 
-                            size="sm" 
-                            className="h-8 w-full flex items-center justify-center space-x-2 text-xs"
+                            size="lg" 
+                            className="w-full flex items-center justify-center space-x-2 text-xs"
                           >
                             <span>Visit Business Dashboard</span>
                             <ArrowRight size={14} />
@@ -287,7 +287,7 @@ const Home = () => {
                     <Button 
                       variant="primary" 
                       size="lg" 
-                      className="h-16 w-full flex items-center justify-center space-x-4 focus:outline-none focus:ring-0 min-h-[4rem]"
+                      className="w-full flex items-center justify-center space-x-4 focus:outline-none focus:ring-0"
                     >
                       <ArrowLeft />
                       <span className="text-center leading-tight">Run Ads on your Website</span>
@@ -301,7 +301,7 @@ const Home = () => {
                     <Button 
                       variant="primary" 
                       size="lg" 
-                      className="h-16 w-full flex items-center justify-center space-x-4 focus:outline-none focus:ring-0 min-h-[4rem]"
+                      className="w-full flex items-center justify-center space-x-4 focus:outline-none focus:ring-0"
                     >
                       <span className="text-center leading-tight">Advertise your Product Online</span>
                       <ArrowRight />
@@ -318,7 +318,7 @@ const Home = () => {
                     <div className="flex justify-center">
                       <button 
                         onClick={() => setShowAssistant(true)}
-                        className="inline-flex items-center px-6 py-3 bg-orange-600 text-white text-sm font-medium transition-all duration-300 shadow-md hover:shadow-lg hover:scale-105"
+                        className="inline-flex items-center px-6 py-3 rounded-full bg-orange-600 text-white text-sm font-medium transition-all duration-300 shadow-md hover:shadow-lg hover:scale-105"
                       >
                         <span>Use Yepper AI Marketing Assistant</span>
                       </button>
@@ -343,7 +343,7 @@ const Home = () => {
                 <Button 
                   variant="primary" 
                   size="lg" 
-                  className="h-16 w-full flex items-center justify-center space-x-4 focus:outline-none focus:ring-0"
+                  className="w-full flex items-center justify-center space-x-4 focus:outline-none focus:ring-0"
                 >
                   <ArrowLeft />
                   <span className="text-center leading-tight">Run Ads on your Website</span>
@@ -362,7 +362,7 @@ const Home = () => {
                 <Button 
                   variant="primary" 
                   size="lg" 
-                  className="h-16 w-full flex items-center justify-center space-x-4 focus:outline-none focus:ring-0"
+                  className="w-full flex items-center justify-center space-x-4 focus:outline-none focus:ring-0"
                 >
                   <span className="text-center leading-tight">Advertise your Product Online</span>
                   <ArrowRight />
@@ -385,7 +385,7 @@ const Home = () => {
                 <div className="flex justify-center">
                   <button 
                     onClick={() => setShowAssistant(true)}
-                    className="inline-flex items-center px-6 py-3 bg-orange-600 text-white text-sm font-medium transition-all duration-300 shadow-md hover:shadow-lg hover:scale-105"
+                    className="inline-flex items-center px-6 py-3 rounded-full bg-orange-600 text-white text-sm font-medium transition-all duration-300 shadow-md hover:shadow-lg hover:scale-105"
                   >
                     <span>Use Yepper AI Marketing Assistant</span>
                   </button>
