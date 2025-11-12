@@ -54,17 +54,65 @@ const AdCustomizationModal = ({ categoryId, onClose, onSave }) => {
         setSettings(prev => ({ ...prev, ...response.data.customization }));
         if (response.data.customization.customCSS) {
           setCustomCSS(response.data.customization.customCSS);
+        } else {
+          setCustomCSS(getDefaultCSS());
         }
+      } else {
+        setCustomCSS(getDefaultCSS());
       }
       setLoading(false);
     } catch (error) {
       console.error('Error fetching customization:', error);
+      setCustomCSS(getDefaultCSS());
       setLoading(false);
     }
   };
 
+  const updateSetting = (key, value) => {
+    setSettings(prev => ({ ...prev, [key]: value }));
+  };
+
+  const getDefaultCSS = () => {
+    return `.ad-container {
+  width: 100%;
+  max-width: ${settings.width}px;
+  height: ${settings.height}px;
+  padding: ${settings.padding}px;
+  background: ${settings.backgroundColor};
+  border: ${settings.borderWidth}px solid ${settings.borderColor};
+  border-radius: ${settings.borderRadius}px;
+  box-shadow: ${shadowOptions.find(s => s.value === settings.shadow)?.css || 'none'};
+}
+
+.ad-title {
+  font-size: ${settings.titleSize}px;
+  color: ${settings.titleColor};
+  font-weight: 600;
+}
+
+.ad-description {
+  font-size: ${settings.descriptionSize}px;
+  color: ${settings.descriptionColor};
+  line-height: 1.5;
+}
+
+.ad-cta {
+  font-size: ${settings.ctaSize}px;
+  background: ${settings.ctaBackground};
+  color: ${settings.ctaColor};
+  padding: 10px 20px;
+  border-radius: 8px;
+}
+
+.ad-image {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  border-radius: 8px;
+}`;
+  };
+
   const validateCustomCSS = (css) => {
-    // Check for class removals or display:none on essential elements
     const forbiddenPatterns = [
       /display\s*:\s*none\s*!important/i,
       /visibility\s*:\s*hidden\s*!important/i,
@@ -80,7 +128,6 @@ const AdCustomizationModal = ({ categoryId, onClose, onSave }) => {
       }
     }
 
-    // Basic CSS syntax validation
     const braceCount = (css.match(/{/g) || []).length - (css.match(/}/g) || []).length;
     if (braceCount !== 0) {
       return { 
@@ -120,13 +167,11 @@ const AdCustomizationModal = ({ categoryId, onClose, onSave }) => {
       );
       
       if (response.data.success) {
-        // Force reload all ad scripts
         const event = new CustomEvent('yepperAdRefresh', { 
           detail: { categoryId, timestamp: Date.now() } 
         });
         window.dispatchEvent(event);
         
-        // Notify parent window
         if (window.opener) {
           window.opener.postMessage({ 
             type: 'YEPPER_AD_REFRESH', 
@@ -135,7 +180,6 @@ const AdCustomizationModal = ({ categoryId, onClose, onSave }) => {
           }, '*');
         }
         
-        // Broadcast to all tabs
         const broadcast = new BroadcastChannel('yepper_ads');
         broadcast.postMessage({ 
           type: 'CUSTOMIZATION_UPDATED', 
@@ -176,51 +220,9 @@ const AdCustomizationModal = ({ categoryId, onClose, onSave }) => {
     }
   };
 
-  const updateSetting = (key, value) => {
-    setSettings(prev => ({ ...prev, [key]: value }));
-  };
-
   const handleCSSChange = (value) => {
     setCustomCSS(value);
     setCssError('');
-  };
-
-  const getDefaultCSS = () => {
-    return `.ad-container {
-  /* Layout */
-  width: 100%;
-  max-width: ${settings.width}px;
-  height: ${settings.height}px;
-  padding: ${settings.padding}px;
-  
-  /* Styling */
-  background: ${settings.backgroundColor};
-  border: ${settings.borderWidth}px solid ${settings.borderColor};
-  border-radius: ${settings.borderRadius}px;
-  box-shadow: ${shadowOptions.find(s => s.value === settings.shadow)?.css || 'none'};
-  
-  /* Add your custom styles below */
-  
-}
-
-.ad-title {
-  font-size: ${settings.titleSize}px;
-  color: ${settings.titleColor};
-  
-}
-
-.ad-description {
-  font-size: ${settings.descriptionSize}px;
-  color: ${settings.descriptionColor};
-  
-}
-
-.ad-cta {
-  font-size: ${settings.ctaSize}px;
-  background: ${settings.ctaBackground};
-  color: ${settings.ctaColor};
-  
-}`;
   };
 
   const orientationPresets = [
@@ -617,13 +619,13 @@ const AdCustomizationModal = ({ categoryId, onClose, onSave }) => {
                 <div className="space-y-4">
                   <div className="flex items-center justify-between mb-3">
                     <label className="block text-sm font-medium text-black">Custom CSS Editor</label>
-                    <button
-                      onClick={() => setCustomCSS(getDefaultCSS())}
-                      className="px-3 py-1.5 text-xs bg-blue-600 text-white hover:bg-blue-700 transition-colors rounded"
-                    >
-                      Load Template
-                    </button>
                   </div>
+                  
+                  {cssError && (
+                    <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded">
+                      {cssError}
+                    </div>
+                  )}
                   
                   <CSSEditor 
                     value={customCSS} 

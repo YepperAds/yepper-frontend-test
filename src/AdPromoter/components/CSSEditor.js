@@ -1,7 +1,8 @@
-// CSSEditor.js - REPLACE YOUR ENTIRE CSSEditor.js FILE WITH THIS
-import React, { useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import { X, Save, Monitor, Smartphone, Tablet, AlertCircle, Eye, Code } from 'lucide-react';
 
-const CSSEditor = ({ value, onChange }) => {
+// CSS Editor Component with Syntax Highlighting
+const CSSEditor = ({ value, onChange, onValidate }) => {
   const textareaRef = useRef(null);
   const highlightRef = useRef(null);
 
@@ -15,125 +16,51 @@ const CSSEditor = ({ value, onChange }) => {
   const highlightCSS = (code) => {
     if (!code) return '';
     
-    const tokens = [];
-    let i = 0;
-    
-    while (i < code.length) {
-      const char = code[i];
-      const remaining = code.slice(i);
-      
-      // Match multi-line comments /* ... */
-      if (remaining.startsWith('/*')) {
-        const end = code.indexOf('*/', i);
-        if (end !== -1) {
-          const comment = code.slice(i, end + 2);
-          tokens.push({ type: 'comment', value: comment });
-          i = end + 2;
-          continue;
-        }
-      }
-      
-      // Match selectors (word followed by {)
-      if (remaining.match(/^[.#a-zA-Z0-9_-]+\s*\{/)) {
-        const match = remaining.match(/^([.#a-zA-Z0-9_-]+)(\s*)(\{)/);
-        tokens.push({ type: 'selector', value: match[1] });
-        tokens.push({ type: 'whitespace', value: match[2] });
-        tokens.push({ type: 'punctuation', value: match[3] });
-        i += match[0].length;
-        continue;
-      }
-      
-      // Match property names (word followed by :)
-      if (remaining.match(/^[a-z-]+\s*:/)) {
-        const match = remaining.match(/^([a-z-]+)(\s*)(:)/);
-        tokens.push({ type: 'property', value: match[1] });
-        tokens.push({ type: 'whitespace', value: match[2] });
-        tokens.push({ type: 'punctuation', value: match[3] });
-        i += match[0].length;
-        continue;
-      }
-      
-      // Match hex colors
-      if (remaining.match(/^#[0-9a-fA-F]{3,8}/)) {
-        const match = remaining.match(/^#[0-9a-fA-F]{3,8}/)[0];
-        tokens.push({ type: 'color', value: match });
-        i += match.length;
-        continue;
-      }
-      
-      // Match rgba/rgb
-      if (remaining.match(/^rgba?\([^)]+\)/)) {
-        const match = remaining.match(/^rgba?\([^)]+\)/)[0];
-        tokens.push({ type: 'color', value: match });
-        i += match.length;
-        continue;
-      }
-      
-      // Match numbers with units
-      if (remaining.match(/^\d+(\.\d+)?(px|em|rem|%|vh|vw|s|ms|deg)\b/)) {
-        const match = remaining.match(/^\d+(\.\d+)?(px|em|rem|%|vh|vw|s|ms|deg)/)[0];
-        tokens.push({ type: 'number', value: match });
-        i += match.length;
-        continue;
-      }
-      
-      // Match plain numbers
-      if (remaining.match(/^\d+(\.\d+)?/)) {
-        const match = remaining.match(/^\d+(\.\d+)?/)[0];
-        tokens.push({ type: 'number', value: match });
-        i += match.length;
-        continue;
-      }
-      
-      // Match keywords
-      if (remaining.match(/^\b(none|auto|flex|inline-flex|block|inline|relative|absolute|fixed|center|left|right|top|bottom|bold|normal|ease|linear|blur|brightness|hidden|visible|transparent|solid|border-box|content-box)\b/)) {
-        const match = remaining.match(/^\b(none|auto|flex|inline-flex|block|inline|relative|absolute|fixed|center|left|right|top|bottom|bold|normal|ease|linear|blur|brightness|hidden|visible|transparent|solid|border-box|content-box)\b/)[0];
-        tokens.push({ type: 'keyword', value: match });
-        i += match.length;
-        continue;
-      }
-      
-      // Match punctuation
-      if (char.match(/[{}();,]/)) {
-        tokens.push({ type: 'punctuation', value: char });
-        i++;
-        continue;
-      }
-      
-      // Everything else (whitespace, semicolons, etc)
-      tokens.push({ type: 'text', value: char });
-      i++;
-    }
-    
-    // Convert tokens to HTML
-    return tokens.map(token => {
-      const escaped = token.value
+    const lines = code.split('\n');
+    return lines.map((line, idx) => {
+      let highlighted = line
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
-        .replace(/ /g, '&nbsp;')
-        .replace(/\n/g, '<br/>');
-      
-      switch (token.type) {
-        case 'comment':
-          return `<span style="color: #6A9955;">${escaped}</span>`;
-        case 'selector':
-          return `<span style="color: #D7BA7D;">${escaped}</span>`;
-        case 'property':
-          return `<span style="color: #9CDCFE;">${escaped}</span>`;
-        case 'color':
-          return `<span style="color: #CE9178;">${escaped}</span>`;
-        case 'number':
-          return `<span style="color: #B5CEA8;">${escaped}</span>`;
-        case 'keyword':
-          return `<span style="color: #569CD6;">${escaped}</span>`;
-        case 'punctuation':
-          return `<span style="color: #D4D4D4;">${escaped}</span>`;
-        case 'whitespace':
-          return escaped;
-        default:
-          return escaped;
-      }
+        .replace(/ /g, '&nbsp;');
+
+      // Comments
+      highlighted = highlighted.replace(
+        /(\/\*.*?\*\/)/g,
+        '<span style="color: #6A9955;">$1</span>'
+      );
+
+      // Selectors
+      highlighted = highlighted.replace(
+        /^(&nbsp;*)(\.[a-zA-Z0-9_-]+|#[a-zA-Z0-9_-]+|[a-zA-Z][a-zA-Z0-9]*)/,
+        '$1<span style="color: #D7BA7D;">$2</span>'
+      );
+
+      // Properties
+      highlighted = highlighted.replace(
+        /([a-z-]+)(&nbsp;*):(?!\/\/)/g,
+        '<span style="color: #9CDCFE;">$1</span>$2:'
+      );
+
+      // Colors
+      highlighted = highlighted.replace(
+        /(#[0-9a-fA-F]{3,8}|rgba?\([^)]+\))/g,
+        '<span style="color: #CE9178;">$1</span>'
+      );
+
+      // Numbers with units
+      highlighted = highlighted.replace(
+        /(\d+(?:\.\d+)?)(px|em|rem|%|vh|vw|s|ms|deg)/g,
+        '<span style="color: #B5CEA8;">$1$2</span>'
+      );
+
+      // Keywords
+      highlighted = highlighted.replace(
+        /\b(none|auto|flex|block|inline|center|left|right|bold|normal|solid|transparent)\b/g,
+        '<span style="color: #569CD6;">$1</span>'
+      );
+
+      return `<div style="height: 21px;">${highlighted}</div>`;
     }).join('');
   };
 
@@ -174,7 +101,7 @@ const CSSEditor = ({ value, onChange }) => {
             <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#ffbd2e' }}></div>
             <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#27c93f' }}></div>
           </div>
-          <span style={{ fontSize: '12px', color: '#858585', fontFamily: 'monospace', marginLeft: '12px' }}>styles.css</span>
+          <span style={{ fontSize: '12px', color: '#858585', fontFamily: 'monospace', marginLeft: '12px' }}>custom-styles.css</span>
         </div>
         <span style={{ fontSize: '11px', color: '#6e6e6e' }}>CSS</span>
       </div>
@@ -183,7 +110,7 @@ const CSSEditor = ({ value, onChange }) => {
       <div style={{
         display: 'flex',
         background: '#1e1e1e',
-        height: '500px'
+        height: '450px'
       }}>
         {/* Line Numbers */}
         <div style={{
@@ -233,11 +160,14 @@ const CSSEditor = ({ value, onChange }) => {
             dangerouslySetInnerHTML={{ __html: highlightCSS(value) }}
           />
 
-          {/* Actual Textarea (transparent) */}
+          {/* Actual Textarea */}
           <textarea
             ref={textareaRef}
             value={value}
-            onChange={(e) => onChange(e.target.value)}
+            onChange={(e) => {
+              onChange(e.target.value);
+              if (onValidate) onValidate(e.target.value);
+            }}
             onScroll={handleScroll}
             onKeyDown={handleTab}
             placeholder="/* Type your CSS here... */"
