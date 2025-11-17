@@ -229,7 +229,7 @@ const Ads = () => {
                     {/* Add Button */}
                     <div className="flex-shrink-0">
                         <Button
-                            onClick={() => navigate('/upload-ad')}
+                            onClick={() => navigate('/select-websites')}
                             variant="secondary"
                             size="lg"
                             icon={Plus}
@@ -241,7 +241,7 @@ const Ads = () => {
 
                     <div className="flex-shrink-0">
                         <Button
-                            onClick={() => navigate('/upload-ad')}
+                            onClick={() => navigate('/create-website')}
                             variant="secondary"
                             size="lg"
                             icon={Plus}

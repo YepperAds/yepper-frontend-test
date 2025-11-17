@@ -1,104 +1,56 @@
-// BusinessForm.js
+// Updated BusinessForm.js - Final step before payment
 import React, { useState, useEffect } from 'react';
-import { useLocation, useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, Building2, Tag, MapPin, FileText, X } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { ArrowLeft, Building2, Link as LinkIcon, MapPin, FileText, X, Tag } from 'lucide-react';
+import axios from 'axios';
 import { Container, Badge, Input, Button, TextArea } from '../../components/components';
 
 function BusinessForm() {
   const location = useLocation();
   const navigate = useNavigate();
   
-  const getInitialData = () => {
-    if (location.state?.file || location.state?.userId) {
-      return location.state;
-    }
-    
-    const savedData = localStorage.getItem('adFormData');
-    if (savedData) {
-      const parsed = JSON.parse(savedData);
-      return { ...parsed, file: null };
-    }
-    
-    return {};
-  };
-
-  const initialData = getInitialData();
-  const { file: initialFile, userId: initialUserId } = initialData;
+  const { 
+    selectedWebsites, 
+    selectedCategory, 
+    categoryRequirements,
+    file,
+    filePreview 
+  } = location.state || {};
   
-  const [file, setFile] = useState(initialFile || null);
-  const [userId, setUserId] = useState(initialUserId || null);
+  const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-
-  const [businessData, setBusinessData] = useState({
-    businessName: initialData.businessName || '',
-    businessLink: initialData.businessLink || '',
-    businessLocation: initialData.businessLocation || '',
-    adDescription: initialData.adDescription || '',
-    businessCategory: initialData.businessCategory || ''
-  });
-
-  const [errors, setErrors] = useState({});
-  const [showCategoryModal, setShowCategoryModal] = useState(false);
-
-  useEffect(() => {
-    const dataToSave = {
-      userId,
-      ...businessData
-      // Do NOT include file here
-    };
-    
-    try {
-      localStorage.setItem('adFormData', JSON.stringify(dataToSave));
-    } catch (e) {
-      localStorage.removeItem('adFormData');
-    }
-  }, [businessData, userId]);
-
-//  useEffect(() => {
-//     const loadFileFromStorage = () => {
-//       const savedData = localStorage.getItem('adFormData');
-//       if (savedData) {
-//         const parsed = JSON.parse(savedData);
-//         if (parsed.file && parsed.file.data && !file) {
-//           fetch(parsed.file.data)
-//             .then(res => res.blob())
-//             .then(blob => {
-//               const restoredFile = new File([blob], parsed.file.name, {
-//                 type: parsed.file.type
-//               });
-//               setFile(restoredFile);
-//             });
-//         }
-//       }
-//     };
-    
-//     loadFileFromStorage();
-//   }, []);
   
-  useEffect(() => {
-    if (!file && !location.state?.file) {
-      navigate('/upload-ad');
-    }
-  }, [file, location.state, navigate]);
+  const [businessData, setBusinessData] = useState({
+    businessName: '',
+    businessLink: '',
+    businessLocation: '',
+    adDescription: ''
+  });
+  
+  const [errors, setErrors] = useState({});
 
-  const businessCategories = [
-    { value: 'technology', label: 'Technology', icon: 'Monitor', description: 'Software, hardware, IT services' },
-    { value: 'food-beverage', label: 'Food & Beverage', icon: 'Coffee', description: 'Restaurants, cafes, food services' },
-    { value: 'real-estate', label: 'Real Estate', icon: 'Home', description: 'Property sales, rentals, development' },
-    { value: 'automotive', label: 'Automotive', icon: 'Car', description: 'Car sales, repairs, services' },
-    { value: 'health-wellness', label: 'Health & Wellness', icon: 'Heart', description: 'Healthcare, fitness, beauty' },
-    { value: 'entertainment', label: 'Entertainment', icon: 'Gamepad2', description: 'Gaming, events, recreation' },
-    { value: 'fashion', label: 'Fashion', icon: 'Shirt', description: 'Clothing, accessories, style' },
-    { value: 'education', label: 'Education', icon: 'GraduationCap', description: 'Schools, training, courses' },
-    { value: 'business-services', label: 'Business Services', icon: 'Briefcase', description: 'Consulting, legal, finance' },
-    { value: 'travel-tourism', label: 'Travel & Tourism', icon: 'Plane', description: 'Hotels, tours, travel agencies' },
-    { value: 'arts-culture', label: 'Arts & Culture', icon: 'Palette', description: 'Museums, galleries, creative' },
-    { value: 'photography', label: 'Photography', icon: 'Camera', description: 'Photo services, studios' },
-    { value: 'gifts-events', label: 'Gifts & Events', icon: 'Gift', description: 'Party planning, gift shops' },
-    { value: 'government-public', label: 'Government & Public', icon: 'Users', description: 'Public services, non-profit' },
-    { value: 'general-retail', label: 'General Retail', icon: 'ShoppingBag', description: 'Stores, e-commerce, shopping' }
-  ];
+  useEffect(() => {
+    if (!file || !selectedCategory || !categoryRequirements) {
+      navigate('/select-websites');
+    }
+  }, [file, selectedCategory, categoryRequirements, navigate]);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await axios.get('http://localhost:5000/api/auth/me', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        setUser(response.data.user);
+      } catch (error) {
+        localStorage.removeItem('token');
+        navigate('/login');
+      }
+    };
+    checkAuth();
+  }, [navigate]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -106,122 +58,110 @@ function BusinessForm() {
       ...prev,
       [name]: value
     }));
-
+    
     if (errors[name]) {
       setErrors(prev => ({
         ...prev,
-        [name]: undefined
+        [name]: ''
       }));
     }
-  };
-
-  const handleCategorySelect = (categoryValue) => {
-    setBusinessData(prev => ({
-      ...prev,
-      businessCategory: categoryValue
-    }));
-    
-    if (errors.businessCategory) {
-      setErrors(prev => ({
-        ...prev,
-        businessCategory: undefined
-      }));
-    }
-    
-    setShowCategoryModal(false);
-  };
-
-  const getSelectedCategory = () => {
-    return businessCategories.find(cat => cat.value === businessData.businessCategory);
   };
 
   const validateForm = () => {
     const newErrors = {};
-    Object.entries(businessData).forEach(([key, value]) => {
-      if (!value.trim()) {
-        newErrors[key] = 'This field is required';
-      }
-    });
-
-    if (businessData.businessLink && 
-        !/^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/.test(businessData.businessLink)) {
-      newErrors.businessLink = 'Please enter a valid URL';
+    
+    if (!businessData.businessName.trim()) {
+      newErrors.businessName = 'Business name is required';
+    } else if (businessData.businessName.trim().length < 2) {
+      newErrors.businessName = 'Business name must be at least 2 characters';
     }
-
+    
+    if (!businessData.businessLink.trim()) {
+      newErrors.businessLink = 'Business website is required';
+    } else if (!/^https?:\/\/.+/.test(businessData.businessLink.trim())) {
+      newErrors.businessLink = 'Please enter a valid URL (starting with http:// or https://)';
+    }
+    
+    if (!businessData.businessLocation.trim()) {
+      newErrors.businessLocation = 'Business location is required';
+    }
+    
+    if (!businessData.adDescription.trim()) {
+      newErrors.adDescription = 'Ad description is required';
+    } else if (businessData.adDescription.trim().length < 10) {
+      newErrors.adDescription = 'Description must be at least 10 characters';
+    }
+    
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const isFormValid = () => {
-    return (
-      Object.values(businessData).every((value) => value.trim()) &&
-      (!businessData.businessLink || 
-       /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/.test(businessData.businessLink))
-    );
+    return businessData.businessName.trim() &&
+           businessData.businessLink.trim() &&
+           businessData.businessLocation.trim() &&
+           businessData.adDescription.trim();
   };
 
-  const getAuthToken = () => {
-    return localStorage.getItem('token') || sessionStorage.getItem('token');
-  };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  const handleSaveAd = async () => {
+    if (!validateForm()) return;
+    
+    setLoading(true);
+    setError(null);
+    
     try {
       const formData = new FormData();
-      if (file) formData.append('file', file);
+      formData.append('adOwnerEmail', user?.email);
+      formData.append('file', file);
       formData.append('businessName', businessData.businessName);
       formData.append('businessLink', businessData.businessLink);
       formData.append('businessLocation', businessData.businessLocation);
       formData.append('adDescription', businessData.adDescription);
+      formData.append('selectedWebsites', JSON.stringify(selectedWebsites));
+      formData.append('selectedCategories', JSON.stringify([selectedCategory]));
 
-      const token = getAuthToken();
-      const response = await axios.post('http://localhost:5000/api/web-advertise', formData, {
-        headers: { 
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'multipart/form-data'
+      const token = localStorage.getItem('token');
+      
+      const response = await axios.post(
+        'http://localhost:5000/api/web-advertise',
+        formData,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          }
         }
-      });
+      );
 
       if (response.data.success) {
-        // Clear saved data after successful save
-        localStorage.removeItem('adFormData');
-        
-        navigate('/my-ads', {
-          state: { message: 'Ad saved successfully!' }
+        navigate('/payment-summary', {
+          state: { 
+            adData: response.data.data,
+            categoryRequirements,
+            businessData
+          }
         });
       }
+      
     } catch (error) {
-      setError('Failed to save ad');
-    }
-  };
-
-  const handleNext = (e) => {
-    e.preventDefault();
-
-    if (validateForm()) {
-      setLoading(true);
-      try {
-        if (e.target.name === 'saveOnly') {
-          handleSaveAd();
-        } else {
-          // Pass file through state, not localStorage
-          const dataToPass = {
-            file,
-            userId,
-            ...businessData
-          };
-          
-          navigate('/select-websites', {
-            state: dataToPass
-          });
-        }
-      } catch (error) {
-        setError('An error occurred during upload');
-      } finally {
-        setLoading(false);
+      console.error('Ad creation error:', error);
+      
+      if (error.response?.status === 401) {
+        localStorage.removeItem('token');
+        navigate('/login');
+        return;
       }
+      
+      const errorMessage = error.response?.data?.message || 
+                          error.response?.data?.error || 
+                          'An error occurred while creating the ad';
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
     }
   };
-
+  
   return (
     <div className="min-h-screen bg-white">
       <header className="border-b border-gray-200 bg-white">
@@ -232,20 +172,78 @@ function BusinessForm() {
               className="flex items-center text-gray-600 hover:text-black transition-colors"
             >
               <ArrowLeft size={18} className="mr-2" />
-              <span className="font-medium">Back</span>
+              <span className="font-medium">Back to Upload</span>
             </button>
-            <Badge variant="default">Business Details</Badge>
+            <Badge variant="default">Step 4: Business Details</Badge>
           </div>
         </Container>
       </header>
 
-      {/* Main Content */}
       <div className="max-w-4xl mx-auto px-4 py-12">
+        <div className="bg-gray-50 border border-gray-200 p-6 mb-8">
+          <h3 className="text-lg font-semibold mb-4">Your Ad Summary</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <p className="text-sm font-medium text-gray-700 mb-2">Ad File</p>
+              {filePreview && (
+                <div className="border border-gray-300 bg-white p-2">
+                  {filePreview.type.startsWith('image') && (
+                    <img 
+                      src={filePreview.url} 
+                      alt="Ad preview" 
+                      className="w-full h-auto"
+                      style={{
+                        maxHeight: '200px',
+                        objectFit: 'contain'
+                      }}
+                    />
+                  )}
+                  {filePreview.type.startsWith('video') && (
+                    <video 
+                      src={filePreview.url} 
+                      controls 
+                      className="w-full h-auto"
+                      style={{ maxHeight: '200px' }}
+                    />
+                  )}
+                  <p className="text-xs text-gray-600 mt-2">{filePreview.name}</p>
+                </div>
+              )}
+            </div>
+
+            <div>
+              <p className="text-sm font-medium text-gray-700 mb-2">Ad Placement</p>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Category:</span>
+                  <span className="font-medium">{categoryRequirements?.categoryName}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Size:</span>
+                  <span className="font-medium">
+                    {categoryRequirements?.adSize.width} × {categoryRequirements?.adSize.height}px
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Price:</span>
+                  <span className="font-medium text-lg">${categoryRequirements?.price}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div className="border border-black bg-white p-8">
-          <form onSubmit={handleNext} className="space-y-6">
-            {/* First Row - Business Name & Website */}
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold mb-2">Tell Us About Your Business</h2>
+            <p className="text-gray-600">
+              This information will help users learn more about your business when they click on your ad.
+            </p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="relative flex gap-1">
+              <div className="relative">
                 <Input
                   label="Business Name"
                   name="businessName"
@@ -270,37 +268,10 @@ function BusinessForm() {
                   required
                   className="pl-10"
                 />
-                <Link size={16} className="absolute left-3 top-9 text-gray-400" />
+                <LinkIcon size={16} className="absolute left-3 top-9 text-gray-400" />
               </div>
             </div>
 
-            {/* Business Category - Custom Selector */}
-            <div className="relative">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Business Category <span className="text-red-500">*</span>
-              </label>
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => setShowCategoryModal(true)}
-                  className={`w-full pl-10 pr-4 py-3 border border-gray-300 bg-white text-left focus:outline-none focus:ring-2 focus:ring-black focus:border-black transition-colors ${
-                    errors.businessCategory ? 'border-red-500' : ''
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className={businessData.businessCategory ? 'text-black' : 'text-gray-500'}>
-                      {getSelectedCategory()?.label || 'Select your business category'}
-                    </span>
-                  </div>
-                </button>
-                <Tag size={16} className="absolute left-3 top-4 text-gray-400" />
-                {errors.businessCategory && (
-                  <p className="mt-1 text-sm text-red-600">{errors.businessCategory}</p>
-                )}
-              </div>
-            </div>
-
-            {/* Business Location */}
             <div className="relative">
               <Input
                 label="Business Location"
@@ -315,12 +286,11 @@ function BusinessForm() {
               <MapPin size={16} className="absolute left-3 top-9 text-gray-400" />
             </div>
 
-            {/* Business Description */}
             <div className="relative">
               <TextArea
-                label="Business Description"
+                label="Ad Description"
                 name="adDescription"
-                placeholder="Tell us about your business in a few compelling words..."
+                placeholder="Tell potential customers about your business in a few compelling words..."
                 value={businessData.adDescription}
                 onChange={handleInputChange}
                 error={errors.adDescription}
@@ -329,21 +299,24 @@ function BusinessForm() {
                 className="pl-10"
               />
               <FileText size={16} className="absolute left-3 top-9 text-gray-400" />
+              <p className="text-sm text-gray-500 mt-1">
+                {businessData.adDescription.length} characters
+              </p>
             </div>
 
-            {/* Submit Button */}
-            <Button
-              type="submit"
-              variant="secondary"
-              size="lg"
-              disabled={!isFormValid() || loading}
-              loading={loading}
-              className="w-full"
-            >
-              {loading ? 'Processing...' : 'Continue to Select Websites'}
-            </Button>
+            <div className="pt-4">
+              <Button
+                type="submit"
+                variant="secondary"
+                size="lg"
+                disabled={!isFormValid() || loading}
+                loading={loading}
+                className="w-full"
+              >
+                {loading ? 'Creating Your Ad...' : 'Continue to Payment'}
+              </Button>
+            </div>
 
-            {/* Error Message */}
             {error && (
               <div className="border border-red-600 bg-red-50 p-4 flex items-start">
                 <FileText size={20} className="mr-2 text-red-600 flex-shrink-0 mt-0.5" />
@@ -352,82 +325,13 @@ function BusinessForm() {
             )}
           </form>
         </div>
-      </div>
 
-      {/* Category Selection Modal */}
-      {showCategoryModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white border border-black max-w-4xl w-full max-h-[80vh] overflow-hidden">
-            {/* Modal Header */}
-            <div className="border-b border-black p-6 flex items-center justify-between">
-              <div className="flex items-center">
-                <h3 className="text-xl font-semibold text-black">Select Business Category</h3>
-              </div>
-              <button
-                onClick={() => setShowCategoryModal(false)}
-                className="p-2 hover:bg-gray-100 transition-colors"
-              >
-                <X size={20} className="text-gray-500" />
-              </button>
-            </div>
-
-            {/* Modal Content */}
-            <div className="p-6 overflow-y-auto max-h-[calc(80vh-120px)]">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {businessCategories.map((category) => {
-                  const IconComponent = category.icon;
-                  const isSelected = businessData.businessCategory === category.value;
-                  
-                  return (
-                    <button
-                      key={category.value}
-                      onClick={() => handleCategorySelect(category.value)}
-                      className={`p-4 border text-left transition-all duration-200 hover:shadow-lg group ${
-                        isSelected 
-                          ? 'border-black bg-black text-white' 
-                          : 'border-gray-200 hover:border-gray-300 bg-white'
-                      }`}
-                    >
-                      <div className="flex items-start space-x-3">
-                        <div className={`p-2 rounded-lg transition-colors ${
-                          isSelected 
-                            ? 'bg-white bg-opacity-20' 
-                            : 'bg-gray-100 group-hover:bg-gray-200'
-                        }`}>
-                          <IconComponent 
-                            size={24} 
-                            className={isSelected ? 'text-white' : 'text-gray-700'}
-                          />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h4 className={`font-medium mb-1 ${
-                            isSelected ? 'text-white' : 'text-black'
-                          }`}>
-                            {category.label}
-                          </h4>
-                          <p className={`text-sm ${
-                            isSelected ? 'text-white text-opacity-80' : 'text-gray-600'
-                          }`}>
-                            {category.description}
-                          </p>
-                        </div>
-                      </div>
-                      
-                      {isSelected && (
-                        <div className="mt-3 flex items-center justify-end">
-                          <div className="w-5 h-5 bg-white rounded-full flex items-center justify-center">
-                            <div className="w-2 h-2 bg-black rounded-full"></div>
-                          </div>
-                        </div>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
+        <div className="mt-6 text-center">
+          <p className="text-sm text-gray-600">
+            After completing your business details, you'll proceed to secure payment
+          </p>
         </div>
-      )}
+      </div>
     </div>
   );
 }

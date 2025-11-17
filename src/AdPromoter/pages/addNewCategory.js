@@ -43,8 +43,8 @@ import Sidebar from '../img/sidebar.png';
 import StickySidebar from '../img/stickySidebar.png';
 
 const AddNewCategory = ({ onSubmitSuccess }) => {
-  const [user, setUser] = useState(null); // NEW: Custom user state
-  const [loading, setLoading] = useState(true); // NEW: Loading state for auth check
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
   const { websiteId } = useParams();
   const { state } = useLocation();
   const navigate = useNavigate();
@@ -66,19 +66,19 @@ const AddNewCategory = ({ onSubmitSuccess }) => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const token = localStorage.getItem('token'); // Get token from localStorage
+        const token = localStorage.getItem('token'); 
 
-        // Verify token and get user data
+        
         const response = await axios.get('http://localhost:5000/api/auth/me', {
           headers: {
             'Authorization': `Bearer ${token}`
           }
         });
 
-        setUser(response.data.user); // Set user data from your API
+        setUser(response.data.user);
         setLoading(false);
       } catch (error) {
-        localStorage.removeItem('token'); // Remove invalid token
+        localStorage.removeItem('token');
       }
     };
 
@@ -273,11 +273,6 @@ const AddNewCategory = ({ onSubmitSuccess }) => {
       });
   }, [categoryDetails, searchTerm, activeFilter]);
 
-  const handleInfoClick = (e, category) => {
-      e.stopPropagation();
-      setActiveInfoModal(category);
-  };
-
   const handleCategorySelect = (category) => {
       setActiveCategory(category);
       if (!selectedCategories[category]) {
@@ -292,94 +287,232 @@ const AddNewCategory = ({ onSubmitSuccess }) => {
       setActiveCategory(null);
   };
 
+  const AD_SIZES = [
+    { width: 300, height: 250, label: 'Medium Rectangle' },
+    { width: 728, height: 90, label: 'Leaderboard' },
+    { width: 160, height: 600, label: 'Wide Skyscraper' },
+    { width: 300, height: 600, label: 'Half Page' },
+    { width: 320, height: 50, label: 'Mobile Banner' },
+    { width: 320, height: 100, label: 'Large Mobile Banner' },
+    { width: 970, height: 90, label: 'Large Leaderboard' },
+    { width: 970, height: 250, label: 'Billboard' },
+    { width: 250, height: 250, label: 'Square' },
+    { width: 336, height: 280, label: 'Large Rectangle' },
+    { width: 120, height: 600, label: 'Skyscraper' },
+    { width: 468, height: 60, label: 'Banner' },
+    { width: 234, height: 60, label: 'Half Banner' },
+  ];
+
+  const AD_TYPES = [
+    { id: 'image', label: 'Static Image', icon: '🖼️', description: 'JPG, PNG formats' },
+    { id: 'gif', label: 'Animated GIF', icon: '🎬', description: 'Animated image' },
+    { id: 'video', label: 'Video', icon: '🎥', description: 'MP4, WebM formats' },
+    { id: 'html5', label: 'HTML5', icon: '💻', description: 'Interactive ads' },
+    { id: 'text', label: 'Text Ad', icon: '📝', description: 'Text-based ads' },
+  ];
+
+  const AdSizeSelector = ({ selectedSize, onSizeSelect }) => {
+    return (
+      <div className="w-full">
+        <div className="flex items-center gap-3 mb-3">
+          <span className="text-sm font-medium text-gray-700">Ad Size *</span>
+        </div>
+        <div className="grid grid-cols-2 gap-3 max-h-64 overflow-y-auto border border-gray-300 p-3">
+          {AD_SIZES.map((size) => (
+            <button
+              key={`${size.width}x${size.height}`}
+              type="button"
+              onClick={() => onSizeSelect(size)}
+              className={`p-3 border text-left transition-all ${
+                selectedSize?.width === size.width && selectedSize?.height === size.height
+                  ? 'border-black bg-black text-white'
+                  : 'border-gray-300 hover:border-black'
+              }`}
+            >
+              <div className="font-semibold text-sm">{size.label}</div>
+              <div className="text-xs opacity-80">{size.width} × {size.height}px</div>
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  const AdTypeSelector = ({ selectedTypes, onTypeToggle }) => {
+    return (
+      <div className="w-full">
+        <div className="flex items-center gap-3 mb-3">
+          <span className="text-sm font-medium text-gray-700">Allowed Ad Types *</span>
+          <span className="text-xs text-gray-500">(Select one or more)</span>
+        </div>
+        <div className="grid grid-cols-1 gap-3">
+          {AD_TYPES.map((type) => (
+            <button
+              key={type.id}
+              type="button"
+              onClick={() => onTypeToggle(type.id)}
+              className={`p-4 border text-left transition-all ${
+                selectedTypes?.includes(type.id)
+                  ? 'border-black bg-black text-white'
+                  : 'border-gray-300 hover:border-black'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">{type.icon}</span>
+                <div className="flex-1">
+                  <div className="font-semibold text-sm">{type.label}</div>
+                  <div className="text-xs opacity-80">{type.description}</div>
+                </div>
+                {selectedTypes?.includes(type.id) && (
+                  <Check size={20} className="flex-shrink-0" />
+                )}
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
   const updateCategoryData = (category, field, value) => {
-      if (field === 'price') {
-          // value will now be an object containing price, tier, and visitorRange
-          setCategoryData(prev => ({
-              ...prev,
-              [category]: {
-                  ...prev[category],
-                  price: value.price,
-                  tier: value.tier,
-                  visitorRange: value.visitorRange
-              }
-          }));
-          } else {
-              // Handle other fields normally
-              setCategoryData(prev => ({
-                  ...prev,
-                  [category]: {
-                      ...prev[category],
-                      [field]: value
-                  }
-          }));
-      }
-  };
-
-  const handleNext = () => {
-      if (activeCategory && !isCategoryDataEmpty(activeCategory)) {
-          setCompletedCategories(prev => 
-              prev.includes(activeCategory) 
-                  ? prev 
-                  : [...prev, activeCategory]
-          );
-      }
-      setActiveCategory(null);
-  };
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-  
-    try {
-        const categoriesToSubmit = Object.entries(selectedCategories)
-            .filter(([category]) => completedCategories.includes(category))
-            .map(([category]) => ({
-                // CHANGED: Updated to use custom auth user ID
-                ownerId: user?.id || user?._id, // NEW: Use your custom user ID (adjust based on your user object structure)
-                websiteId,
-                categoryName: category.charAt(0).toUpperCase() + category.slice(1),
-                price: categoryData[category]?.price || 0,
-                description: categoryDetails[category]?.description || '',
-                spaceType: categoryDetails[category]?.spaceType,
-                userCount: parseInt(categoryData[category]?.userCount) || 0,
-                instructions: categoryData[category]?.instructions || '',
-                customAttributes: {},
-                // CHANGED: Updated to use custom auth user email
-                webOwnerEmail: user?.email, // NEW: Use your custom user email field
-                // Add the required fields
-                visitorRange: categoryData[category]?.visitorRange || { min: 0, max: 10000 },
-                tier: categoryData[category]?.tier || 'bronze'
-            }));
-  
-        // CHANGED: Added authorization header for API calls
-        const token = localStorage.getItem('token');
-        const responses = await Promise.all(
-            categoriesToSubmit.map(async (category) => {
-                const response = await axios.post('http://localhost:5000/api/ad-categories', category, {
-                  headers: {
-                    'Authorization': `Bearer ${token}` // NEW: Added auth header
-                  }
-                });
-                return { ...response.data, name: category.categoryName };
-            })
-        );
-  
-        const categoriesWithId = responses.reduce((acc, category) => {
-            acc[category.name.toLowerCase()] = { 
-                id: category._id, 
-                price: category.price,
-                apiCodes: category.apiCodes
-            };
-            return acc;
-        }, {});
-  
-        onSubmitSuccess();
-    } catch (error) {
-        if (error.response?.status === 401) {
-          localStorage.removeItem('token');
-          navigate('/login');
+    if (field === 'price') {
+      setCategoryData(prev => ({
+        ...prev,
+        [category]: {
+          ...prev[category],
+          price: value.price,
+          tier: value.tier,
+          visitorRange: value.visitorRange
         }
+      }));
+    } else if (field === 'adSize') {
+      setCategoryData(prev => ({
+        ...prev,
+        [category]: {
+          ...prev[category],
+          adSize: value
+        }
+      }));
+    } else if (field === 'allowedAdTypes') {
+      setCategoryData(prev => ({
+        ...prev,
+        [category]: {
+          ...prev[category],
+          allowedAdTypes: value
+        }
+      }));
+    } else {
+      setCategoryData(prev => ({
+        ...prev,
+        [category]: {
+          ...prev[category],
+          [field]: value
+        }
+      }));
     }
+  };
+
+  const toggleAdType = (category, typeId) => {
+    const currentTypes = categoryData[category]?.allowedAdTypes || [];
+    const newTypes = currentTypes.includes(typeId)
+      ? currentTypes.filter(t => t !== typeId)
+      : [...currentTypes, typeId];
+    updateCategoryData(category, 'allowedAdTypes', newTypes);
+  };
+
+  const AnimatedTemplate = ({ adSize, adTypes, isVisible }) => {
+    // Simplified animation logic for a professional 'fade and scale' effect
+    const [showTemplate, setShowTemplate] = useState(false);
+    
+    useEffect(() => {
+      if (isVisible && adSize && adTypes.length > 0) {
+        // Delay to allow visibility check to render
+        const timer = setTimeout(() => setShowTemplate(true), 50);
+        return () => clearTimeout(timer);
+      } else {
+        setShowTemplate(false);
+      }
+    }, [adSize, adTypes, isVisible]);
+
+    const getAdTypeStyles = (type) => {
+      // Simplified and standardized styles for a cleaner look
+      const styles = {
+        image: { color: 'bg-indigo-500', icon: '🖼️', label: 'Static Image' },
+        gif: { color: 'bg-green-500', icon: '🎬', label: 'Animated GIF' },
+        video: { color: 'bg-red-500', icon: '🎥', label: 'Video Content' },
+        html5: { color: 'bg-yellow-500', icon: '💻', label: 'Interactive HTML' },
+        text: { color: 'bg-gray-500', icon: '📝', label: 'Text-Only Ad' }
+      };
+      return styles[type] || styles.image;
+    };
+
+    if (!isVisible || !adSize || adTypes.length === 0) {
+      // Professional Placeholder
+      return (
+        <div className="relative w-full h-[300px] border border-dashed border-gray-400 rounded-lg bg-gray-50 flex items-center justify-center p-4">
+          <div className="text-center text-gray-500">
+            <svg className="w-12 h-12 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-2-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+            <div className="text-base font-semibold">Ad Preview Not Configured</div>
+            <p className="text-sm mt-1">Select an Ad Size and at least one Ad Type to see the live preview.</p>
+          </div>
+        </div>
+      );
+    }
+    
+    return (
+      <div className="relative w-full border border-gray-300 bg-white rounded-lg p-4 shadow-xl">
+        <h3 className="text-sm font-semibold text-gray-800 mb-4 text-center">
+          Preview for {adSize.width} × {adSize.height}px ({adTypes.length} Types)
+        </h3>
+          
+        <div className="border border-gray-200 bg-gray-50 overflow-x-auto overflow-y-hidden rounded-md">
+          <div className="flex p-4 gap-6 items-center" style={{ minHeight: `${Math.min(adSize.height, 350) + 32}px` }}>
+            {adTypes.map((currentAdType, index) => {
+              const typeStyles = getAdTypeStyles(currentAdType);
+              const delay = index * 0.1; // Staggered animation delay
+              
+              return (
+                <div
+                  key={currentAdType}
+                  className={`flex-shrink-0 transition-all duration-500 ease-out transform ${showTemplate ? 'scale-100 opacity-100' : 'scale-75 opacity-0'}`}
+                  style={{
+                    width: `${adSize.width}px`,
+                    height: `${adSize.height}px`,
+                    transitionDelay: `${delay}s`,
+                  }}
+                >
+                  <div
+                    className={`w-full h-full ${typeStyles.color} rounded-lg shadow-lg flex flex-col items-center justify-center relative overflow-hidden text-white`}
+                  >
+                    <div className="relative z-10 text-center px-4">
+                      <div className="text-4xl mb-2">{typeStyles.icon}</div>
+                      <div
+                        className="font-bold mb-1"
+                        style={{ fontSize: `${Math.min(adSize.width, adSize.height) / 10}px` }}
+                      >
+                        {adSize.width} × {adSize.height}
+                      </div>
+                      <div className="text-sm font-medium opacity-90">
+                        {typeStyles.label}
+                      </div>
+                    </div>
+
+                      {/* Subtle Overlay to act as a watermark/border */}
+                      <div className="absolute inset-0 border-2 border-white/50 rounded-lg pointer-events-none" />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+        
+        {adTypes.length > 1 && (
+          <div className="mt-3 text-center text-xs text-gray-500 font-medium">
+            Scroll horizontally to view all {adTypes.length} previews.
+          </div>
+        )}
+      </div>
+    );
   };
 
   const renderCategoryModal = () => {
@@ -388,11 +521,15 @@ const AddNewCategory = ({ onSubmitSuccess }) => {
     if (!activeCategory) return null;
     
     const details = categoryDetails[activeCategory];
+    const currentData = categoryData[activeCategory] || {};
+    const hasPrice = !!currentData.price;
+    const hasAdSize = !!currentData.adSize;
+    
+    const selectedAdTypes = currentData.allowedAdTypes || [];
     
     return (
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-        <div className="bg-white border border-black max-w-7xl w-full max-h-[90vh] overflow-y-auto">
-          {/* Header */}
+        <div className="bg-white border border-black w-full max-h-[92vh] overflow-y-auto">
           <div className="flex items-center justify-between p-6 border-b border-black">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-black text-white">
@@ -410,11 +547,9 @@ const AddNewCategory = ({ onSubmitSuccess }) => {
               <X size={16} />
             </button>
           </div>
-  
-          {/* Content */}
+
           <div className="p-6">
             {showFullImage ? (
-              /* Full Image View */
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
                   <h3 className="text-lg font-semibold text-black">Preview Image</h3>
@@ -435,15 +570,23 @@ const AddNewCategory = ({ onSubmitSuccess }) => {
                 </div>
               </div>
             ) : (
-              /* Side by Side Layout */
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {/* Left Side - Pricing and Inputs */}
                 <div className="space-y-6">
                   <PricingTiers 
                     selectedPrice={categoryData[activeCategory] || {}}
                     onPriceSelect={(price) => updateCategoryData(activeCategory, 'price', price)}
                   />
-  
+
+                  <AdSizeSelector
+                    selectedSize={categoryData[activeCategory]?.adSize}
+                    onSizeSelect={(size) => updateCategoryData(activeCategory, 'adSize', size)}
+                  />
+
+                  <AdTypeSelector
+                    selectedTypes={selectedAdTypes}
+                    onTypeToggle={(typeId) => toggleAdType(activeCategory, typeId)}
+                  />
+
                   <div className="space-y-6">
                     <div className="w-full">
                       <div className="flex items-center gap-3 mb-2">
@@ -457,7 +600,7 @@ const AddNewCategory = ({ onSubmitSuccess }) => {
                         className="w-full"
                       />
                     </div>
-  
+
                     <div className="w-full">
                       <div className="flex items-center gap-3 mb-2">
                         <span className="text-sm font-medium text-gray-700">Additional Requirements</span>
@@ -472,9 +615,15 @@ const AddNewCategory = ({ onSubmitSuccess }) => {
                     </div>
                   </div>
                 </div>
-  
-                {/* Right Side - Description and Image */}
+
                 <div className="space-y-6">
+                  <AnimatedTemplate 
+                    adSize={currentData.adSize}
+                    adTypes={selectedAdTypes}
+                    image={details.image}
+                    isVisible={hasPrice && hasAdSize && selectedAdTypes.length > 0}
+                  />
+
                   <div>
                     <h3 className="text-lg font-semibold text-black mb-4">Description & Preview</h3>
                     
@@ -509,24 +658,100 @@ const AddNewCategory = ({ onSubmitSuccess }) => {
                 </div>
               </div>
             )}
-  
-            {/* Footer - only show when not in full image mode */}
+
             {!showFullImage && (
               <div className="flex justify-end pt-6 mt-8 border-t border-black">
                 <Button
-                  variant="secondary"
-                  onClick={handleNext}
-                  disabled={!categoryData[activeCategory]?.price}
-                  size="lg"
-                >
-                  Save & Continue
-                </Button>
+                variant="secondary"
+                onClick={handleNext}
+                disabled={
+                  !categoryData[activeCategory]?.price || 
+                  !categoryData[activeCategory]?.adSize ||
+                  !categoryData[activeCategory]?.allowedAdTypes?.length
+                }
+                size="lg"
+              >
+                Save & Continue
+              </Button>
               </div>
             )}
           </div>
         </div>
       </div>
     );
+  };
+
+  const handleNext = () => {
+      if (activeCategory && !isCategoryDataEmpty(activeCategory)) {
+        setCompletedCategories(prev => 
+            prev.includes(activeCategory) 
+                ? prev 
+                : [...prev, activeCategory]
+        );
+      }
+      setActiveCategory(null);
+  };
+
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    try {
+      const categoriesToSubmit = Object.entries(selectedCategories)
+        .filter(([category]) => completedCategories.includes(category))
+        .map(([category]) => {
+          const data = categoryData[category] || {};
+          const details = categoryDetails[category] || {};
+          
+          return {
+            websiteId: websiteId,
+            categoryName: category.charAt(0).toUpperCase() + category.slice(1),
+            description: details.description || '',
+            price: Number(data.price) || 0,
+            spaceType: details.spaceType || 'banner',
+            userCount: Number(data.userCount) || 0,
+            instructions: data.instructions || '',
+            customAttributes: data.customAttributes || {},
+            visitorRange: {
+              min: Number(data.visitorRange?.min) || 0,
+              max: Number(data.visitorRange?.max) || 10000
+            },
+            tier: data.tier || 'bronze',
+            adSize: data.adSize,
+            allowedAdTypes: data.allowedAdTypes || []
+          };
+        });
+
+        const token = localStorage.getItem('token');
+        const responses = await Promise.all(
+            categoriesToSubmit.map(async (category) => {
+                const response = await axios.post('http://localhost:5000/api/ad-categories', category, {
+                  headers: {
+                    'Authorization': `Bearer ${token}` 
+                  }
+                });
+                return { ...response.data, name: category.categoryName };
+            })
+        );
+  
+        const categoriesWithId = responses.reduce((acc, category) => {
+          acc[category.name.toLowerCase()] = { 
+            id: category.category?._id || category._id,
+            price: category.category?.price || category.price,
+            apiCodes: category.category?.apiCodes || category.apiCodes,
+            adSize: category.category?.adSize || category.adSize,
+            allowedAdTypes: category.category?.allowedAdTypes || category.allowedAdTypes
+          };
+          return acc;
+        }, {});
+  
+        onSubmitSuccess();
+    } catch (error) {
+        if (error.response?.status === 401) {
+          localStorage.removeItem('token');
+          navigate('/login');
+        }
+    }
   };
 
   const categoryFilters = [
@@ -543,13 +768,11 @@ const AddNewCategory = ({ onSubmitSuccess }) => {
     <div className="min-h-screen bg-white">
       <div className="max-w-6xl mx-auto px-4 py-12">
         
-        {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-black mb-4">Select Ad Spaces</h1>
           <p className="text-gray-700">Choose and configure advertising spaces for your website</p>
         </div>
 
-        {/* Search and Filters */}
         <div className="flex justify-between items-center gap-4 mb-8">
           <div className="flex-1 max-w-md">
             <div className="relative">
@@ -581,7 +804,6 @@ const AddNewCategory = ({ onSubmitSuccess }) => {
           </div>
         </div>
 
-        {/* Categories Grid */}
         <form onSubmit={handleSubmit}>
           {filteredCategories.length > 0 ? (
             <Grid cols={3} gap={6} className="mb-8">
@@ -595,7 +817,6 @@ const AddNewCategory = ({ onSubmitSuccess }) => {
                   }`}
                   onClick={() => handleCategorySelect(category)}
                 >
-                  {/* Header */}
                   <div className="flex justify-between items-start mb-4">
                     <div className="flex items-center gap-3">
                       <div className={`p-2 ${
@@ -610,15 +831,11 @@ const AddNewCategory = ({ onSubmitSuccess }) => {
                         )}
                       </div>
                       <div>
-                        {/* <div className="text-xs font-medium text-gray-500 uppercase">
-                          {details.category}
-                        </div> */}
                         <h3 className="text-lg font-semibold text-black">{details.name}</h3>
                       </div>
                     </div>
                   </div>
 
-                  {/* Preview Image */}
                   <div className="mb-4">
                     <img 
                       src={details.image} 
@@ -627,12 +844,10 @@ const AddNewCategory = ({ onSubmitSuccess }) => {
                     />
                   </div>
 
-                  {/* Description */}
                   <p className="text-gray-700 text-sm mb-4">
                     {details.description}
                   </p>
 
-                  {/* Footer */}
                   <div className="flex items-center justify-between pt-4 border-t border-gray-200">
                     <span className="text-xs text-gray-500 uppercase">
                       {details.position}
@@ -658,7 +873,6 @@ const AddNewCategory = ({ onSubmitSuccess }) => {
             </div>
           )}
 
-          {/* Submit Button */}
           {completedCategories.length > 0 && (
             <div className="flex justify-center">
               <Button 
@@ -673,7 +887,6 @@ const AddNewCategory = ({ onSubmitSuccess }) => {
         </form>
       </div>
 
-      {/* Modals */}
       {renderCategoryModal()}
       {activeInfoModal && (
         <CategoryInfoModal 

@@ -236,6 +236,30 @@ const UnifiedWebsiteCreation = () => {
     { id: 'mobile', name: 'Mobile' }
   ];
 
+  const AD_SIZES = [
+    { width: 300, height: 250, label: 'Medium Rectangle' },
+    { width: 728, height: 90, label: 'Leaderboard' },
+    { width: 160, height: 600, label: 'Wide Skyscraper' },
+    { width: 300, height: 600, label: 'Half Page' },
+    { width: 320, height: 50, label: 'Mobile Banner' },
+    { width: 320, height: 100, label: 'Large Mobile Banner' },
+    { width: 970, height: 90, label: 'Large Leaderboard' },
+    { width: 970, height: 250, label: 'Billboard' },
+    { width: 250, height: 250, label: 'Square' },
+    { width: 336, height: 280, label: 'Large Rectangle' },
+    { width: 120, height: 600, label: 'Skyscraper' },
+    { width: 468, height: 60, label: 'Banner' },
+    { width: 234, height: 60, label: 'Half Banner' },
+  ];
+
+  const AD_TYPES = [
+    { id: 'image', label: 'Static Image', icon: '🖼️', description: 'JPG, PNG formats' },
+    { id: 'gif', label: 'Animated GIF', icon: '🎬', description: 'Animated image' },
+    { id: 'video', label: 'Video', icon: '🎥', description: 'MP4, WebM formats' },
+    { id: 'html5', label: 'HTML5', icon: '💻', description: 'Interactive ads' },
+    { id: 'text', label: 'Text Ad', icon: '📝', description: 'Text-based ads' },
+  ];
+
   useEffect(() => {
     fetchBusinessCategories();
   }, []);
@@ -344,6 +368,159 @@ const UnifiedWebsiteCreation = () => {
     }
   };
 
+  const AdSizeSelector = ({ selectedSize, onSizeSelect }) => {
+    return (
+      <div className="w-full">
+        <div className="flex items-center gap-3 mb-3">
+          <span className="text-sm font-medium text-gray-700">Ad Size *</span>
+        </div>
+        <div className="grid grid-cols-2 gap-3 max-h-64 overflow-y-auto border border-gray-300 p-3">
+          {AD_SIZES.map((size) => (
+            <button
+              key={`${size.width}x${size.height}`}
+              type="button"
+              onClick={() => onSizeSelect(size)}
+              className={`p-3 border text-left transition-all ${
+                selectedSize?.width === size.width && selectedSize?.height === size.height
+                  ? 'border-black bg-black text-white'
+                  : 'border-gray-300 hover:border-black'
+              }`}
+            >
+              <div className="font-semibold text-sm">{size.label}</div>
+              <div className="text-xs opacity-80">{size.width} × {size.height}px</div>
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  const AdTypeSelector = ({ selectedTypes, onTypeToggle }) => {
+    return (
+      <div className="w-full">
+        <div className="flex items-center gap-3 mb-3">
+          <span className="text-sm font-medium text-gray-700">Allowed Ad Types *</span>
+          <span className="text-xs text-gray-500">(Select one or more)</span>
+        </div>
+        <div className="grid grid-cols-1 gap-3">
+          {AD_TYPES.map((type) => (
+            <button
+              key={type.id}
+              type="button"
+              onClick={() => onTypeToggle(type.id)}
+              className={`p-4 border text-left transition-all ${
+                selectedTypes?.includes(type.id)
+                  ? 'border-black bg-black text-white'
+                  : 'border-gray-300 hover:border-black'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">{type.icon}</span>
+                <div className="flex-1">
+                  <div className="font-semibold text-sm">{type.label}</div>
+                  <div className="text-xs opacity-80">{type.description}</div>
+                </div>
+                {selectedTypes?.includes(type.id) && (
+                  <Check size={20} className="flex-shrink-0" />
+                )}
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  const AnimatedTemplate = ({ adSize, adTypes, isVisible }) => {
+    const [showTemplate, setShowTemplate] = useState(false);
+    
+    useEffect(() => {
+      if (isVisible && adSize && adTypes.length > 0) {
+        const timer = setTimeout(() => setShowTemplate(true), 50);
+        return () => clearTimeout(timer);
+      } else {
+        setShowTemplate(false);
+      }
+    }, [adSize, adTypes, isVisible]);
+
+    const getAdTypeStyles = (type) => {
+      const styles = {
+        image: { color: 'bg-indigo-500', icon: '🖼️', label: 'Static Image' },
+        gif: { color: 'bg-green-500', icon: '🎬', label: 'Animated GIF' },
+        video: { color: 'bg-red-500', icon: '🎥', label: 'Video Content' },
+        html5: { color: 'bg-yellow-500', icon: '💻', label: 'Interactive HTML' },
+        text: { color: 'bg-gray-500', icon: '📝', label: 'Text-Only Ad' }
+      };
+      return styles[type] || styles.image;
+    };
+
+    if (!isVisible || !adSize || adTypes.length === 0) {
+      return (
+        <div className="relative w-full h-[300px] border border-dashed border-gray-400 rounded-lg bg-gray-50 flex items-center justify-center p-4">
+          <div className="text-center text-gray-500">
+            <svg className="w-12 h-12 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-2-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+            <div className="text-base font-semibold">Ad Preview Not Configured</div>
+            <p className="text-sm mt-1">Select an Ad Size and at least one Ad Type to see the live preview.</p>
+          </div>
+        </div>
+      );
+    }
+    
+    return (
+      <div className="relative w-full border border-gray-300 bg-white rounded-lg p-4 shadow-xl">
+        <h3 className="text-sm font-semibold text-gray-800 mb-4 text-center">
+          Preview for {adSize.width} × {adSize.height}px ({adTypes.length} Types)
+        </h3>
+          
+        <div className="border border-gray-200 bg-gray-50 overflow-x-auto overflow-y-hidden rounded-md">
+          <div className="flex p-4 gap-6 items-center" style={{ minHeight: `${Math.min(adSize.height, 350) + 32}px` }}>
+            {adTypes.map((currentAdType, index) => {
+              const typeStyles = getAdTypeStyles(currentAdType);
+              const delay = index * 0.1;
+              
+              return (
+                <div
+                  key={currentAdType}
+                  className={`flex-shrink-0 transition-all duration-500 ease-out transform ${showTemplate ? 'scale-100 opacity-100' : 'scale-75 opacity-0'}`}
+                  style={{
+                    width: `${adSize.width}px`,
+                    height: `${adSize.height}px`,
+                    transitionDelay: `${delay}s`,
+                  }}
+                >
+                  <div
+                    className={`w-full h-full ${typeStyles.color} rounded-lg shadow-lg flex flex-col items-center justify-center relative overflow-hidden text-white`}
+                  >
+                    <div className="relative z-10 text-center px-4">
+                      <div className="text-4xl mb-2">{typeStyles.icon}</div>
+                      <div
+                        className="font-bold mb-1"
+                        style={{ fontSize: `${Math.min(adSize.width, adSize.height) / 10}px` }}
+                      >
+                        {adSize.width} × {adSize.height}
+                      </div>
+                      <div className="text-sm font-medium opacity-90">
+                        {typeStyles.label}
+                      </div>
+                    </div>
+                    <div className="absolute inset-0 border-2 border-white/50 rounded-lg pointer-events-none" />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+        
+        {adTypes.length > 1 && (
+          <div className="mt-3 text-center text-xs text-gray-500 font-medium">
+            Scroll horizontally to view all {adTypes.length} previews.
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // Update the updateAdCategoryData function
   const updateAdCategoryData = (category, field, value) => {
     if (field === 'price') {
       setAdCategoryData(prev => ({
@@ -355,6 +532,22 @@ const UnifiedWebsiteCreation = () => {
           visitorRange: value.visitorRange
         }
       }));
+    } else if (field === 'adSize') {
+      setAdCategoryData(prev => ({
+        ...prev,
+        [category]: {
+          ...prev[category],
+          adSize: value
+        }
+      }));
+    } else if (field === 'allowedAdTypes') {
+      setAdCategoryData(prev => ({
+        ...prev,
+        [category]: {
+          ...prev[category],
+          allowedAdTypes: value
+        }
+      }));
     } else {
       setAdCategoryData(prev => ({
         ...prev,
@@ -364,6 +557,14 @@ const UnifiedWebsiteCreation = () => {
         }
       }));
     }
+  };
+
+  const toggleAdType = (category, typeId) => {
+    const currentTypes = adCategoryData[category]?.allowedAdTypes || [];
+    const newTypes = currentTypes.includes(typeId)
+      ? currentTypes.filter(t => t !== typeId)
+      : [...currentTypes, typeId];
+    updateAdCategoryData(category, 'allowedAdTypes', newTypes);
   };
 
   const handleAdCategoryComplete = () => {
@@ -473,24 +674,26 @@ const UnifiedWebsiteCreation = () => {
 
       if (completedAdCategories.length > 0) {
         const adCategoriesToSubmit = completedAdCategories.map(category => {
-          const data = adCategoryData[category] || {};
-          const details = adCategoryDetails[category] || {};
-          
-          return {
-            websiteId,
-            categoryName: details.name || category.charAt(0).toUpperCase() + category.slice(1),
-            description: details.description || '',
-            price: Number(data.price) || 0,
-            spaceType: details.spaceType || 'banner',
-            userCount: Number(data.userCount) || 0,
-            instructions: data.instructions || '',
-            visitorRange: {
-              min: Number(data.visitorRange?.min) || 0,
-              max: Number(data.visitorRange?.max) || 10000
-            },
-            tier: data.tier || 'bronze'
-          };
-        });
+        const data = adCategoryData[category] || {};
+        const details = adCategoryDetails[category] || {};
+        
+        return {
+          websiteId,
+          categoryName: details.name || category.charAt(0).toUpperCase() + category.slice(1),
+          description: details.description || '',
+          price: Number(data.price) || 0,
+          spaceType: details.spaceType || 'banner',
+          userCount: Number(data.userCount) || 0,
+          instructions: data.instructions || '',
+          visitorRange: {
+            min: Number(data.visitorRange?.min) || 0,
+            max: Number(data.visitorRange?.max) || 10000
+          },
+          tier: data.tier || 'bronze',
+          adSize: data.adSize, // NEW
+          allowedAdTypes: data.allowedAdTypes || [] // NEW
+        };
+      });
 
         await Promise.all(
           adCategoriesToSubmit.map(category =>
@@ -980,11 +1183,15 @@ const UnifiedWebsiteCreation = () => {
       {/* Ad Category Modal - Matching CategoryCreation.js style */}
       {activeAdCategory && (() => {
         const details = adCategoryDetails[activeAdCategory];
+        const currentData = adCategoryData[activeAdCategory] || {};
+        const hasPrice = !!currentData.price;
+        const hasAdSize = !!currentData.adSize;
+        const selectedAdTypes = currentData.allowedAdTypes || [];
         
         return (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
             <div className="bg-white border border-black max-w-7xl w-full max-h-[90vh] overflow-y-auto">
-              {/* Header */}
+              {/* Header - keep as is */}
               <div className="flex items-center justify-between p-6 border-b border-black">
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-black text-white">
@@ -1009,7 +1216,6 @@ const UnifiedWebsiteCreation = () => {
               {/* Content */}
               <div className="p-6">
                 {showFullImage ? (
-                  /* Full Image View */
                   <div className="space-y-4">
                     <div className="flex justify-between items-center">
                       <h3 className="text-lg font-semibold text-black">Preview Image</h3>
@@ -1029,13 +1235,22 @@ const UnifiedWebsiteCreation = () => {
                     </div>
                   </div>
                 ) : (
-                  /* Side by Side Layout */
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    {/* Left Side - Pricing and Inputs */}
+                    {/* Left Side */}
                     <div className="space-y-6">
                       <PricingTiers 
                         selectedPrice={adCategoryData[activeAdCategory] || {}}
                         onPriceSelect={(price) => updateAdCategoryData(activeAdCategory, 'price', price)}
+                      />
+
+                      <AdSizeSelector
+                        selectedSize={adCategoryData[activeAdCategory]?.adSize}
+                        onSizeSelect={(size) => updateAdCategoryData(activeAdCategory, 'adSize', size)}
+                      />
+
+                      <AdTypeSelector
+                        selectedTypes={selectedAdTypes}
+                        onTypeToggle={(typeId) => toggleAdType(activeAdCategory, typeId)}
                       />
 
                       <div className="space-y-6">
@@ -1067,8 +1282,14 @@ const UnifiedWebsiteCreation = () => {
                       </div>
                     </div>
 
-                    {/* Right Side - Description and Image */}
+                    {/* Right Side */}
                     <div className="space-y-6">
+                      <AnimatedTemplate 
+                        adSize={currentData.adSize}
+                        adTypes={selectedAdTypes}
+                        isVisible={hasPrice && hasAdSize && selectedAdTypes.length > 0}
+                      />
+
                       <div>
                         <h3 className="text-lg font-semibold text-black mb-4">Description & Preview</h3>
                         
@@ -1104,12 +1325,15 @@ const UnifiedWebsiteCreation = () => {
                   </div>
                 )}
 
-                {/* Footer - only show when not in full image mode */}
                 {!showFullImage && (
                   <div className="flex justify-end pt-6 mt-8 border-t border-black">
                     <button
                       onClick={handleAdCategoryComplete}
-                      disabled={!adCategoryData[activeAdCategory]?.price}
+                      disabled={
+                        !adCategoryData[activeAdCategory]?.price || 
+                        !adCategoryData[activeAdCategory]?.adSize ||
+                        !adCategoryData[activeAdCategory]?.allowedAdTypes?.length
+                      }
                       className="bg-black text-white px-6 py-3 hover:bg-gray-800 transition-colors font-medium disabled:bg-gray-300 disabled:cursor-not-allowed"
                     >
                       Save & Continue

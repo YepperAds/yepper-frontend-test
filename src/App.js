@@ -161,18 +161,6 @@ function App() {
               } />
 
               {/* AdOwner */}
-              <Route path="/upload-ad" element={
-                <ProtectedRoute>
-                  <UploadAdForWeb />
-                </ProtectedRoute>
-              } />
-
-              <Route path="/insert-data" element={
-                <ProtectedRoute>
-                  <InfoForm />
-                </ProtectedRoute>
-              } />
-
               <Route path="/select-websites" element={
                 <ProtectedRoute>
                   <WebsitesSelection />
@@ -182,6 +170,18 @@ function App() {
               <Route path="/select-categories" element={
                 <ProtectedRoute>
                   <CategoriesSelection />
+                </ProtectedRoute>
+              } />
+
+              <Route path="/upload-ad" element={
+                <ProtectedRoute>
+                  <UploadAdForWeb />
+                </ProtectedRoute>
+              } />
+
+              <Route path="/insert-data" element={
+                <ProtectedRoute>
+                  <InfoForm />
                 </ProtectedRoute>
               } />
 
