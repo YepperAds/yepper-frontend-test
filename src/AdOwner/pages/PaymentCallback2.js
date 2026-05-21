@@ -1,8 +1,9 @@
 // PaymentCallback2.js - Fixed version
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import axios from 'axios';
 import { Button, Text, Heading, Container } from '../../components/components';
+import api from '../../utils/api';
+
 
 const PaymentCallback2 = () => {
   const [searchParams] = useSearchParams();
@@ -38,8 +39,7 @@ const PaymentCallback2 = () => {
   const createAuthenticatedAxios = () => {
     const token = getAuthToken();
     const axiosInstance = axios.create({
-      baseURL: 'https://yepper-backend-test.onrender.com',
-      timeout: 30000,
+            timeout: 30000,
       headers: {
         'Content-Type': 'application/json'
       }
@@ -118,8 +118,8 @@ const PaymentCallback2 = () => {
         });
         
         // Try public callback route first (for payment callbacks)
-        const response = await axios.post(
-          'https://yepper-backend-test.onrender.com/api/web-advertise/payment/verify-callback', 
+        const response = await api.post(
+          '/api/web-advertise/payment/verify-callback', 
           requestData,
           {
             timeout: 30000,

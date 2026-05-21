@@ -1,10 +1,11 @@
 // WithdrawalRequest.js
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import axios from 'axios';
 import { ArrowLeft } from 'lucide-react';
 import { Button, Container, Badge } from '../../components/components';
 import LoadingSpinner from '../../components/LoadingSpinner';
+import api from '../../utils/api';
+
 
 const WithdrawalRequest = () => {
   const navigate = useNavigate();
@@ -73,8 +74,8 @@ const WithdrawalRequest = () => {
         return;
       }
 
-      const response = await axios.get(
-        `https://yepper-backend-test.onrender.com/api/ad-categories/wallet/${walletType}/balance`,
+      const response = await api.get(
+        `/api/ad-categories/wallet/${walletType}/balance`,
         { headers: getAuthHeaders() }
       );
 
@@ -147,8 +148,8 @@ const WithdrawalRequest = () => {
     setSubmitting(true);
 
     try {
-      const response = await axios.post(
-        `https://yepper-backend-test.onrender.com/api/ad-categories/wallet/${walletType}/withdrawal-request`,
+      const response = await api.post(
+        `/api/ad-categories/wallet/${walletType}/withdrawal-request`,
         formData,
         { headers: getAuthHeaders() }
       );

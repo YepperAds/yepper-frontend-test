@@ -2,11 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Globe, Search, Edit, Check, X, Plus, AlertTriangle, ArrowLeft } from 'lucide-react';
 import { Link, useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
-import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
 import { Button, Badge, Grid, Container } from '../../components/components';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import AdModalData from '../components/adModalData'
+import api from '../../utils/api';
+
 
 function Websites() {
   const { user, isAuthenticated, isLoading } = useAuth();
@@ -26,8 +27,7 @@ function Websites() {
   // const [walletBalance, setWalletBalance] = useState(0);
 
   const authenticatedAxios = axios.create({
-    baseURL: 'https://yepper-backend-test.onrender.com/api',
-    headers: {
+        headers: {
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json'
     }

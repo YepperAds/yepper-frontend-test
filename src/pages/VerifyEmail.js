@@ -1,9 +1,10 @@
 // VerifyEmail.js
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import { CheckCircle, XCircle, Mail } from 'lucide-react';
 import { Button, Input } from '../components/components';
+import api from '../utils/api';
+
 
 const VerifyEmail = () => {
   const [searchParams] = useSearchParams();
@@ -26,7 +27,7 @@ const VerifyEmail = () => {
 
   const verifyEmail = async () => {
     try {
-      await axios.get(`${process.env.REACT_APP_API_URL || 'https://yepper-backend-test.onrender.com'}/api/auth/verify-email?token=${token}`);
+      await api.get(`/api/auth/verify-email?token=${token}`);
       setStatus('success');
     } catch (error) {
       setStatus('error');
@@ -43,7 +44,7 @@ const VerifyEmail = () => {
 
     setResendLoading(true);
     try {
-      await axios.post(`${process.env.REACT_APP_API_URL || 'https://yepper-backend-test.onrender.com'}/api/auth/resend-verification`, { email });
+      await api.post('/api/auth/resend-verification', { email });
     } catch (error) {
       if (error.response?.data?.message) {
         setMessage(error.response.data.message);

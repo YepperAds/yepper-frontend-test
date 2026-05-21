@@ -2,8 +2,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Check, ArrowLeft, Building2, Code, Utensils, Home, Car, Heart, Gamepad2, Shirt, BookOpen, Briefcase, Plane, Music, Camera, Gift, Shield, Zap, Loader } from 'lucide-react';
-import axios from 'axios';
 import { Button, Grid, Badge, Container } from '../../components/components';
+import api from '../../utils/api';
+
 
 function BusinessCategorySelection() {
   const { websiteId } = useParams(); // This is tempId
@@ -64,7 +65,7 @@ function BusinessCategorySelection() {
 
   const fetchCategories = async () => {
     try {
-      const response = await axios.get('https://yepper-backend-test.onrender.com/api/business-categories/categories');
+      const response = await api.get('/api/business-categories/categories');
       if (response.data.success) {
         const categoriesWithIcons = response.data.data.categories.map(category => ({
           ...category,
@@ -118,8 +119,8 @@ function BusinessCategorySelection() {
       const token = localStorage.getItem('token');
       
       // Create the website with categories in one request
-      const response = await axios.post(
-        'https://yepper-backend-test.onrender.com/api/createWebsite/createWebsiteWithCategories',
+      const response = await api.post(
+        '/api/createWebsite/createWebsiteWithCategories',
         {
           websiteName: websiteDetails.name,
           websiteLink: websiteDetails.url,

@@ -2,8 +2,9 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { CheckCircle, XCircle, Loader2 } from 'lucide-react';
-import axios from 'axios';
 import { Button, Text, Heading, Container } from '../../components/components';
+import api from '../../utils/api';
+
 
 const PaymentCallback = () => {
   const [searchParams] = useSearchParams();
@@ -23,7 +24,7 @@ const PaymentCallback = () => {
       }
 
       try {
-        const response = await axios.post('https://yepper-backend-test.onrender.com/api/web-advertise/payment/verify', {
+        const response = await api.post('/api/web-advertise/payment/verify', {
           transaction_id: transactionId
         });
 

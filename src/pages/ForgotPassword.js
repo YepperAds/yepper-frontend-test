@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { Button, Input, Container } from '../components/components';
+import api from '../utils/api';
+
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
@@ -17,9 +19,7 @@ const ForgotPassword = () => {
 
   try {
     // CHANGE THIS LINE - use local backend
-    const API_URL = process.env.REACT_APP_API_URL || 'https://yepper-backend-test.onrender.com';
-    
-    const response = await fetch(`${API_URL}/api/password/forgot-password`, {
+        const response = await fetch(`/api/password/forgot-password`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -36,7 +36,7 @@ const ForgotPassword = () => {
       setError(data.message);
     }
   } catch (error) {
-    setError('Cannot connect to server. Please make sure your backend is running on localhost:5000');
+    setError('Cannot connect to server. Please try again.');
   } finally {
     setIsLoading(false);
   }

@@ -3,6 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, Building2, Tag, MapPin, FileText, X } from 'lucide-react';
 import { Container, Badge, Input, Button, TextArea } from '../../components/components';
+import api from '../../utils/api';
+
 
 function BusinessForm() {
   const location = useLocation();
@@ -174,7 +176,7 @@ function BusinessForm() {
       formData.append('adDescription', businessData.adDescription);
 
       const token = getAuthToken();
-      const response = await axios.post('https://yepper-backend-test.onrender.com/api/web-advertise', formData, {
+      const response = await api.post('/api/web-advertise', formData, {
         headers: { 
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'multipart/form-data'

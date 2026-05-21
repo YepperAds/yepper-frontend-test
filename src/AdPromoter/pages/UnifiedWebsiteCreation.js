@@ -9,8 +9,6 @@ import {
   Sidebar as SidebarIcon, PanelRight, PanelLeft, AlignJustify,
   PanelBottom, PieChart, Layout, Maximize
 } from 'lucide-react';
-import axios from 'axios';
-
 import LoadingSpinner from '../../components/LoadingSpinner';
 
 import PricingTiers from '../components/PricingTiers';
@@ -30,8 +28,8 @@ import ProFooter from '../img/proFooter.png';
 import RightRail from '../img/rightRail.png';
 import Sidebar from '../img/sidebar.png';
 import StickySidebar from '../img/stickySidebar.png';
+import api from '../../utils/api';
 
-const API_URL = process.env.REACT_APP_API_URL || 'https://yepper-backend-test.onrender.com';
 
 const UnifiedWebsiteCreation = () => {
   const navigate = useNavigate();
@@ -243,7 +241,7 @@ const UnifiedWebsiteCreation = () => {
   const fetchBusinessCategories = async () => {
     try {
       setLoadingCategories(true);
-      const response = await axios.get(`${API_URL}/api/business-categories/categories`);
+      const response = await api.get(`/api/business-categories/categories`);
       if (response.data.success) {
         const categoriesWithIcons = response.data.data.categories.map(category => ({
           ...category,
@@ -389,7 +387,7 @@ const UnifiedWebsiteCreation = () => {
 
     try {
       if (authMode === 'signup') {
-        const response = await axios.post(`${API_URL}/api/auth/register`, {
+        const response = await api.post(`/api/auth/register`, {
           name: authFormData.name,
           email: authFormData.email,
           password: authFormData.password
@@ -400,7 +398,7 @@ const UnifiedWebsiteCreation = () => {
           setMaskedEmail(response.data.maskedEmail);
         }
       } else {
-        const response = await axios.post(`${API_URL}/api/auth/login`, {
+        const response = await api.post(`/api/auth/login`, {
           email: authFormData.email,
           password: authFormData.password
         });
@@ -421,7 +419,7 @@ const UnifiedWebsiteCreation = () => {
 
   const handleResendVerification = async () => {
     try {
-      await axios.post(`${API_URL}/api/auth/resend-verification`, {
+      await api.post(`/api/auth/resend-verification`, {
         email: authFormData.email
       });
       alert('Verification email resent successfully!');
@@ -433,8 +431,8 @@ const UnifiedWebsiteCreation = () => {
   const handleFinalSubmit = async (token) => {
     setIsSubmitting(true);
     try {
-      const websiteResponse = await axios.post(
-        `${API_URL}/api/createWebsite/createWebsiteWithCategories`,
+      const websiteResponse = await api.post(
+        `/api/createWebsite/createWebsiteWithCategories`,
         {
           websiteName: websiteData.name,
           websiteLink: websiteData.url,
@@ -456,8 +454,8 @@ const UnifiedWebsiteCreation = () => {
         formData.append('file', websiteData.image);
         
         try {
-          await axios.post(
-            `${API_URL}/api/createWebsite/upload/${websiteId}`,
+          await api.post(
+            `/api/createWebsite/upload/${websiteId}`,
             formData,
             {
               headers: {
@@ -494,7 +492,7 @@ const UnifiedWebsiteCreation = () => {
 
         await Promise.all(
           adCategoriesToSubmit.map(category =>
-            axios.post(`${API_URL}/api/ad-categories`, category, {
+            api.post(`/api/ad-categories`, category, {
               headers: {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json'

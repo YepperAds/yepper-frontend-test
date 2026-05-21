@@ -5,9 +5,10 @@ import {
   Wallet as WalletIcon,
   ArrowLeft,
 } from 'lucide-react';
-import axios from 'axios';
 import { Button, Container, Badge } from '../../components/components';
 import LoadingSpinner from '../../components/LoadingSpinner';
+import api from '../../utils/api';
+
 
 const WithdrawalHistory = () => {
   const navigate = useNavigate();
@@ -56,8 +57,8 @@ const WithdrawalHistory = () => {
   const fetchWithdrawals = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(
-        `https://yepper-backend-test.onrender.com/api/ad-categories/wallet/${walletType}/withdrawal-requests?page=${currentPage}&limit=10`,
+      const response = await api.get(
+        `/api/ad-categories/wallet/${walletType}/withdrawal-requests?page=${currentPage}&limit=10`,
         { headers: getAuthHeaders() }
       );
 
@@ -89,8 +90,8 @@ const WithdrawalHistory = () => {
     setError('');
 
     try {
-      await axios.patch(
-        `https://yepper-backend-test.onrender.com/api/ad-categories/wallet/withdrawal-request/${requestId}/cancel`,
+      await api.patch(
+        `/api/ad-categories/wallet/withdrawal-request/${requestId}/cancel`,
         {},
         { headers: getAuthHeaders() }
       );

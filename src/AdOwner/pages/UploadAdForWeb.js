@@ -3,7 +3,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Cloud, FileText, ArrowLeft, Upload, Loader } from 'lucide-react';
 import { Button, Alert, Container, Badge } from '../../components/components';
-import axios from 'axios';
+import api from '../../utils/api';
 
 function Select() {
   const navigate = useNavigate();
@@ -21,7 +21,7 @@ function Select() {
       try {
         const token = localStorage.getItem('token');
 
-        const response = await axios.get('https://yepper-backend-test.onrender.com/api/auth/me', {
+        const response = await api.get('/api/auth/me', {
           headers: {
             'Authorization': `Bearer ${token}`
           }

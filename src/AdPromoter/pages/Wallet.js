@@ -8,9 +8,10 @@ import {
   Download,
   History
 } from 'lucide-react';
-import axios from 'axios';
 import { Button, Grid, Container, Badge } from '../../components/components';
 import LoadingSpinner from '../../components/LoadingSpinner';
+import api from '../../utils/api';
+
 
 const Wallet = () => {
   const navigate = useNavigate();
@@ -98,7 +99,7 @@ const Wallet = () => {
         return;
       }
 
-      const response = await axios.get('https://yepper-backend-test.onrender.com/api/auth/me', {
+      const response = await api.get('/api/auth/me', {
         headers: getAuthHeaders()
       });
       setUser(response.data.user);
@@ -117,7 +118,7 @@ const Wallet = () => {
         return;
       }
 
-      const response = await axios.get(`https://yepper-backend-test.onrender.com/api/ad-categories/wallet/${walletType}/balance`, {
+      const response = await api.get(`/api/ad-categories/wallet/${walletType}/balance`, {
         headers: getAuthHeaders()
       });
 
@@ -146,8 +147,8 @@ const Wallet = () => {
     setTransactionsLoading(true);
     try {
       const token = getAuthToken();
-      const response = await axios.get(
-        `https://yepper-backend-test.onrender.com/api/ad-categories/wallet/${walletType}/transactions?page=${page}&limit=10`, 
+      const response = await api.get(
+        `/api/ad-categories/wallet/${walletType}/transactions?page=${page}&limit=10`, 
         {
           headers: getAuthHeaders()
         }

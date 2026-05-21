@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Search, Plus, ArrowLeft } from 'lucide-react';
-import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
 import { Button, Grid, Badge, Container } from '../../components/components';
 import LoadingSpinner from "../../components/LoadingSpinner";
+import api from '../../utils/api';
+
 
 const Ads = () => {
     const { user, token } = useAuth();
@@ -16,8 +17,7 @@ const Ads = () => {
     const [filteredAds, setFilteredAds] = useState([]);
 
     const authenticatedAxios = axios.create({
-        baseURL: 'https://yepper-backend-test.onrender.com/api',
-        headers: {
+                headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         }

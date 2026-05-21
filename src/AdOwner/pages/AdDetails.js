@@ -6,9 +6,10 @@ import {
     Play, 
     ArrowLeft,
 } from 'lucide-react';
-import axios from 'axios';
 import { Button, Badge, Text, Heading, Container } from '../../components/components';
 import LoadingSpinner from '../../components/LoadingSpinner';
+import api from '../../utils/api';
+
 
 function AdDetails() {
     const { adId } = useParams();
@@ -25,7 +26,7 @@ function AdDetails() {
             try {
                 setLoading(true);
                 setError(null);
-                const adResponse = await axios.get(`https://yepper-backend-test.onrender.com/api/web-advertise/ad-details/${adId}`);
+                const adResponse = await api.get(`/api/web-advertise/ad-details/${adId}`);
                 setAd(adResponse.data);
             } catch (err) {
                 setError(err.response?.data?.message || err.message || 'Failed to load ad details');

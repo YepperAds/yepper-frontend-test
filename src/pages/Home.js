@@ -3,13 +3,14 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowRight, ArrowLeft, X, ChevronRight, ChevronLeft } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import axios from 'axios';
 import { Button, Grid } from '../components/components';
 import Navbar from '../components/Navbar';
 import { useAuth } from '../context/AuthContext';
 import WebsiteCard from '../components/WebsiteCard';
 import AdsCard from '../components/AdsCard';
 import MarketingAssistant from '../components/MarketingAssistant';
+import api from '../utils/api';
+
 
 const Home = () => {
   const { user, token, isAuthenticated } = useAuth();
@@ -25,8 +26,7 @@ const Home = () => {
   const getAuthenticatedAxios = () => {
     const token = localStorage.getItem('token');
     return axios.create({
-      baseURL: 'https://yepper-backend-test.onrender.com/api',
-      headers: {
+            headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
       }

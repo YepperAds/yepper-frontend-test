@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Sparkles, Download, Share2, X, Menu, ChevronLeft, ChevronRight } from 'lucide-react';
+import api, { conversationAPI } from '../utils/api';
+
 
 const MarketingAssistant = ({ user, isAuthenticated }) => {
   const [conversations, setConversations] = useState([]);
@@ -14,9 +16,7 @@ const MarketingAssistant = ({ user, isAuthenticated }) => {
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
 
-  const API_URL = 'https://yepper-backend-test.onrender.com';
-
-  const DESIGN_THEMES = {
+    const DESIGN_THEMES = {
     branding: {
       name: 'Brand Identity',
       gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',

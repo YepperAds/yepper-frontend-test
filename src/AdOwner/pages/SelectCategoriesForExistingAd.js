@@ -12,7 +12,6 @@ import {
   Wallet,
   RefreshCcw
 } from 'lucide-react';
-import axios from 'axios';
 import { Button, Text, Heading, Container, Badge } from '../../components/components';
 import LoadingSpinner from '../../components/LoadingSpinner';
 
@@ -32,6 +31,8 @@ import ProFooter from '../img/proFooter.png';
 import RightRail from '../img/rightRail.png';
 import Sidebar from '../img/sidebar.png';
 import StickySidebar from '../img/stickySidebar.png';
+import api from '../../utils/api';
+
 
 const SelectCategoriesForExistingAd = () => {
   const location = useLocation();
@@ -133,8 +134,8 @@ const SelectCategoriesForExistingAd = () => {
 
   const fetchWalletInfo = async () => {
     try {
-      const response = await axios.get(
-        'https://yepper-backend-test.onrender.com/api/web-advertise/payment/wallet-balance',
+      const response = await api.get(
+        '/api/web-advertise/payment/wallet-balance',
         { headers: getAuthHeaders() }
       );
       
@@ -153,11 +154,11 @@ const SelectCategoriesForExistingAd = () => {
     setIsLoading(true);
     try {
       const promises = selectedWebsites.map(async (websiteId) => {
-        const websiteResponse = await axios.get(`https://yepper-backend-test.onrender.com/api/createWebsite/website/${websiteId}`);
+        const websiteResponse = await api.get(`/api/createWebsite/website/${websiteId}`);
         const websiteData = websiteResponse.data;
         
-        const categoriesResponse = await axios.get(
-          `https://yepper-backend-test.onrender.com/api/ad-categories/${websiteId}/advertiser`,
+        const categoriesResponse = await api.get(
+          `/api/ad-categories/${websiteId}/advertiser`,
           { headers: getAuthHeaders() }
         );
         
@@ -193,8 +194,8 @@ const SelectCategoriesForExistingAd = () => {
         categoryId: selection.categoryId
       }));
 
-      const response = await axios.post(
-        'https://yepper-backend-test.onrender.com/api/web-advertise/payment/calculate-breakdown',
+      const response = await api.post(
+        '/api/web-advertise/payment/calculate-breakdown',
         { 
           selections,
           isReassignment: isReassignment || false
@@ -291,8 +292,8 @@ const SelectCategoriesForExistingAd = () => {
         return;
       }
 
-      const response = await axios.post(
-        `https://yepper-backend-test.onrender.com/api/web-advertise/${adId}/add-selections`,
+      const response = await api.post(
+        `/api/web-advertise/${adId}/add-selections`,
         {
           selectedWebsites: JSON.stringify(selectedWebsites),
           selectedCategories: JSON.stringify(selectedCategories),
@@ -332,8 +333,8 @@ const SelectCategoriesForExistingAd = () => {
         return;
       }
 
-      const response = await axios.post(
-        'https://yepper-backend-test.onrender.com/api/web-advertise/payment/process-wallet',
+      const response = await api.post(
+        '/api/web-advertise/payment/process-wallet',
         { 
           selections,
           isReassignment: isReassignment || false

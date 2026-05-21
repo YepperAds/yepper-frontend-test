@@ -4,6 +4,8 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Globe, Check, Search, ArrowLeft } from 'lucide-react';
 import { Button, Grid, Badge, Container } from '../../components/components';
 import LoadingSpinner from '../../components/LoadingSpinner';
+import api from '../../utils/api';
+
 
 function WebsiteSelection() {
   const location = useLocation();
@@ -84,7 +86,7 @@ function WebsiteSelection() {
     const fetchWebsites = async () => {
       try {
         setLoading(true);
-        const response = await fetch('https://yepper-backend-test.onrender.com/api/createWebsite');
+        const response = await fetch('/api/createWebsite');
         const data = await response.json();
         
         const relevantWebsites = data.filter(website => {

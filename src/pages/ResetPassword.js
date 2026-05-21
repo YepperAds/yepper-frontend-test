@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { Button, Input, Container } from '../components/components';
+import api from '../utils/api';
+
 
 const ResetPassword = () => {
   const [searchParams] = useSearchParams();
@@ -38,9 +40,7 @@ const handleSubmit = async (e) => {
 
   try {
     // CHANGE THIS LINE - use local backend
-    const API_URL = process.env.REACT_APP_API_URL || 'https://yepper-backend-test.onrender.com';
-    
-    const response = await fetch(`${API_URL}/api/password/reset-password`, {
+        const response = await fetch(`/api/password/reset-password`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -62,7 +62,7 @@ const handleSubmit = async (e) => {
       setError(data.message);
     }
   } catch (error) {
-    setError('Cannot connect to server. Please make sure your backend is running on localhost:5000');
+    setError('Cannot connect to server. Please try again.');
   } finally {
     setIsLoading(false);
   }

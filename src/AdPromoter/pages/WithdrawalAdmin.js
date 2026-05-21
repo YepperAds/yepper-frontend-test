@@ -10,9 +10,10 @@ import {
   DollarSign,
   AlertCircle
 } from 'lucide-react';
-import axios from 'axios';
 import { Button, Grid, Container, Badge } from '../../components/components';
 import LoadingSpinner from '../../components/LoadingSpinner';
+import api from '../../utils/api';
+
 
 const WithdrawalDashboard = () => {
   const navigate = useNavigate();
@@ -60,8 +61,8 @@ const WithdrawalDashboard = () => {
       if (filterStatus) params.append('status', filterStatus);
       if (filterOwnerType) params.append('ownerType', filterOwnerType);
 
-      const response = await axios.get(
-        `https://yepper-backend-test.onrender.com/api/ad-categories/admin/withdrawal-requests?${params}`,
+      const response = await api.get(
+        `/api/ad-categories/admin/withdrawal-requests?${params}`,
         { headers: getAuthHeaders() }
       );
 
@@ -117,8 +118,8 @@ const WithdrawalDashboard = () => {
         rejectionReason: modalAction === 'reject' ? rejectionReason : undefined
       };
 
-      await axios.patch(
-        `https://yepper-backend-test.onrender.com/api/ad-categories/admin/withdrawal-request/${selectedWithdrawal._id}/process`,
+      await api.patch(
+        `/api/ad-categories/admin/withdrawal-request/${selectedWithdrawal._id}/process`,
         payload,
         { headers: getAuthHeaders() }
       );

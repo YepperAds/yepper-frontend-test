@@ -4,6 +4,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { ArrowLeft } from 'lucide-react';
 import { Button, Input, Container } from '../components/components';
+import api from '../utils/api';
+
 
 const Register = () => {
   const navigate = useNavigate();
@@ -136,7 +138,7 @@ const Register = () => {
   };
 
   const handleGoogleLogin = () => {
-    window.location.href = `${process.env.REACT_APP_API_URL || 'https://yepper-backend-test.onrender.com'}/api/auth/google`;
+    window.location.href = `${process.env.REACT_APP_API_URL}/api/auth/google`;
   };
 
   return (

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Mail, RefreshCw, CheckCircle } from 'lucide-react';
 import { Button } from '../components/components';
-import axios from 'axios';
+import api from '../utils/api';
 
 const EmailVerification = () => {
   const location = useLocation();
@@ -37,8 +37,8 @@ const EmailVerification = () => {
 
     setIsResending(true);
     try {
-      const response = await axios.post(
-        `${process.env.REACT_APP_API_URL || 'https://yepper-backend-test.onrender.com'}/api/auth/resend-verification`,
+      const response = await api.post(
+        '/api/auth/resend-verification',
         { email }
       );
 

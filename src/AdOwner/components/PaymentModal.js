@@ -1,9 +1,10 @@
 // PaymentModal.js
 import React, { useState } from 'react';
-import axios from 'axios';
 import { X } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { Button, Input, Alert, Heading, Text } from '../../components/components';
+import api from '../../utils/api';
+
 
 const PaymentModal = ({ ad, websiteId, onClose }) => {
     const { user, token } = useAuth();
@@ -62,7 +63,7 @@ const PaymentModal = ({ ad, websiteId, onClose }) => {
                 requestConfig.headers.Authorization = `Bearer ${token}`;
             }
 
-            const response = await axios.post('https://yepper-backend-test.onrender.com/api/web-advertise/initiate-payment', {
+            const response = await api.post('/api/web-advertise/initiate-payment', {
                 adId: ad._id,
                 websiteId,
                 amount: totalPrice,

@@ -14,10 +14,11 @@ import {
   X,
   Search
 } from 'lucide-react';
-import axios from 'axios';
 import Navbar from '../../components/Navbar';
 import { Button, Grid } from '../../components/components';
 import LoadingSpinner from '../../components/LoadingSpinner';
+import api from '../../utils/api';
+
 
 const AdReports = () => {
   const navigate = useNavigate();
@@ -47,7 +48,7 @@ const AdReports = () => {
 
   const fetchWalletBalance = async () => {
     try {
-      const response = await axios.get('https://yepper-backend-test.onrender.com/api/ad-categories/wallet', {
+      const response = await api.get('/api/ad-categories/wallet', {
         headers: getAuthHeaders()
       });
       setWalletBalance(response.data.wallet?.balance || 0);
@@ -58,10 +59,10 @@ const AdReports = () => {
   const fetchAdReports = async () => {
     try {
       const [pendingResponse, activeResponse] = await Promise.all([
-        axios.get('https://yepper-backend-test.onrender.com/api/ad-categories/pending-rejections', {
+        api.get('/api/ad-categories/pending-rejections', {
           headers: getAuthHeaders()
         }),
-        axios.get('https://yepper-backend-test.onrender.com/api/ad-categories/active-ads', {
+        api.get('/api/ad-categories/active-ads', {
           headers: getAuthHeaders()
         })
       ]);
@@ -126,8 +127,8 @@ const AdReports = () => {
     try {
       const websiteSelection = selectedAd.websiteSelections.find(sel => sel.approved && !sel.isRejected);
       
-      await axios.post(
-        `https://yepper-backend-test.onrender.com/api/ad-categories/reject/${selectedAd._id}/${websiteSelection.websiteId}/${websiteSelection.categories[0]}`,
+      await api.post(
+        `/api/ad-categories/reject/${selectedAd._id}/${websiteSelection.websiteId}/${websiteSelection.categories[0]}`,
         { rejectionReason: rejectionReason.trim() },
         { headers: getAuthHeaders() }
       );

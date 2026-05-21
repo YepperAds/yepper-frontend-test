@@ -5,6 +5,8 @@ import { AlertCircle, ArrowLeft, CheckCircle, Clock, Loader } from 'lucide-react
 import { useAuth } from '../../context/AuthContext';
 import { Button, Grid, Badge, Container } from '../../components/components';
 import LoadingSpinner from '../../components/LoadingSpinner';
+import api from '../../utils/api';
+
 
 const PendingAds = () => {
   const { user, token } = useAuth();
@@ -26,7 +28,7 @@ const PendingAds = () => {
         setLoading(true);
         setError(null);
         
-        const response = await fetch(`https://yepper-backend-test.onrender.com/api/ad-categories/pending/${userId}`, {
+        const response = await fetch(`/api/ad-categories/pending/${userId}`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
@@ -52,7 +54,7 @@ const PendingAds = () => {
   const handleApprove = async (adId, websiteId) => {
     try {
       const response = await fetch(
-        `https://yepper-backend-test.onrender.com/api/ad-categories/approve/${adId}/website/${websiteId}`, 
+        `/api/ad-categories/approve/${adId}/website/${websiteId}`, 
         {
           method: 'PUT',
           headers: {

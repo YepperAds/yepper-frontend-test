@@ -2,8 +2,9 @@
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Upload, ArrowLeft, AlertTriangle } from 'lucide-react';
-import axios from 'axios';
 import { Button, Input, Alert, Container, Badge } from '../../components/components';
+import api from '../../utils/api';
+
 
 function WebsiteCreation() {
   const navigate = useNavigate();
@@ -100,8 +101,8 @@ function WebsiteCreation() {
       }
 
       const token = localStorage.getItem('token');
-      const response = await axios.post(
-        'https://yepper-backend-test.onrender.com/api/createWebsite/prepareWebsite',
+      const response = await api.post(
+        '/api/createWebsite/prepareWebsite',
         formData,
         {
           headers: {

@@ -1,5 +1,4 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import axios from 'axios';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { 
     Info, 
@@ -41,6 +40,8 @@ import ProFooter from '../img/proFooter.png';
 import RightRail from '../img/rightRail.png';
 import Sidebar from '../img/sidebar.png';
 import StickySidebar from '../img/stickySidebar.png';
+import api from '../../utils/api';
+
 
 const AddNewCategory = ({ onSubmitSuccess }) => {
   const [user, setUser] = useState(null); // NEW: Custom user state
@@ -69,7 +70,7 @@ const AddNewCategory = ({ onSubmitSuccess }) => {
         const token = localStorage.getItem('token'); // Get token from localStorage
 
         // Verify token and get user data
-        const response = await axios.get('https://yepper-backend-test.onrender.com/api/auth/me', {
+        const response = await api.get('/api/auth/me', {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -355,7 +356,7 @@ const AddNewCategory = ({ onSubmitSuccess }) => {
         const token = localStorage.getItem('token');
         const responses = await Promise.all(
             categoriesToSubmit.map(async (category) => {
-                const response = await axios.post('https://yepper-backend-test.onrender.com/api/ad-categories', category, {
+                const response = await api.post('/api/ad-categories', category, {
                   headers: {
                     'Authorization': `Bearer ${token}` // NEW: Added auth header
                   }

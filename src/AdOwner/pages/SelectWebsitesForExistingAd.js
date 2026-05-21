@@ -2,9 +2,10 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Search, Globe, Check } from 'lucide-react';
-import axios from 'axios';
 import { Button, Container, Badge, Grid } from '../../components/components';
 import LoadingSpinner from "../../components/LoadingSpinner";
+import api from '../../utils/api';
+
 
 function SelectWebsitesForExistingAd() {
   const location = useLocation();
@@ -45,7 +46,7 @@ function SelectWebsitesForExistingAd() {
 
   const fetchAdDetails = async () => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/web-advertise/${adId}`, {
+      const response = await api.get(`/api/web-advertise/${adId}`, {
         headers: getAuthHeaders()
       });
       
@@ -60,7 +61,7 @@ function SelectWebsitesForExistingAd() {
   const fetchWebsites = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('http://localhost:5000/api/createWebsite', {
+      const response = await api.get('/api/createWebsite', {
         headers: getAuthHeaders()
       });
       

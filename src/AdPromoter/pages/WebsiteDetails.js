@@ -1,7 +1,6 @@
 // WebsiteDetails.js
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import { useQuery } from '@tanstack/react-query';
 import {  
     X,
@@ -26,6 +25,8 @@ import { useAuth } from '../../context/AuthContext';
 import AdModalData from '../components/adModalData'
 import DeleteCategoryModal from '../components/DeleteCategoryModal';
 import AdCustomizationModal from '../components/AdCustomizationModal';
+import api from '../../utils/api';
+
 
 const WebsiteDetails = () => {
     const navigate = useNavigate();
@@ -63,8 +64,7 @@ const WebsiteDetails = () => {
         categoryId: null
     });
     const authenticatedAxios = axios.create({
-        baseURL: 'https://yepper-backend-test.onrender.com/api',
-        headers: {
+                headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
         }
@@ -106,8 +106,8 @@ const WebsiteDetails = () => {
         setFetchError(null);
 
         try {
-            const websiteResponse = await axios.get(`https://yepper-backend-test.onrender.com/api/createWebsite/website/${websiteId}`);
-            const categoriesResponse = await axios.get(`https://yepper-backend-test.onrender.com/api/ad-categories/${websiteId}`);
+            const websiteResponse = await api.get(`/api/createWebsite/website/${websiteId}`);
+            const categoriesResponse = await api.get(`/api/ad-categories/${websiteId}`);
             setWebsite(websiteResponse.data);
             setCategories(categoriesResponse.data.categories);
             setLoading(false);
@@ -249,7 +249,7 @@ const WebsiteDetails = () => {
         if (!tempWebsiteName.trim()) return;
 
         try {
-            const response = await axios.patch(`https://yepper-backend-test.onrender.com/api/createWebsite/${websiteId}/name`, {
+            const response = await api.patch(`/api/createWebsite/${websiteId}/name`, {
                 websiteName: tempWebsiteName.trim()
             });
             
@@ -346,7 +346,7 @@ const WebsiteDetails = () => {
                 return;
             }
 
-            const response = await axios.put(`https://yepper-backend-test.onrender.com/api/ad-categories/${categoryId}/reset-user-count`, {
+            const response = await api.put(`/api/ad-categories/${categoryId}/reset-user-count`, {
                 newUserCount: parsedCount
             });
 
@@ -391,8 +391,8 @@ const WebsiteDetails = () => {
         if (!currentCategory) return;
         
         try {
-            const response = await axios.patch(
-                `https://yepper-backend-test.onrender.com/api/ad-categories/category/${currentCategory._id}/language`,
+            const response = await api.patch(
+                `/api/ad-categories/category/${currentCategory._id}/language`,
                 { defaultLanguage: selectedLanguage }
             );
             

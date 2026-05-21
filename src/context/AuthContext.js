@@ -1,203 +1,163 @@
-// AuthContext.js
+// context/AuthContext.js
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import axios from 'axios';
+import api, { authAPI } from '../utils/api';
 
 const AuthContext = createContext();
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
+  if (!context) throw new Error('useAuth must be used within an AuthProvider');
   return context;
 };
 
+// ── helpers ───────────────────────────────────────────────────
+const CACHE_KEY = 'yepper_user';
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+const getCachedUser = () => {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY);
+    if (!raw) return null;
+    const { user, ts } = JSON.parse(raw);
+    if (Date.now() - ts > CACHE_TTL) {
+      localStorage.removeItem(CACHE_KEY);
+      return null;
+    }
+    return user;
+  } catch {
+    return null;
+  }
+};
+
+const setCachedUser = (user) => {
+  try {
+    localStorage.setItem(CACHE_KEY, JSON.stringify({ user, ts: Date.now() }));
+  } catch {}
+};
+
+const clearCachedUser = () => {
+  try { localStorage.removeItem(CACHE_KEY); } catch {}
+};
+
+// ─────────────────────────────────────────────────────────────
+
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  // Seed from cache so the UI renders immediately without waiting for the network
+  const [user, setUser]                     = useState(() => getCachedUser());
+  const [isAuthenticated, setIsAuthenticated] = useState(() => !!getCachedUser());
+  const [isLoading, setIsLoading]           = useState(() => {
+    // Only show loading spinner if there's a token but no cached user yet
+    return !!localStorage.getItem('token') && !getCachedUser();
+  });
 
-  const API_URL = process.env.REACT_APP_API_URL || 'https://yepper-backend-test.onrender.com';
-
-  // Set up axios interceptors for automatic token handling
-  useEffect(() => {
-    const token = localStorage.getItem('token');
+  // ── Token helpers ─────────────────────────────────────────
+  const setAuthToken = (token) => {
     if (token) {
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-    }
-
-    // Add response interceptor to handle token expiration
-    const responseInterceptor = axios.interceptors.response.use(
-      (response) => response,
-      (error) => {
-        if (error.response?.status === 401) {
-          handleInvalidToken();
-        }
-        return Promise.reject(error);
-      }
-    );
-
-    return () => {
-      axios.interceptors.response.eject(responseInterceptor);
-    };
-  }, []);
-
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      getCurrentUser();
+      localStorage.setItem('token', token);
+      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     } else {
-      setIsLoading(false);
-    }
-  }, []);
-
-  const getCurrentUser = async (retryCount = 0) => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      const response = await axios.get(`${API_URL}/api/auth/me`);
-      
-      if (response.data.success && response.data.user) {
-        setUser(response.data.user);
-        setIsAuthenticated(true);
-      } else {
-        handleInvalidToken();
-      }
-    } catch (error) {
-      
-      if (error.response) {
-        const status = error.response.status;
-        
-        if (status === 401) {
-          handleInvalidToken();
-        } else if (status >= 500) {
-          // Server error - retry once after a delay
-          if (retryCount < 1) {
-            setTimeout(() => getCurrentUser(retryCount + 1), 2000);
-            return;
-          } else {
-            setIsLoading(false);
-          }
-        } else {
-          handleInvalidToken();
-        }
-      } else if (error.request) {
-        // Network error (server not responding)
-        if (retryCount < 2) {
-          setTimeout(() => getCurrentUser(retryCount + 1), (retryCount + 1) * 2000);
-          return;
-        } else {
-          setIsLoading(false);
-        }
-      } else {
-        setIsLoading(false);
-      }
-    } finally {
-      if (retryCount === 0) {
-        setIsLoading(false);
-      }
+      handleInvalidToken();
     }
   };
 
   const handleInvalidToken = () => {
     localStorage.removeItem('token');
-    delete axios.defaults.headers.common['Authorization'];
+    delete api.defaults.headers.common['Authorization'];
+    clearCachedUser();
     setUser(null);
     setIsAuthenticated(false);
   };
 
-  const setAuthToken = (token) => {
-    if (token) {
-      localStorage.setItem('token', token);
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-    } else {
-      handleInvalidToken();
-    }
-  };
+  // ── Fetch current user from server ───────────────────────
+  const getCurrentUser = async (retryCount = 0) => {
+    const token = localStorage.getItem('token');
+    if (!token) { setIsLoading(false); return; }
 
-  const handleAutoLogin = async (token) => {
+    api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+
     try {
-      setAuthToken(token);
-      const response = await axios.get(`${API_URL}/api/auth/me`);
+      const response = await authAPI.me();
       if (response.data.success && response.data.user) {
         setUser(response.data.user);
         setIsAuthenticated(true);
-        return { success: true, user: response.data.user };
+        setCachedUser(response.data.user);
       } else {
-        throw new Error('Invalid token received');
+        handleInvalidToken();
       }
     } catch (error) {
-      handleInvalidToken();
-      throw new Error('Auto-login failed');
+      const status = error.response?.status;
+      if (status === 401) {
+        handleInvalidToken();
+      } else if (!status || status >= 500) {
+        // Network error or server error — retry with shorter delays
+        const delays = [1000, 2000];
+        if (retryCount < delays.length) {
+          setTimeout(() => getCurrentUser(retryCount + 1), delays[retryCount]);
+          return;
+        }
+        // Give up but don't log user out — keep the cached session alive
+        setIsLoading(false);
+      } else {
+        handleInvalidToken();
+      }
+    } finally {
+      if (retryCount === 0) setIsLoading(false);
     }
   };
 
-  // UPDATED: Now accepts optional returnUrl parameter
-  const signup = async (email, password, name, returnUrl = null) => {
-    try {
-      const requestData = {
-        email,
-        password,
-        name
-      };
-      
-      // Add returnUrl if provided
-      if (returnUrl) {
-        requestData.returnUrl = returnUrl;
-      }
+  // ── On mount: attach token and verify in background ──────
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) { setIsLoading(false); return; }
 
-      const response = await axios.post(`${API_URL}/api/auth/register`, requestData);
+    api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
-      return {
-        success: true,
-        requiresVerification: response.data.requiresVerification,
-        maskedEmail: response.data.maskedEmail,
-        message: response.data.message
-      };
-    } catch (error) {
-      throw new Error(error.response?.data?.message || 'Registration failed');
+    // If we have a cached user, render immediately and re-validate silently
+    if (getCachedUser()) {
+      getCurrentUser();   // runs silently — isLoading is already false
+    } else {
+      getCurrentUser();   // blocking — isLoading stays true until resolved
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // ── Auth actions ─────────────────────────────────────────
+  const signup = async (email, password, name, returnUrl = null) => {
+    const payload = { email, password, name };
+    if (returnUrl) payload.returnUrl = returnUrl;
+    const response = await authAPI.register(payload);
+    return {
+      success: true,
+      requiresVerification: response.data.requiresVerification,
+      maskedEmail: response.data.maskedEmail,
+      message: response.data.message,
+    };
   };
 
   const login = async (email, password) => {
-    try {
-      const response = await axios.post(`${API_URL}/api/auth/login`, {
-        email,
-        password
-      });
-
-      const { token, user } = response.data;
-      
-      if (!token || !user) {
-        throw new Error('Invalid response from server');
-      }
-
-      setAuthToken(token);
-      setUser(user);
-      setIsAuthenticated(true);
-
-      return { success: true, user };
-    } catch (error) {
-      const errorMessage = error.response?.data?.message || 'Login failed';
-      const errorData = error.response?.data;
-      
-      if (errorData?.requiresVerification) {
-        const verificationError = new Error(errorMessage);
-        verificationError.requiresVerification = true;
-        verificationError.maskedEmail = errorData.maskedEmail;
-        throw verificationError;
-      }
-      
-      throw new Error(errorMessage);
-    }
+    const response = await authAPI.login({ email, password });
+    const { token, user: userData } = response.data;
+    if (!token || !userData) throw new Error('Invalid response from server');
+    setAuthToken(token);
+    setUser(userData);
+    setIsAuthenticated(true);
+    setCachedUser(userData);
+    return { success: true, user: userData };
   };
 
-  const logout = () => {
+  const logout = () => handleInvalidToken();
+
+  const handleAutoLogin = async (token) => {
+    setAuthToken(token);
+    const response = await authAPI.me();
+    if (response.data.success && response.data.user) {
+      setUser(response.data.user);
+      setIsAuthenticated(true);
+      setCachedUser(response.data.user);
+      return { success: true, user: response.data.user };
+    }
     handleInvalidToken();
+    throw new Error('Auto-login failed');
   };
 
   const retryAuthentication = () => {
@@ -208,22 +168,20 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const value = {
-    user,
-    isAuthenticated,
-    isLoading,
-    signup,
-    login,
-    logout,
-    setAuthToken,
-    getCurrentUser,
-    handleAutoLogin,
-    retryAuthentication,
-    token: localStorage.getItem('token')
-  };
-
   return (
-    <AuthContext.Provider value={value}>
+    <AuthContext.Provider value={{
+      user,
+      isAuthenticated,
+      isLoading,
+      signup,
+      login,
+      logout,
+      setAuthToken,
+      getCurrentUser,
+      handleAutoLogin,
+      retryAuthentication,
+      token: localStorage.getItem('token'),
+    }}>
       {children}
     </AuthContext.Provider>
   );

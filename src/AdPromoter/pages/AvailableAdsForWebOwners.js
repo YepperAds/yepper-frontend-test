@@ -1,8 +1,9 @@
 // AvailableAdsForWebOwners.js - Page for web owners to find rejected/available ads
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import { Search, Filter, Eye, Plus, Clock, CheckCircle, XCircle } from 'lucide-react';
+import api from '../../utils/api';
+
 
 function AvailableAdsForWebOwners() {
   const { websiteId } = useParams();
@@ -41,8 +42,8 @@ function AvailableAdsForWebOwners() {
   const fetchAvailableAds = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(
-        `https://yepper-backend-test.onrender.com/api/web-advertise/available/${websiteId}`,
+      const response = await api.get(
+        `/api/web-advertise/available/${websiteId}`,
         { headers: getAuthHeaders() }
       );
       
@@ -57,8 +58,8 @@ function AvailableAdsForWebOwners() {
 
   const fetchCategories = async () => {
     try {
-      const response = await axios.get(
-        `https://yepper-backend-test.onrender.com/api/ad-categories/${websiteId}/advertiser`,
+      const response = await api.get(
+        `/api/ad-categories/${websiteId}/advertiser`,
         { headers: getAuthHeaders() }
       );
       
@@ -106,8 +107,8 @@ function AvailableAdsForWebOwners() {
     if (!selectedAd || !selectedCategory) return;
 
     try {
-      const response = await axios.post(
-        'https://yepper-backend-test.onrender.com/api/web-advertise/select-for-website',
+      const response = await api.post(
+        '/api/web-advertise/select-for-website',
         {
           adId: selectedAd._id,
           websiteId: websiteId,

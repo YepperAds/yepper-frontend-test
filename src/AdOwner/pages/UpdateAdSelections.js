@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, AlertCircle } from 'lucide-react';
-import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
 import { Button, Container, Badge } from '../../components/components';
 import LoadingSpinner from '../../components/LoadingSpinner';
+import api from '../../utils/api';
+
 
 const UpdateAdSelections = () => {
     const { token } = useAuth();
@@ -21,8 +22,7 @@ const UpdateAdSelections = () => {
     const [error, setError] = useState('');
 
     const authenticatedAxios = axios.create({
-        baseURL: 'https://yepper-backend-test.onrender.com/api',
-        headers: {
+                headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
         }

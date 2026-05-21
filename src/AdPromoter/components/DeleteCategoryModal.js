@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import { 
     Trash2, 
     AlertTriangle,
     X 
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import api from '../../utils/api';
+
 
 const DeleteCategoryModal = ({ 
     categoryId, 
@@ -21,7 +22,7 @@ const DeleteCategoryModal = ({
     const handleDeleteCategory = async () => {
         setIsDeleting(true);
         try {
-          const response = await axios.delete(`https://yepper-backend-test.onrender.com/api/ad-categories/${categoryId}`, {
+          const response = await api.delete(`/api/ad-categories/${categoryId}`, {
             data: { ownerId: userId }
           });
           

@@ -1,8 +1,9 @@
 // AdCustomizationModal.js
 import React, { useState, useEffect } from 'react';
 import { X, Save, Monitor, Smartphone, Tablet } from 'lucide-react';
-import axios from 'axios';
 import CSSEditor from './CSSEditor'
+import api from '../../utils/api';
+
 
 const AdCustomizationModal = ({ categoryId, onClose, onSave }) => {
   const [settings, setSettings] = useState({
@@ -45,8 +46,8 @@ const AdCustomizationModal = ({ categoryId, onClose, onSave }) => {
   const fetchCategoryCustomization = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get(
-        `https://yepper-backend-test.onrender.com/api/ad-categories/categoriees/${categoryId}`,
+      const response = await api.get(
+        `/api/ad-categories/categoriees/${categoryId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       
@@ -155,8 +156,8 @@ const AdCustomizationModal = ({ categoryId, onClose, onSave }) => {
       
       const customizationData = { ...settings, customCSS: customCSS.trim() };
       
-      const response = await axios.put(
-        `https://yepper-backend-test.onrender.com/api/ad-categories/categoriees/${categoryId}/customization`,
+      const response = await api.put(
+        `/api/ad-categories/categoriees/${categoryId}/customization`,
         { customization: customizationData },
         { 
           headers: { 

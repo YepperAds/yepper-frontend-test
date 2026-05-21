@@ -6,7 +6,6 @@ import {
   ArrowLeft,
   Eye,
 } from 'lucide-react';
-import axios from 'axios';
 import { Button, Text, Heading, Container, Badge } from '../../components/components';
 import LoadingSpinner from '../../components/LoadingSpinner';
 
@@ -25,6 +24,8 @@ import ProFooter from '../img/proFooter.png';
 import RightRail from '../img/rightRail.png';
 import Sidebar from '../img/sidebar.png';
 import StickySidebar from '../img/stickySidebar.png';
+import api from '../../utils/api';
+
 
 const Categories = () => {
   const [user, setUser] = useState(null);
@@ -150,7 +151,7 @@ const Categories = () => {
       }
 
       try {
-        const response = await axios.get('https://yepper-backend-test.onrender.com/api/auth/me', {
+        const response = await api.get('/api/auth/me', {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -169,11 +170,11 @@ const Categories = () => {
       setIsLoading(true);
       try {
         const promises = selectedWebsites.map(async (websiteId) => {
-          const websiteResponse = await fetch(`https://yepper-backend-test.onrender.com/api/createWebsite/website/${websiteId}`);
+          const websiteResponse = await fetch(`/api/createWebsite/website/${websiteId}`);
           const websiteData = await websiteResponse.json();
           
           const categoriesResponse = await fetch(
-            `https://yepper-backend-test.onrender.com/api/ad-categories/${websiteId}/advertiser`,
+            `/api/ad-categories/${websiteId}/advertiser`,
             {
               headers: getAuthHeaders()
             }
@@ -303,7 +304,7 @@ const Categories = () => {
         }
       };
 
-      const response = await axios.post('https://yepper-backend-test.onrender.com/api/web-advertise', formData, config);
+      const response = await api.post('/api/web-advertise', formData, config);
 
       if (response.data.success) {
         setAdCreated(response.data.data);
@@ -338,8 +339,8 @@ const Categories = () => {
         categoryId: detail.categoryId
       }));
 
-      const response = await axios.post(
-        'https://yepper-backend-test.onrender.com/api/web-advertise/payment/initiate', 
+      const response = await api.post(
+        '/api/web-advertise/payment/initiate', 
         {
           adId: adCreated._id,
           selections: selections
