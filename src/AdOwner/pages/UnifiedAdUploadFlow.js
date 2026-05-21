@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import {
 import api from '../../utils/api';
-
+import {
   Upload, ArrowLeft, Check, AlertTriangle, X,
   Mail, Lock, User, Eye, EyeOff, Building2, Tag,
   MapPin, FileText, Globe, Search, Cloud, Sparkles, RotateCcw

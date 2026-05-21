@@ -112,13 +112,7 @@ export const AuthProvider = ({ children }) => {
 
     api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
-    // If we have a cached user, render immediately and re-validate silently
-    if (getCachedUser()) {
-      getCurrentUser();   // runs silently — isLoading is already false
-    } else {
-      getCurrentUser();   // blocking — isLoading stays true until resolved
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    getCurrentUser();
   }, []);
 
   // ── Auth actions ─────────────────────────────────────────
