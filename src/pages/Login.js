@@ -19,6 +19,7 @@ const Login = () => {
     const [passwordError, setPasswordError] = useState('');
     const [emailTouched, setEmailTouched] = useState(false);
     const [passwordTouched, setPasswordTouched] = useState(false);
+    const [loginError, setLoginError] = useState(''); // New state for login failure
 
     const validateEmail = (email) => {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -48,6 +49,10 @@ const Login = () => {
         if (field === 'password' && passwordError) {
             setPasswordError('');
         }
+        // Clear login error when user starts typing
+        if (loginError) {
+            setLoginError('');
+        }
     };
 
     const handleInputBlur = (field, value) => {
@@ -66,6 +71,7 @@ const Login = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsLoading(true);
+        setLoginError(''); // Clear previous login errors
         
         // Mark all fields as touched
         setEmailTouched(true);
@@ -89,17 +95,19 @@ const Login = () => {
             if (success) {
                 navigate('/');
             } else {
-                return;
+                // Show failure message when credentials don't match
+                setLoginError('Invalid email or password. Please try again.');
             }
         } catch (error) {
-            return;
+            // Show failure message for any login errors
+            setLoginError('Invalid email or password. Please try again.');
         } finally {
             setIsLoading(false);
         }
     };
 
     const handleGoogleLogin = () => {
-        window.location.href = `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/auth/google`;
+        window.location.href = `${process.env.REACT_APP_BACKEND_URL || 'https://localhost:5000'}/api/auth/google`;
     };
 
     return (
@@ -123,6 +131,13 @@ const Login = () => {
                     <div className="mb-12 flex justify-center items-center">
                         <h2 className="text-3xl font-bold text-black">Sign in to your account</h2>
                     </div>
+
+                    {/* Display login error message */}
+                    {loginError && (
+                        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
+                            <p className="text-red-600 text-sm text-center">{loginError}</p>
+                        </div>
+                    )}
 
                     {/* <Button
                         type="button"

@@ -37,7 +37,7 @@ const AvailableAds = () => {
 
   const fetchWebsites = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/createWebsite', {
+      const response = await fetch('https://yepper-backend-test.onrender.com/api/createWebsite', {
         headers: getAuthHeaders()
       });
       const data = await response.json();
@@ -48,7 +48,7 @@ const AvailableAds = () => {
 
   const fetchCategories = async (websiteId) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/ad-categories/${websiteId}`, {
+      const response = await fetch(`https://yepper-backend-test.onrender.com/api/ad-categories/${websiteId}`, {
         headers: getAuthHeaders()
       });
       const data = await response.json();
@@ -59,7 +59,7 @@ const AvailableAds = () => {
 
   const fetchWalletBalance = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/ad-categories/wallet', {
+      const response = await fetch('https://yepper-backend-test.onrender.com/api/ad-categories/wallet', {
         headers: getAuthHeaders()
       });
       const data = await response.json();
@@ -71,7 +71,7 @@ const AvailableAds = () => {
   const fetchAvailableAds = async () => {
     setLoading(true);
     try {
-      const url = new URL('http://localhost:5000/api/web-advertise/available');
+      const url = new URL('https://yepper-backend-test.onrender.com/api/web-advertise/available');
       url.searchParams.append('websiteId', selectedWebsite);
       url.searchParams.append('categoryId', selectedCategory);
       
@@ -95,7 +95,7 @@ const AvailableAds = () => {
 
     setAssigning(adId);
     try {
-      const response = await fetch('http://localhost:5000/api/web-advertise/assign', {
+      const response = await fetch('https://yepper-backend-test.onrender.com/api/web-advertise/assign', {
         method: 'POST',
         headers: getAuthHeaders(),
         body: JSON.stringify({

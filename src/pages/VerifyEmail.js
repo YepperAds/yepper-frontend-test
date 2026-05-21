@@ -26,7 +26,7 @@ const VerifyEmail = () => {
 
   const verifyEmail = async () => {
     try {
-      await axios.get(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/auth/verify-email?token=${token}`);
+      await axios.get(`${process.env.REACT_APP_API_URL || 'https://yepper-backend-test.onrender.com'}/api/auth/verify-email?token=${token}`);
       setStatus('success');
     } catch (error) {
       setStatus('error');
@@ -43,7 +43,7 @@ const VerifyEmail = () => {
 
     setResendLoading(true);
     try {
-      await axios.post(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/auth/resend-verification`, { email });
+      await axios.post(`${process.env.REACT_APP_API_URL || 'https://yepper-backend-test.onrender.com'}/api/auth/resend-verification`, { email });
     } catch (error) {
       if (error.response?.data?.message) {
         setMessage(error.response.data.message);

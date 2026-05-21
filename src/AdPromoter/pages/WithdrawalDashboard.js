@@ -74,7 +74,7 @@ const WithdrawalRequest = () => {
       }
 
       const response = await axios.get(
-        `http://localhost:5000/api/ad-categories/wallet/${walletType}/balance`,
+        `https://yepper-backend-test.onrender.com/api/ad-categories/wallet/${walletType}/balance`,
         { headers: getAuthHeaders() }
       );
 
@@ -148,7 +148,7 @@ const WithdrawalRequest = () => {
 
     try {
       const response = await axios.post(
-        `http://localhost:5000/api/ad-categories/wallet/${walletType}/withdrawal-request`,
+        `https://yepper-backend-test.onrender.com/api/ad-categories/wallet/${walletType}/withdrawal-request`,
         formData,
         { headers: getAuthHeaders() }
       );

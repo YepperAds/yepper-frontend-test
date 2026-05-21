@@ -2,10 +2,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import axios from 'axios';
-import { Eye, EyeOff, ArrowLeft, Building2, Link as LinkIcon, MapPin, FileText, Upload, X } from 'lucide-react';
+import { Eye, EyeOff, ArrowLeft, Globe,Building2, Link as LinkIcon, MapPin, FileText, Upload, X } from 'lucide-react';
 import LoadingSpinner from '../../components/LoadingSpinner';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+const API_URL = process.env.REACT_APP_API_URL || 'https://yepper-backend-test.onrender.com/api';
 
 function DirectAdvertise() {
   const { user, isAuthenticated, login, signup } = useAuth();
@@ -151,8 +151,8 @@ function DirectAdvertise() {
 
       try {
         const [websiteResponse, categoryResponse] = await Promise.all([
-          axios.get(`${API_URL}/createWebsite/website/${websiteId}`),
-          axios.get(`${API_URL}/ad-categories/category/${categoryId}`)
+          axios.get(`${API_URL}/api/createWebsite/website/${websiteId}`),
+          axios.get(`${API_URL}/api/ad-categories/category/${categoryId}`)
         ]);
         
         setWebsiteInfo(websiteResponse.data);
@@ -364,7 +364,7 @@ function DirectAdvertise() {
       formData.append('selectedWebsites', JSON.stringify([websiteId]));
       formData.append('selectedCategories', JSON.stringify([categoryId]));
 
-      const response = await axios.post(`${API_URL}/web-advertise`, formData, {
+      const response = await axios.post(`${API_URL}/api/web-advertise`, formData, {
         headers: { 
           'Content-Type': 'multipart/form-data',
           'Authorization': `Bearer ${localStorage.getItem('token') || ''}`
@@ -395,7 +395,7 @@ function DirectAdvertise() {
     try {
       setIsLoading(true);
       
-      const paymentResponse = await axios.post(`${API_URL}/web-advertise/payment/initiate`, {
+      const paymentResponse = await axios.post(`${API_URL}/api/web-advertise/payment/initiate`, {
         adId: adId,
         selections: [{
           websiteId: websiteId,

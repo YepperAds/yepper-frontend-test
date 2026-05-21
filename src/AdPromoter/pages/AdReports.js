@@ -47,7 +47,7 @@ const AdReports = () => {
 
   const fetchWalletBalance = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/ad-categories/wallet', {
+      const response = await axios.get('https://yepper-backend-test.onrender.com/api/ad-categories/wallet', {
         headers: getAuthHeaders()
       });
       setWalletBalance(response.data.wallet?.balance || 0);
@@ -58,10 +58,10 @@ const AdReports = () => {
   const fetchAdReports = async () => {
     try {
       const [pendingResponse, activeResponse] = await Promise.all([
-        axios.get('http://localhost:5000/api/ad-categories/pending-rejections', {
+        axios.get('https://yepper-backend-test.onrender.com/api/ad-categories/pending-rejections', {
           headers: getAuthHeaders()
         }),
-        axios.get('http://localhost:5000/api/ad-categories/active-ads', {
+        axios.get('https://yepper-backend-test.onrender.com/api/ad-categories/active-ads', {
           headers: getAuthHeaders()
         })
       ]);
@@ -127,7 +127,7 @@ const AdReports = () => {
       const websiteSelection = selectedAd.websiteSelections.find(sel => sel.approved && !sel.isRejected);
       
       await axios.post(
-        `http://localhost:5000/api/ad-categories/reject/${selectedAd._id}/${websiteSelection.websiteId}/${websiteSelection.categories[0]}`,
+        `https://yepper-backend-test.onrender.com/api/ad-categories/reject/${selectedAd._id}/${websiteSelection.websiteId}/${websiteSelection.categories[0]}`,
         { rejectionReason: rejectionReason.trim() },
         { headers: getAuthHeaders() }
       );

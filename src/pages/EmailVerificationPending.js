@@ -38,7 +38,7 @@ const EmailVerification = () => {
     setIsResending(true);
     try {
       const response = await axios.post(
-        `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/auth/resend-verification`,
+        `${process.env.REACT_APP_API_URL || 'https://yepper-backend-test.onrender.com'}/api/auth/resend-verification`,
         { email }
       );
 

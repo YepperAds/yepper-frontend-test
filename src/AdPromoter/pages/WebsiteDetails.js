@@ -63,7 +63,7 @@ const WebsiteDetails = () => {
         categoryId: null
     });
     const authenticatedAxios = axios.create({
-        baseURL: 'http://localhost:5000/api',
+        baseURL: 'https://yepper-backend-test.onrender.com/api',
         headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
@@ -106,8 +106,8 @@ const WebsiteDetails = () => {
         setFetchError(null);
 
         try {
-            const websiteResponse = await axios.get(`http://localhost:5000/api/createWebsite/website/${websiteId}`);
-            const categoriesResponse = await axios.get(`http://localhost:5000/api/ad-categories/${websiteId}`);
+            const websiteResponse = await axios.get(`https://yepper-backend-test.onrender.com/api/createWebsite/website/${websiteId}`);
+            const categoriesResponse = await axios.get(`https://yepper-backend-test.onrender.com/api/ad-categories/${websiteId}`);
             setWebsite(websiteResponse.data);
             setCategories(categoriesResponse.data.categories);
             setLoading(false);
@@ -249,7 +249,7 @@ const WebsiteDetails = () => {
         if (!tempWebsiteName.trim()) return;
 
         try {
-            const response = await axios.patch(`http://localhost:5000/api/createWebsite/${websiteId}/name`, {
+            const response = await axios.patch(`https://yepper-backend-test.onrender.com/api/createWebsite/${websiteId}/name`, {
                 websiteName: tempWebsiteName.trim()
             });
             
@@ -346,7 +346,7 @@ const WebsiteDetails = () => {
                 return;
             }
 
-            const response = await axios.put(`http://localhost:5000/api/ad-categories/${categoryId}/reset-user-count`, {
+            const response = await axios.put(`https://yepper-backend-test.onrender.com/api/ad-categories/${categoryId}/reset-user-count`, {
                 newUserCount: parsedCount
             });
 
@@ -392,7 +392,7 @@ const WebsiteDetails = () => {
         
         try {
             const response = await axios.patch(
-                `http://localhost:5000/api/ad-categories/category/${currentCategory._id}/language`,
+                `https://yepper-backend-test.onrender.com/api/ad-categories/category/${currentCategory._id}/language`,
                 { defaultLanguage: selectedLanguage }
             );
             
@@ -600,209 +600,145 @@ const WebsiteDetails = () => {
                                         {categories.map((category) => (
                                             <Card key={category._id} className="border-gray-200">
                                                 <div 
-                                                className="p-6 cursor-pointer hover:bg-gray-50 transition-colors"
-                                                onClick={() => handleCategoryClick(category._id)}
+                                                    className="p-6 cursor-pointer hover:bg-gray-50 transition-colors"
+                                                    onClick={() => handleCategoryClick(category._id)}
                                                 >
-                                                <div className="flex items-start justify-between mb-4">
-                                                    <div className="flex-1">
-                                                    <Badge variant="primary" className="mb-2">
-                                                        {category.spaceType}
-                                                    </Badge>
-                                                    <Heading level={4} className="mb-1">{category.categoryName}</Heading>
-                                                    </div>
-                                                    <div 
-                                                    className={`p-2 transition-transform duration-300 ${
-                                                        expandedCategory === category._id ? 'rotate-180' : ''
-                                                    }`}
-                                                    >
-                                                    <ChevronDown className="w-4 h-4" />
-                                                    </div>
-                                                </div>
-
-                                                {/* Ad Size & Types Visual Display */}
-                                                <div className="mb-4 bg-gradient-to-br from-slate-900 to-slate-800 rounded-lg p-4 overflow-hidden">
-                                                    <div className="flex items-center justify-between mb-3">
-                                                    <div>
-                                                        <Text variant="small" className="text-gray-400 mb-1">Ad Size</Text>
-                                                        <div className="text-white font-mono text-sm">
-                                                        {category.adSize?.width} × {category.adSize?.height}px
+                                                    <div className="flex items-start justify-between mb-4">
+                                                        <div className="flex items-center">
+                                                            <div>
+                                                                <Badge variant="primary" className="mb-2">
+                                                                    {category.spaceType}
+                                                                </Badge>
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                    <div className="text-right">
-                                                        <Text variant="small" className="text-gray-400 mb-1">Types</Text>
-                                                        <div className="text-white text-sm font-semibold">
-                                                        {category.allowedAdTypes?.length || 0}
-                                                        </div>
-                                                    </div>
-                                                    </div>
-
-                                                    {/* Visual Representation */}
-                                                    {category.adSize && category.allowedAdTypes?.length > 0 ? (
-                                                    <div className="relative bg-gradient-to-br from-slate-950 to-slate-900 rounded p-3 min-h-[100px] flex items-center justify-center">
-                                                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.03),transparent_70%)]" />
-                                                        
-                                                        {/* Ad Size Box */}
                                                         <div 
-                                                        className="relative bg-gradient-to-br from-blue-500 to-purple-600 rounded shadow-lg flex items-center justify-center"
-                                                        style={{
-                                                            width: `${Math.min(category.adSize.width / 3, 120)}px`,
-                                                            height: `${Math.min(category.adSize.height / 3, 80)}px`,
-                                                        }}
+                                                            className={`p-2 transition-transform duration-300 ${
+                                                                expandedCategory === category._id ? 'rotate-180' : ''
+                                                            }`}
                                                         >
-                                                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-[shimmer_2s_infinite]" />
-                                                        <div className="relative text-center">
-                                                            <div className="text-white text-xs font-bold">
-                                                            {category.adSize.label}
-                                                            </div>
+                                                            <ChevronDown className="w-4 h-4" />
                                                         </div>
-                                                        </div>
-
-                                                        {/* Type Badges */}
-                                                        <div className="absolute bottom-2 left-2 right-2 flex gap-1 flex-wrap justify-center">
-                                                        {category.allowedAdTypes.map((type) => {
-                                                            const icons = { image: '🖼️', gif: '🎬', video: '🎥', html5: '💻', text: '📝' };
-                                                            return (
-                                                            <div 
-                                                                key={type}
-                                                                className="px-2 py-1 bg-black/40 backdrop-blur-sm rounded text-[10px] text-white font-medium uppercase tracking-wider flex items-center gap-1"
-                                                            >
-                                                                <span>{icons[type]}</span>
-                                                                <span>{type}</span>
-                                                            </div>
-                                                            );
-                                                        })}
-                                                        </div>
-                                                    </div>
-                                                    ) : (
-                                                    <div className="text-center py-4 text-gray-500 text-sm">
-                                                        No ad specifications set
-                                                    </div>
-                                                    )}
-                                                </div>
-                                                
-                                                {/* Metrics */}
-                                                <div className="grid grid-cols-3 gap-4 mb-4">
-                                                    <div className="border border-gray-200 p-3">
-                                                    <div className="flex items-center mb-1">
-                                                        <Text variant="small">Price</Text>
-                                                    </div>
-                                                    <Text variant="large" className="font-semibold">${category.price}</Text>
                                                     </div>
                                                     
-                                                    <div className="border border-gray-200 p-3">
-                                                    {editingUserCount === category._id ? (
-                                                        <div className="flex items-center gap-1">
-                                                        <input 
-                                                            type="number" 
-                                                            value={newUserCount}
-                                                            onChange={(e) => setNewUserCount(e.target.value)}
-                                                            onKeyDown={(e) => {
-                                                            if (e.key === 'Enter') {
-                                                                handleUserCountSave(category._id);
-                                                            } else if (e.key === 'Escape') {
-                                                                setEditingUserCount(null);
-                                                                setNewUserCount('');
-                                                            }
-                                                            }}
-                                                            className="w-16 px-1 py-1 text-sm border border-gray-300 focus:outline-none focus:border-black"
-                                                            autoFocus
-                                                        />
-                                                        <button 
-                                                            onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            handleUserCountSave(category._id);
-                                                            }}
-                                                            className="text-green-600 hover:bg-green-50 p-1"
-                                                        >
-                                                            <Check className="w-4 h-4" />
-                                                        </button>
-                                                        <button 
-                                                            onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            setEditingUserCount(null);
-                                                            setNewUserCount('');
-                                                            }}
-                                                            className="text-red-600 hover:bg-red-50 p-1"
-                                                        >
-                                                            <X className="w-4 h-4" />
-                                                        </button>
+                                                    {/* Metrics */}
+                                                    <div className="grid grid-cols-3 gap-4 mb-4">
+                                                        <div className="border border-gray-200 p-3">
+                                                            <div className="flex items-center mb-1">
+                                                                <Text variant="small">Price</Text>
+                                                            </div>
+                                                            <Text variant="large" className="font-semibold">${category.price}</Text>
                                                         </div>
-                                                    ) : (
-                                                        <div 
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            handleUserCountEdit(category)
-                                                        }}
-                                                        className="cursor-pointer"
-                                                        >
-                                                        <div className="flex items-center mb-1">
-                                                            <Text variant="small">Users</Text>
+                                                        
+                                                        <div className="border border-gray-200 p-3">
+                                                            {editingUserCount === category._id ? (
+                                                                <div className="flex items-center gap-1">
+                                                                    <input 
+                                                                        type="number" 
+                                                                        value={newUserCount}
+                                                                        onChange={(e) => setNewUserCount(e.target.value)}
+                                                                        onKeyDown={(e) => {
+                                                                            if (e.key === 'Enter') {
+                                                                                handleUserCountSave(category._id);
+                                                                            } else if (e.key === 'Escape') {
+                                                                                setEditingUserCount(null);
+                                                                                setNewUserCount('');
+                                                                            }
+                                                                        }}
+                                                                        className="w-16 px-1 py-1 text-sm border border-gray-300 focus:outline-none focus:border-black"
+                                                                        autoFocus
+                                                                    />
+                                                                    <button 
+                                                                        onClick={() => handleUserCountSave(category._id)}
+                                                                        className="text-green-600 hover:bg-green-50 p-1"
+                                                                    >
+                                                                        <Check className="w-4 h-4" />
+                                                                    </button>
+                                                                    <button 
+                                                                        onClick={() => {
+                                                                            setEditingUserCount(null);
+                                                                            setNewUserCount('');
+                                                                        }}
+                                                                        className="text-red-600 hover:bg-red-50 p-1"
+                                                                    >
+                                                                        <X className="w-4 h-4" />
+                                                                    </button>
+                                                                </div>
+                                                            ) : (
+                                                                <div 
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        handleUserCountEdit(category)
+                                                                    }}
+                                                                    className="cursor-pointer"
+                                                                >
+                                                                    <div className="flex items-center mb-1">
+                                                                        <Text variant="small">Users</Text>
+                                                                    </div>
+                                                                    <Text variant="large" className="font-semibold">{category.userCount}</Text>
+                                                                </div>
+                                                            )}
                                                         </div>
-                                                        <Text variant="large" className="font-semibold">{category.userCount}</Text>
-                                                        </div>
-                                                    )}
-                                                    </div>
 
-                                                    <div 
-                                                    className="border border-gray-200 p-3 cursor-pointer hover:bg-gray-50 transition-colors"
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        handleOpenLanguageModal(category);
-                                                    }}
-                                                    >
-                                                    <div className="flex items-center mb-1">
-                                                        <Text variant="small">Language</Text>
+                                                        <div 
+                                                            className="border border-gray-200 p-3 cursor-pointer hover:bg-gray-50 transition-colors"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleOpenLanguageModal(category);
+                                                            }}
+                                                        >
+                                                            <div className="flex items-center mb-1">
+                                                                <Text variant="small">Language</Text>
+                                                            </div>
+                                                            <Text variant="large" className="font-semibold capitalize">
+                                                                {category.defaultLanguage || 'English'}
+                                                            </Text>
+                                                        </div>
                                                     </div>
-                                                    <Text variant="large" className="font-semibold capitalize">
-                                                        {category.defaultLanguage || 'English'}
-                                                    </Text>
-                                                    </div>
-                                                </div>
                                                 </div>
 
                                                 {expandedCategory === category._id && (
-                                                <>
-                                                    <CardContent className="border-t border-gray-200 bg-gray-50">
-                                                    {category.instructions && (
-                                                        <div className="mb-6">
-                                                        <div className="flex items-center mb-3">
-                                                            <Text variant="small" className="font-medium uppercase tracking-wide">
-                                                            Instructions
-                                                            </Text>
+                                                    <>
+                                                        <CardContent className="border-t border-gray-200 bg-gray-50">
+                                                            {category.instructions && (
+                                                                <div className="mb-6">
+                                                                    <div className="flex items-center mb-3">
+                                                                        <Text variant="small" className="font-medium uppercase tracking-wide">
+                                                                            Instructions
+                                                                        </Text>
+                                                                    </div>
+                                                                    <div className="border border-gray-200 bg-white p-4">
+                                                                        <Text>{category.instructions}</Text>
+                                                                    </div>
+                                                                </div>
+                                                            )}
+                                                            
+                                                            <div>
+                                                                <div className="flex items-center mb-3">
+                                                                    <Text variant="small" className="font-medium uppercase tracking-wide">
+                                                                        Integration Code
+                                                                    </Text>
+                                                                </div>
+                                                                <div className="mt-2">
+                                                                    <CodeDisplay codes={category.apiCodes} />
+                                                                </div>
+                                                            </div>
+                                                        </CardContent>
+                                                        
+                                                        <div className="p-4 border-t border-gray-200">
+                                                            <Button 
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation(); 
+                                                                    handleDeleteCategory(category);
+                                                                }}
+                                                                variant="danger"
+                                                                size="sm"
+                                                                icon={Trash2}
+                                                                iconPosition="left"
+                                                            >
+                                                                Delete Space
+                                                            </Button>
                                                         </div>
-                                                        <div className="border border-gray-200 bg-white p-4">
-                                                            <Text>{category.instructions}</Text>
-                                                        </div>
-                                                        </div>
-                                                    )}
-                                                    
-                                                    <div>
-                                                        <div className="flex items-center mb-3">
-                                                        <Text variant="small" className="font-medium uppercase tracking-wide">
-                                                            Integration Code
-                                                        </Text>
-                                                        </div>
-                                                        <div className="mt-2">
-                                                        <CodeDisplay codes={category.apiCodes} />
-                                                        </div>
-                                                    </div>
-                                                    </CardContent>
-                                                    
-                                                    <div className="p-4 border-t border-gray-200">
-                                                    <Button 
-                                                        onClick={(e) => {
-                                                        e.stopPropagation(); 
-                                                        handleDeleteCategory(category);
-                                                        }}
-                                                        variant="danger"
-                                                        size="sm"
-                                                        icon={Trash2}
-                                                        iconPosition="left"
-                                                    >
-                                                        Delete Space
-                                                    </Button>
-                                                    </div>
-                                                </>
+                                                    </>
                                                 )}
                                             </Card>
                                         ))}
@@ -974,97 +910,95 @@ const WebsiteDetails = () => {
                     {activeTab === 'customize' && (
                         <div>
                             <div className="mb-8 text-center">
-                                <Heading level={2} className="mb-3">Customize Your Ad Spaces</Heading>
+                            <Heading level={2} className="mb-3">Customize Your Ad Spaces</Heading>
+                            <Text variant="muted" className="max-w-2xl mx-auto">
+                                Design how ads appear on your website. Each ad space can have its own unique styling 
+                                to match your site's design perfectly.
+                            </Text>
                             </div>
 
                             {categories.length > 0 ? (
-                                <Grid cols={2} gap={6}>
-                                    {categories.map((category) => (
-                                        <Card key={category._id} className="border-gray-200">
-                                            <CardContent className="p-6">
-                                            <div className="flex items-start justify-between mb-4">
-                                                <div>
-                                                <Badge variant="primary" className="mb-2">
-                                                    {category.spaceType}
-                                                </Badge>
-                                                <Heading level={4} className="mb-1">
-                                                    {category.categoryName}
-                                                </Heading>
-                                                <Text variant="small" className="text-gray-600">
-                                                    {category.customization ? 'Customized' : 'Default styling'}
-                                                </Text>
-                                                </div>
-                                                <Palette className="text-gray-400" size={24} />
+                            <Grid cols={2} gap={6}>
+                                {categories.map((category) => (
+                                <Card key={category._id} className="border-gray-200">
+                                    <CardContent className="p-6">
+                                    <div className="flex items-start justify-between mb-4">
+                                        <div>
+                                        <Badge variant="primary" className="mb-2">
+                                            {category.spaceType}
+                                        </Badge>
+                                        <Heading level={4} className="mb-1">
+                                            {category.categoryName}
+                                        </Heading>
+                                        <Text variant="small" className="text-gray-600">
+                                            {category.customization ? 'Customized' : 'Default styling'}
+                                        </Text>
+                                        </div>
+                                        <Palette className="text-gray-400" size={24} />
+                                    </div>
+
+                                    {/* Preview of current customization */}
+                                    {category.customization && (
+                                        <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+                                        <div className="grid grid-cols-2 gap-2 text-xs">
+                                            <div>
+                                            <Text variant="small" className="text-gray-500">Size</Text>
+                                            <Text variant="small" className="font-medium">
+                                                {category.customization.width}×{category.customization.height}px
+                                            </Text>
                                             </div>
+                                            <div>
+                                            <Text variant="small" className="text-gray-500">Layout</Text>
+                                            <Text variant="small" className="font-medium capitalize">
+                                                {category.customization.orientation || 'horizontal'}
+                                            </Text>
+                                            </div>
+                                            <div>
+                                            <Text variant="small" className="text-gray-500">Border Radius</Text>
+                                            <Text variant="small" className="font-medium">
+                                                {category.customization.borderRadius || 16}px
+                                            </Text>
+                                            </div>
+                                            <div>
+                                            <Text variant="small" className="text-gray-500">Effects</Text>
+                                            <Text variant="small" className="font-medium">
+                                                {category.customization.glassmorphism ? 'Glass' : 'Solid'}
+                                            </Text>
+                                            </div>
+                                        </div>
+                                        </div>
+                                    )}
 
-                                            {/* Preview of current customization */}
-                                            {category.customization && (
-                                                <div className="mb-4 p-3 bg-gray-50 rounded-lg">
-                                                <div className="grid grid-cols-2 gap-2 text-xs">
-                                                    <div>
-                                                    <Text variant="small" className="text-gray-500">Size</Text>
-                                                    <Text variant="small" className="font-medium">
-                                                        {category.customization.width}×{category.customization.height}px
-                                                    </Text>
-                                                    </div>
-                                                    <div>
-                                                    <Text variant="small" className="text-gray-500">Layout</Text>
-                                                    <Text variant="small" className="font-medium capitalize">
-                                                        {category.customization.orientation || 'horizontal'}
-                                                    </Text>
-                                                    </div>
-                                                    <div>
-                                                    <Text variant="small" className="text-gray-500">Border Radius</Text>
-                                                    <Text variant="small" className="font-medium">
-                                                        {category.customization.borderRadius || 16}px
-                                                    </Text>
-                                                    </div>
-                                                    <div>
-                                                    <Text variant="small" className="text-gray-500">Effects</Text>
-                                                    <Text variant="small" className="font-medium">
-                                                        {category.customization.glassmorphism ? 'Glass' : 'Solid'}
-                                                    </Text>
-                                                    </div>
-                                                </div>
-                                                </div>
-                                            )}
-
-                                            <Button
-                                                onClick={() => handleOpenCustomization(category._id)}
-                                                variant="secondary"
-                                                size="sm"
-                                                icon={Palette}
-                                                iconPosition="left"
-                                                className="w-full"
-                                            >
-                                                {category.customization ? 'Edit Customization' : 'Customize Ad Space'}
-                                            </Button>
-                                            </CardContent>
-                                        </Card>
-                                    ))}
-                                    <style jsx>{`
-                                        @keyframes shimmer {
-                                            0% { background-position: -200% 0; }
-                                            100% { background-position: 200% 0; }
-                                        }
-                                    `}</style>
-                                </Grid>
-                            ) : (
-                                <Card className="p-12 text-center">
-                                    <Palette className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-                                    <Heading level={3} className="mb-3">No Ad Spaces to Customize</Heading>
-                                    <Text variant="muted" className="mb-6">
-                                    Create an ad space first, then you can customize how ads appear.
-                                    </Text>
                                     <Button
-                                    onClick={handleOpenCategoriesForm}
-                                    variant="secondary"
-                                    icon={Plus}
-                                    iconPosition="left"
+                                        onClick={() => handleOpenCustomization(category._id)}
+                                        variant="secondary"
+                                        size="sm"
+                                        icon={Palette}
+                                        iconPosition="left"
+                                        className="w-full"
                                     >
-                                    Create Ad Space
+                                        {category.customization ? 'Edit Customization' : 'Customize Ad Space'}
                                     </Button>
+                                    </CardContent>
                                 </Card>
+                                ))}
+                            </Grid>
+                            ) : (
+                            <Card className="p-12 text-center">
+                                <Palette className="w-16 h-16 mx-auto mb-4 text-gray-400" />
+                                <Heading level={3} className="mb-3">No Ad Spaces to Customize</Heading>
+                                <Text variant="muted" className="mb-6">
+                                Create an ad space first, then you can customize how ads appear.
+                                </Text>
+                                <Button
+                                onClick={handleOpenCategoriesForm}
+                                variant="secondary"
+                                icon={Plus}
+                                iconPosition="left"
+                                >
+                                Create Ad Space
+                                </Button>
+                            </Card>
                             )}
                         </div>
                     )}

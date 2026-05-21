@@ -46,7 +46,7 @@ const AdCustomizationModal = ({ categoryId, onClose, onSave }) => {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.get(
-        `http://localhost:5000/api/ad-categories/categoriees/${categoryId}`,
+        `https://yepper-backend-test.onrender.com/api/ad-categories/categoriees/${categoryId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       
@@ -156,7 +156,7 @@ const AdCustomizationModal = ({ categoryId, onClose, onSave }) => {
       const customizationData = { ...settings, customCSS: customCSS.trim() };
       
       const response = await axios.put(
-        `http://localhost:5000/api/ad-categories/categoriees/${categoryId}/customization`,
+        `https://yepper-backend-test.onrender.com/api/ad-categories/categoriees/${categoryId}/customization`,
         { customization: customizationData },
         { 
           headers: { 

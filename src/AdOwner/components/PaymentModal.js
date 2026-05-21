@@ -62,7 +62,7 @@ const PaymentModal = ({ ad, websiteId, onClose }) => {
                 requestConfig.headers.Authorization = `Bearer ${token}`;
             }
 
-            const response = await axios.post('http://localhost:5000/api/web-advertise/initiate-payment', {
+            const response = await axios.post('https://yepper-backend-test.onrender.com/api/web-advertise/initiate-payment', {
                 adId: ad._id,
                 websiteId,
                 amount: totalPrice,

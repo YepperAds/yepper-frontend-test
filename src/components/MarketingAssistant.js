@@ -14,7 +14,7 @@ const MarketingAssistant = ({ user, isAuthenticated }) => {
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
 
-  const API_URL = 'http://localhost:5000';
+  const API_URL = 'https://yepper-backend-test.onrender.com';
 
   const DESIGN_THEMES = {
     branding: {

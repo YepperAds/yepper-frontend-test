@@ -57,7 +57,7 @@ const WithdrawalHistory = () => {
     setLoading(true);
     try {
       const response = await axios.get(
-        `http://localhost:5000/api/ad-categories/wallet/${walletType}/withdrawal-requests?page=${currentPage}&limit=10`,
+        `https://yepper-backend-test.onrender.com/api/ad-categories/wallet/${walletType}/withdrawal-requests?page=${currentPage}&limit=10`,
         { headers: getAuthHeaders() }
       );
 
@@ -90,7 +90,7 @@ const WithdrawalHistory = () => {
 
     try {
       await axios.patch(
-        `http://localhost:5000/api/ad-categories/wallet/withdrawal-request/${requestId}/cancel`,
+        `https://yepper-backend-test.onrender.com/api/ad-categories/wallet/withdrawal-request/${requestId}/cancel`,
         {},
         { headers: getAuthHeaders() }
       );

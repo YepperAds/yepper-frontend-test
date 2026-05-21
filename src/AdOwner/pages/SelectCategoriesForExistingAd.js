@@ -134,7 +134,7 @@ const SelectCategoriesForExistingAd = () => {
   const fetchWalletInfo = async () => {
     try {
       const response = await axios.get(
-        'http://localhost:5000/api/web-advertise/payment/wallet-balance',
+        'https://yepper-backend-test.onrender.com/api/web-advertise/payment/wallet-balance',
         { headers: getAuthHeaders() }
       );
       
@@ -153,11 +153,11 @@ const SelectCategoriesForExistingAd = () => {
     setIsLoading(true);
     try {
       const promises = selectedWebsites.map(async (websiteId) => {
-        const websiteResponse = await axios.get(`http://localhost:5000/api/createWebsite/website/${websiteId}`);
+        const websiteResponse = await axios.get(`https://yepper-backend-test.onrender.com/api/createWebsite/website/${websiteId}`);
         const websiteData = websiteResponse.data;
         
         const categoriesResponse = await axios.get(
-          `http://localhost:5000/api/ad-categories/${websiteId}/advertiser`,
+          `https://yepper-backend-test.onrender.com/api/ad-categories/${websiteId}/advertiser`,
           { headers: getAuthHeaders() }
         );
         
@@ -194,7 +194,7 @@ const SelectCategoriesForExistingAd = () => {
       }));
 
       const response = await axios.post(
-        'http://localhost:5000/api/web-advertise/payment/calculate-breakdown',
+        'https://yepper-backend-test.onrender.com/api/web-advertise/payment/calculate-breakdown',
         { 
           selections,
           isReassignment: isReassignment || false
@@ -292,7 +292,7 @@ const SelectCategoriesForExistingAd = () => {
       }
 
       const response = await axios.post(
-        `http://localhost:5000/api/web-advertise/${adId}/add-selections`,
+        `https://yepper-backend-test.onrender.com/api/web-advertise/${adId}/add-selections`,
         {
           selectedWebsites: JSON.stringify(selectedWebsites),
           selectedCategories: JSON.stringify(selectedCategories),
@@ -333,7 +333,7 @@ const SelectCategoriesForExistingAd = () => {
       }
 
       const response = await axios.post(
-        'http://localhost:5000/api/web-advertise/payment/process-wallet',
+        'https://yepper-backend-test.onrender.com/api/web-advertise/payment/process-wallet',
         { 
           selections,
           isReassignment: isReassignment || false

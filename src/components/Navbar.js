@@ -40,7 +40,7 @@ const Navbar = () => {
   return (
     <nav className="bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-12">
+        <div className="flex justify-between items-center h-16">
           <Link to="/" className="text-xl font-bold text-gray-800 hover:text-blue-600 transition-colors">
             Yepper
           </Link>
@@ -140,7 +140,7 @@ const Navbar = () => {
                 <Link to="/login">
                   <Button 
                     variant='primary'
-                    className="h-6 flex items-center space-x-2 focus:outline-none focus:ring-0"
+                    className="h-9 flex items-center space-x-2 focus:outline-none focus:ring-0"
                   >
                     <span>Login</span>
                   </Button>
@@ -150,7 +150,7 @@ const Navbar = () => {
                 <Link to="/register">
                   <Button 
                     variant='secondary'
-                    className="h-6 flex items-center space-x-2 focus:outline-none focus:ring-0"
+                    className="h-9 flex items-center space-x-2 focus:outline-none focus:ring-0"
                   >
                     <span>Register</span>
                   </Button>

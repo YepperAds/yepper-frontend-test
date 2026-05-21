@@ -16,7 +16,7 @@ const Ads = () => {
     const [filteredAds, setFilteredAds] = useState([]);
 
     const authenticatedAxios = axios.create({
-        baseURL: 'http://localhost:5000/api',
+        baseURL: 'https://yepper-backend-test.onrender.com/api',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -229,7 +229,7 @@ const Ads = () => {
                     {/* Add Button */}
                     <div className="flex-shrink-0">
                         <Button
-                            onClick={() => navigate('/select-websites')}
+                            onClick={() => navigate('/upload-ad')}
                             variant="secondary"
                             size="lg"
                             icon={Plus}
@@ -241,7 +241,7 @@ const Ads = () => {
 
                     <div className="flex-shrink-0">
                         <Button
-                            onClick={() => navigate('/create-website')}
+                            onClick={() => navigate('/upload-ad')}
                             variant="secondary"
                             size="lg"
                             icon={Plus}

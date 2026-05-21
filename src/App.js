@@ -20,6 +20,10 @@ import VerifyError from './pages/VerifyError';
 import EmailVerification from './pages/EmailVerificationPending';
 import CheckEmail from './pages/CheckEmail';
 
+// reset password
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
+
 // AdPromoter
 import WebsiteCreation from './AdPromoter/pages/websiteCreation';
 import CategoryCreation from './AdPromoter/pages/categoryCreation';
@@ -86,6 +90,8 @@ function App() {
               <Route path="/payment/callback" element={<PaymentCallback />} />
               <Route path="/add-website" element={<UnifiedWebsiteCreation />} />
               <Route path="/advertise" element={<UnifiedAdUploadFlow />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
 
               {/* AdPromoter */}
               <Route path="/websites" element={
@@ -161,18 +167,6 @@ function App() {
               } />
 
               {/* AdOwner */}
-              <Route path="/select-websites" element={
-                <ProtectedRoute>
-                  <WebsitesSelection />
-                </ProtectedRoute>
-              } />
-
-              <Route path="/select-categories" element={
-                <ProtectedRoute>
-                  <CategoriesSelection />
-                </ProtectedRoute>
-              } />
-
               <Route path="/upload-ad" element={
                 <ProtectedRoute>
                   <UploadAdForWeb />
@@ -182,6 +176,18 @@ function App() {
               <Route path="/insert-data" element={
                 <ProtectedRoute>
                   <InfoForm />
+                </ProtectedRoute>
+              } />
+
+              <Route path="/select-websites" element={
+                <ProtectedRoute>
+                  <WebsitesSelection />
+                </ProtectedRoute>
+              } />
+
+              <Route path="/select-categories" element={
+                <ProtectedRoute>
+                  <CategoriesSelection />
                 </ProtectedRoute>
               } />
 

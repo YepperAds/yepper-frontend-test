@@ -101,7 +101,7 @@ function WebsiteCreation() {
 
       const token = localStorage.getItem('token');
       const response = await axios.post(
-        'http://localhost:5000/api/createWebsite/prepareWebsite',
+        'https://yepper-backend-test.onrender.com/api/createWebsite/prepareWebsite',
         formData,
         {
           headers: {
