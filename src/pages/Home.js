@@ -39,7 +39,7 @@ const Home = () => {
       try {
         const userId = user?._id || user?.id;
         const authenticatedAxios = getAuthenticatedAxios();
-        const response = await authenticatedAxios.get(`/web-advertise/mixed/${userId}`);
+        const response = await api.get(`/api/web-advertise/mixed/${userId}`);
         return response.data;
       } catch (error) {
         throw error;
@@ -57,7 +57,7 @@ const Home = () => {
       try {
         const userId = user?._id || user?.id;
         const authenticatedAxios = getAuthenticatedAxios();
-        const response = await authenticatedAxios.get(`/createWebsite/${userId}`);
+        const response = await api.get(`/api/createWebsite/${userId}`);
         return response.data;
       } catch (error) {
         throw error;
