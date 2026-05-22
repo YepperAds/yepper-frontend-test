@@ -35,26 +35,6 @@ const PaymentCallback2 = () => {
     return null;
   };
 
-  // Create axios instance with auth
-  const createAuthenticatedAxios = () => {
-    const token = getAuthToken();
-    const axiosInstance = axios.create({
-            timeout: 30000,
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    });
-
-    if (token) {
-      // Try different auth header formats
-      axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      // Some APIs might use different formats
-      axiosInstance.defaults.headers.common['x-auth-token'] = token;
-    }
-
-    return axiosInstance;
-  };
-
   useEffect(() => {
     const verifyPayment = async () => {
       const transactionId = searchParams.get('transaction_id');

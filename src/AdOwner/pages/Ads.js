@@ -16,13 +16,6 @@ const Ads = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [filteredAds, setFilteredAds] = useState([]);
 
-    const authenticatedAxios = axios.create({
-                headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-    });
-
     useEffect(() => {
         if (user && token) {
             fetchUserAds();
@@ -79,7 +72,7 @@ const Ads = () => {
     const fetchUserAds = async () => {
         try {
             setLoading(true);
-            const response = await authenticatedAxios.get('/web-advertise/my-ads');
+            const response = await api.get('/api/web-advertise/my-ads');
             
             if (response.data.success) {
                 const adsData = response.data.ads || [];

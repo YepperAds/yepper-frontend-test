@@ -63,13 +63,6 @@ const WebsiteDetails = () => {
         isOpen: false,
         categoryId: null
     });
-    const authenticatedAxios = axios.create({
-                headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-        }
-    });
-
     useEffect(() => {
         fetchWebsiteData();
         if (token) {
@@ -83,7 +76,7 @@ const WebsiteDetails = () => {
         queryFn: async () => {
             try {
                 const userId = user?._id || user?.id;
-                const response = await authenticatedAxios.get(`/createWebsite/${userId}`);
+                const response = await api.get(`/api/createWebsite/${userId}`);
                 return response.data;
             } catch (error) {
                 throw error;
@@ -123,8 +116,8 @@ const WebsiteDetails = () => {
         setAdsLoading(true);
         try {
             const [pendingResponse, activeResponse] = await Promise.all([
-                authenticatedAxios.get('/ad-categories/pending-rejections'),
-                authenticatedAxios.get('/ad-categories/active-ads')
+                api.get('/api/ad-categories/pending-rejections'),
+                api.get('/api/ad-categories/active-ads')
             ]);
 
             setPendingAds(pendingResponse.data.pendingAds || []);
@@ -141,7 +134,7 @@ const WebsiteDetails = () => {
         if (!token) return;
         
         try {
-            const response = await authenticatedAxios.get('/ad-categories/wallet');
+            const response = await api.get('/api/ad-categories/wallet');
             setWalletBalance(response.data.wallet?.balance || 0);
         } catch (error) {
         }
@@ -219,7 +212,7 @@ const WebsiteDetails = () => {
         try {
             const websiteSelection = selectedAd.websiteSelections.find(sel => sel.approved && !sel.isRejected);
             
-            await authenticatedAxios.post(
+            await api.post(
                 `/ad-categories/reject/${selectedAd._id}/${websiteSelection.websiteId}/${websiteSelection.categories[0]}`,
                 { rejectionReason: rejectionReason.trim() }
             );

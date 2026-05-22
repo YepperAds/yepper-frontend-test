@@ -21,13 +21,6 @@ const UpdateAdSelections = () => {
     const [updating, setUpdating] = useState(false);
     const [error, setError] = useState('');
 
-    const authenticatedAxios = axios.create({
-                headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-        }
-    });
-
     useEffect(() => {
         if (!adId) {
             navigate('/my-ads');
@@ -40,8 +33,8 @@ const UpdateAdSelections = () => {
         try {
             setLoading(true);
             const [adRes, websitesRes] = await Promise.all([
-                authenticatedAxios.get(`/web-advertise/ads/${adId}`),
-                authenticatedAxios.get('/ad-promoter/websites-with-categories')
+                api.get(`/api/web-advertise/ads/${adId}`),
+                api.get('/api/ad-promoter/websites-with-categories')
             ]);
 
             setAd(adRes.data.ad);
@@ -104,8 +97,8 @@ const UpdateAdSelections = () => {
             setUpdating(true);
             setError('');
 
-            const response = await authenticatedAxios.put(
-                `/web-advertise/ads/${adId}/update-selections`,
+            const response = await api.put(
+                `/api/web-advertise/ads/${adId}/update-selections`,
                 {
                     selectedWebsites,
                     selectedCategories

@@ -26,19 +26,12 @@ function Websites() {
   const [adModalData, setAdModalData] = useState(null);
   // const [walletBalance, setWalletBalance] = useState(0);
 
-  const authenticatedAxios = axios.create({
-        headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    }
-  });
-
   const { data: websites, isLoading: websitesLoading, error: websitesError, refetch: refetchWebsites } = useQuery({
     queryKey: ['websites', user?._id || user?.id],
     queryFn: async () => {
       try {
         const userId = user?._id || user?.id;
-        const response = await authenticatedAxios.get(`/createWebsite/${userId}`);
+        const response = await api.get(`/api/createWebsite/${userId}`);
         return response.data;
       } catch (error) {
         throw error;
@@ -64,7 +57,7 @@ function Websites() {
     queryKey: ['activeAds'],
     queryFn: async () => {
       try {
-        const response = await authenticatedAxios.get('/ad-categories/active-ads');
+        const response = await api.get('/api/ad-categories/active-ads');
         return response.data.activeAds || [];
       } catch (error) {
         return [];
@@ -75,7 +68,7 @@ function Websites() {
 
   const updateWebsiteNameMutation = useMutation({
     mutationFn: ({ websiteId, websiteName }) => 
-      authenticatedAxios.patch(`/createWebsite/${websiteId}/name`, { websiteName }),
+      api.patch(`/api/createWebsite/${websiteId}/name`, { websiteName }),
     onSuccess: (response) => {
       queryClient.setQueryData(['websites', user?._id || user?.id], (oldData) => 
         oldData.map(website => 
