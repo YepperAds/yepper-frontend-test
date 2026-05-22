@@ -23,27 +23,14 @@ const Home = () => {
   const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(true);
   const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(false);
 
-  const getAuthenticatedAxios = () => {
-    const token = localStorage.getItem('token');
-    return axios.create({
-            headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      }
-    });
-  };
+  
 
   const { data: mixedAds, isLoading, error } = useQuery({
     queryKey: ['mixedAds', user?._id || user?.id],
     queryFn: async () => {
-      try {
-        const userId = user?._id || user?.id;
-        const authenticatedAxios = getAuthenticatedAxios();
-        const response = await api.get(`/api/web-advertise/mixed/${userId}`);
-        return response.data;
-      } catch (error) {
-        throw error;
-      }
+      const userId = user?._id || user?.id;
+      const response = await api.get(`/api/web-advertise/mixed/${userId}`);
+      return response.data;
     },
     enabled: isAuthenticated && !!(user?._id || user?.id),
     onSuccess: (data) => {
@@ -54,14 +41,9 @@ const Home = () => {
   const { data: websites } = useQuery({
     queryKey: ['websites', user?._id || user?.id],
     queryFn: async () => {
-      try {
-        const userId = user?._id || user?.id;
-        const authenticatedAxios = getAuthenticatedAxios();
-        const response = await api.get(`/api/createWebsite/${userId}`);
-        return response.data;
-      } catch (error) {
-        throw error;
-      }
+      const userId = user?._id || user?.id;
+      const response = await api.get(`/api/createWebsite/${userId}`);
+      return response.data;
     },
     enabled: isAuthenticated && !!(user?._id || user?.id),
     onSuccess: (data) => {
