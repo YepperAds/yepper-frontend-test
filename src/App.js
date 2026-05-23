@@ -8,6 +8,7 @@ import Home from './pages/Home';
 import ProtectedRoute from './components/ProtectedRoute';
 
 import MarketingSection from './pages/MarketingSection';
+import PrivacyPolicy from './pages/PrivacyPolicy';
 import Dost from './Dost'
 
 // User Auth
@@ -75,6 +76,7 @@ function App() {
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/about-yepper" element={<MarketingSection />} />
+              <Route path="/privacy-policy" element={<PrivacyPolicy />} />
 
               <Route path="/dost" element={<Dost />} />
 
