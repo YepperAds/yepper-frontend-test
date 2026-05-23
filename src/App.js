@@ -8,7 +8,7 @@ import Home from './pages/Home';
 import ProtectedRoute from './components/ProtectedRoute';
 
 import MarketingSection from './pages/MarketingSection';
-import PrivacyPolicy from './pages/PrivacyPolicy';
+import PrivacyPolicy from './pages/privacyPolicy';
 import Dost from './Dost'
 
 // User Auth
