@@ -4,20 +4,19 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import {  
     X,
-    ChevronDown,
     Code,
     AlertCircle,
     ArrowLeft,
     Plus,
     Trash2,
-    Edit,
     Check,
     Palette,
     Copy,
     XCircle,
-    RefreshCw
+    RefreshCw,
+    Edit
 } from 'lucide-react';
-import CodeDisplay from '../components/codeDisplay';
+import CodeDisplay, { MasterIntegration } from '../components/codeDisplay';
 import AddNewCategory from './addNewCategory';
 import { Button, Card, CardContent, Heading, Text, Input, Badge, Grid, Container } from '../../components/components';
 import LoadingSpinner from '../../components/LoadingSpinner';
@@ -380,6 +379,20 @@ const WebsiteDetails = () => {
         setIsLanguageModalOpen(true);
     };
 
+    // Called from MasterIntegration when user sets language for all spaces at once
+    const handleAllSpacesLanguageChange = async (lang) => {
+        try {
+            await Promise.all(
+                categories.map(cat =>
+                    api.patch(`/api/ad-categories/category/${cat._id}/language`, { defaultLanguage: lang })
+                )
+            );
+            setCategories(categories.map(cat => ({ ...cat, defaultLanguage: lang })));
+        } catch (error) {
+            // silently ignore — UI already updated optimistically
+        }
+    };
+
     const handleSaveLanguage = async () => {
         if (!currentCategory) return;
         
@@ -574,174 +587,14 @@ const WebsiteDetails = () => {
                     
                     {activeTab === 'spaces' && (
                         <div>
-                            <div className="text-center mb-12">
-                                <Button
-                                    onClick={handleOpenCategoriesForm}
-                                    variant="secondary"
-                                    size="md"
-                                    icon={Plus}
-                                    iconPosition="left"
-                                >
-                                    Add New Ad Space
-                                </Button>
-                            </div>
-
-                            {/* Website Spaces */}
-                            <div className="mb-12">
-                                {categories.length > 0 ? (
-                                    <Grid cols={2} gap={6}>
-                                        {categories.map((category) => (
-                                            <Card key={category._id} className="border-gray-200">
-                                                <div 
-                                                    className="p-6 cursor-pointer hover:bg-gray-50 transition-colors"
-                                                    onClick={() => handleCategoryClick(category._id)}
-                                                >
-                                                    <div className="flex items-start justify-between mb-4">
-                                                        <div className="flex items-center">
-                                                            <div>
-                                                                <Badge variant="primary" className="mb-2">
-                                                                    {category.spaceType}
-                                                                </Badge>
-                                                            </div>
-                                                        </div>
-                                                        <div 
-                                                            className={`p-2 transition-transform duration-300 ${
-                                                                expandedCategory === category._id ? 'rotate-180' : ''
-                                                            }`}
-                                                        >
-                                                            <ChevronDown className="w-4 h-4" />
-                                                        </div>
-                                                    </div>
-                                                    
-                                                    {/* Metrics */}
-                                                    <div className="grid grid-cols-3 gap-4 mb-4">
-                                                        <div className="border border-gray-200 p-3">
-                                                            <div className="flex items-center mb-1">
-                                                                <Text variant="small">Price</Text>
-                                                            </div>
-                                                            <Text variant="large" className="font-semibold">${category.price}</Text>
-                                                        </div>
-                                                        
-                                                        <div className="border border-gray-200 p-3">
-                                                            {editingUserCount === category._id ? (
-                                                                <div className="flex items-center gap-1">
-                                                                    <input 
-                                                                        type="number" 
-                                                                        value={newUserCount}
-                                                                        onChange={(e) => setNewUserCount(e.target.value)}
-                                                                        onKeyDown={(e) => {
-                                                                            if (e.key === 'Enter') {
-                                                                                handleUserCountSave(category._id);
-                                                                            } else if (e.key === 'Escape') {
-                                                                                setEditingUserCount(null);
-                                                                                setNewUserCount('');
-                                                                            }
-                                                                        }}
-                                                                        className="w-16 px-1 py-1 text-sm border border-gray-300 focus:outline-none focus:border-black"
-                                                                        autoFocus
-                                                                    />
-                                                                    <button 
-                                                                        onClick={() => handleUserCountSave(category._id)}
-                                                                        className="text-green-600 hover:bg-green-50 p-1"
-                                                                    >
-                                                                        <Check className="w-4 h-4" />
-                                                                    </button>
-                                                                    <button 
-                                                                        onClick={() => {
-                                                                            setEditingUserCount(null);
-                                                                            setNewUserCount('');
-                                                                        }}
-                                                                        className="text-red-600 hover:bg-red-50 p-1"
-                                                                    >
-                                                                        <X className="w-4 h-4" />
-                                                                    </button>
-                                                                </div>
-                                                            ) : (
-                                                                <div 
-                                                                    onClick={(e) => {
-                                                                        e.stopPropagation();
-                                                                        handleUserCountEdit(category)
-                                                                    }}
-                                                                    className="cursor-pointer"
-                                                                >
-                                                                    <div className="flex items-center mb-1">
-                                                                        <Text variant="small">Users</Text>
-                                                                    </div>
-                                                                    <Text variant="large" className="font-semibold">{category.userCount}</Text>
-                                                                </div>
-                                                            )}
-                                                        </div>
-
-                                                        <div 
-                                                            className="border border-gray-200 p-3 cursor-pointer hover:bg-gray-50 transition-colors"
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                handleOpenLanguageModal(category);
-                                                            }}
-                                                        >
-                                                            <div className="flex items-center mb-1">
-                                                                <Text variant="small">Language</Text>
-                                                            </div>
-                                                            <Text variant="large" className="font-semibold capitalize">
-                                                                {category.defaultLanguage || 'English'}
-                                                            </Text>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                {expandedCategory === category._id && (
-                                                    <>
-                                                        <CardContent className="border-t border-gray-200 bg-gray-50">
-                                                            {category.instructions && (
-                                                                <div className="mb-6">
-                                                                    <div className="flex items-center mb-3">
-                                                                        <Text variant="small" className="font-medium uppercase tracking-wide">
-                                                                            Instructions
-                                                                        </Text>
-                                                                    </div>
-                                                                    <div className="border border-gray-200 bg-white p-4">
-                                                                        <Text>{category.instructions}</Text>
-                                                                    </div>
-                                                                </div>
-                                                            )}
-                                                            
-                                                            <div>
-                                                                <div className="flex items-center mb-3">
-                                                                    <Text variant="small" className="font-medium uppercase tracking-wide">
-                                                                        Integration Code
-                                                                    </Text>
-                                                                </div>
-                                                                <div className="mt-2">
-                                                                    <CodeDisplay codes={category.apiCodes} />
-                                                                </div>
-                                                            </div>
-                                                        </CardContent>
-                                                        
-                                                        <div className="p-4 border-t border-gray-200">
-                                                            <Button 
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation(); 
-                                                                    handleDeleteCategory(category);
-                                                                }}
-                                                                variant="danger"
-                                                                size="sm"
-                                                                icon={Trash2}
-                                                                iconPosition="left"
-                                                            >
-                                                                Delete Space
-                                                            </Button>
-                                                        </div>
-                                                    </>
-                                                )}
-                                            </Card>
-                                        ))}
-                                    </Grid>
-                                ) : (
-                                    <Card className="p-12 text-center">
-                                        <Heading level={3} className="mb-3">No Ad Spaces Yet</Heading>
-                                    </Card>
-                                )}
-                            </div>
+                            {/* Master Integration Container */}
+                            <MasterIntegration
+                                website={website}
+                                categories={categories}
+                                onAddSpace={handleOpenCategoriesForm}
+                                onLanguageChange={handleAllSpacesLanguageChange}
+                                onDeleteCategory={handleDeleteCategory}
+                            />
                         </div>
                     )}
 
