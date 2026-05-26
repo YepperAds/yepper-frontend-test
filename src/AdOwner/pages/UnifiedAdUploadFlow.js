@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import api from '../../utils/api';
+import api, { websiteAPI, categoryAPI } from '../../utils/api';
 import {
   Upload, ArrowLeft, Check, AlertTriangle, X,
   Mail, Lock, User, Eye, EyeOff, Building2, Tag,
@@ -73,35 +73,65 @@ const UnifiedAdUploadFlow = () => {
     { value: 'ecommerce', label: 'E-commerce', description: 'Online retail stores' }
   ];
 
-  // Mock data for demo
+  // Fetch real websites from backend
   useEffect(() => {
     if (currentStep === 3 && websites.length === 0) {
-      setWebsites([
-        { _id: '1', websiteName: 'Tech News Daily', websiteLink: 'technews.com', imageUrl: null, businessCategories: 'Technology' },
-        { _id: '2', websiteName: 'Food Magazine', websiteLink: 'foodmag.com', imageUrl: null, businessCategories: 'Food & Beverage' }
-      ]);
-      setFilteredWebsites([
-        { _id: '1', websiteName: 'Tech News Daily', websiteLink: 'technews.com', imageUrl: null, businessCategories: 'Technology' },
-        { _id: '2', websiteName: 'Food Magazine', websiteLink: 'foodmag.com', imageUrl: null, businessCategories: 'Food & Beverage' }
-      ]);
+      setLoading(true);
+      websiteAPI.getAll()
+        .then((res) => {
+          const data = res.data?.websites || res.data || [];
+          setWebsites(data);
+          setFilteredWebsites(data);
+        })
+        .catch((err) => {
+          console.error('Failed to fetch websites:', err);
+          setErrors({ general: 'Failed to load websites. Please try again.' });
+        })
+        .finally(() => setLoading(false));
     }
   }, [currentStep, websites.length]);
 
+  // Filter websites by search term
+  useEffect(() => {
+    if (!searchTerm.trim()) {
+      setFilteredWebsites(websites);
+    } else {
+      const lower = searchTerm.toLowerCase();
+      setFilteredWebsites(
+        websites.filter(
+          (w) =>
+            w.websiteName?.toLowerCase().includes(lower) ||
+            w.websiteLink?.toLowerCase().includes(lower) ||
+            w.businessCategories?.toLowerCase().includes(lower)
+        )
+      );
+    }
+  }, [searchTerm, websites]);
   useEffect(() => {
     if (currentStep === 4 && selectedWebsites.length > 0 && categoriesByWebsite.length === 0) {
-      setCategoriesByWebsite([
-        {
-          websiteId: selectedWebsites[0],
-          websiteName: 'Tech News Daily',
-          websiteLink: 'technews.com',
-          categories: [
-            { _id: 'cat1', categoryName: 'Homepage Banner', description: 'Premium placement at the top of homepage', price: 299 },
-            { _id: 'cat2', categoryName: 'Sidebar Ad', description: 'Visible on all article pages', price: 149 }
-          ]
-        }
-      ]);
+      setLoading(true);
+      Promise.all(
+        selectedWebsites.map((websiteId) =>
+          categoryAPI.getByWebsiteAdvertiser(websiteId).then((res) => {
+            const websiteInfo = websites.find((w) => w._id === websiteId);
+            const categories = res.data?.categories || res.data || [];
+            return {
+              websiteId,
+              websiteName: websiteInfo?.websiteName || websiteId,
+              websiteLink: websiteInfo?.websiteLink || '',
+              categories,
+            };
+          })
+        )
+      )
+        .then((results) => setCategoriesByWebsite(results))
+        .catch((err) => {
+          console.error('Failed to fetch categories:', err);
+          setErrors({ general: 'Failed to load ad placements. Please try again.' });
+        })
+        .finally(() => setLoading(false));
     }
-  }, [currentStep, selectedWebsites, categoriesByWebsite.length]);
+  }, [currentStep, selectedWebsites, categoriesByWebsite.length, websites]);
 
   useEffect(() => {
     let total = 0;

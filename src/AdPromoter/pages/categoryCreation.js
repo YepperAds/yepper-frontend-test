@@ -50,6 +50,9 @@ const CategoryCreation = () => {
   const { state } = useLocation();
   const navigate = useNavigate();
   const [websiteDetails] = useState(state?.websiteDetails || null);
+  const [websiteMonthlyTraffic, setWebsiteMonthlyTraffic] = useState(
+    state?.websiteDetails?.monthlyTraffic || null
+  );
   const [selectedCategories, setSelectedCategories] = useState({});
   const [categoryData, setCategoryData] = useState({});
   const [activeCategory, setActiveCategory] = useState(null);
@@ -96,7 +99,10 @@ const CategoryCreation = () => {
                     'Authorization': `Bearer ${token}` // NEW: Added auth header
                   }
                 });
-                // Handle the website details...
+                // Capture monthlyTraffic so PricingTiers can auto-price
+                if (response.data?.monthlyTraffic) {
+                  setWebsiteMonthlyTraffic(response.data.monthlyTraffic);
+                }
             } catch (error) {
                 navigate('/create-website');
             }
@@ -494,6 +500,8 @@ const CategoryCreation = () => {
                   <PricingTiers 
                     selectedPrice={categoryData[activeCategory] || {}}
                     onPriceSelect={(price) => updateCategoryData(activeCategory, 'price', price)}
+                    monthlyTraffic={websiteMonthlyTraffic}
+                    spaceType={categoryDetails[activeCategory]?.spaceType}
                   />
   
                   <div className="space-y-6">

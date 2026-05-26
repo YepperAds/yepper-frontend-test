@@ -43,13 +43,16 @@ import StickySidebar from '../img/stickySidebar.png';
 import api from '../../utils/api';
 
 
-const AddNewCategory = ({ onSubmitSuccess }) => {
+const AddNewCategory = ({ onSubmitSuccess, monthlyTraffic: trafficProp }) => {
   const [user, setUser] = useState(null); // NEW: Custom user state
   const [loading, setLoading] = useState(true); // NEW: Loading state for auth check
   const { websiteId } = useParams();
   const { state } = useLocation();
   const navigate = useNavigate();
   const [websiteDetails] = useState(state?.websiteDetails || null);
+  const [websiteMonthlyTraffic, setWebsiteMonthlyTraffic] = useState(
+    trafficProp || state?.websiteDetails?.monthlyTraffic || null
+  );
   const [selectedCategories, setSelectedCategories] = useState({});
   const [categoryData, setCategoryData] = useState({});
   const [activeCategory, setActiveCategory] = useState(null);
@@ -85,6 +88,27 @@ const AddNewCategory = ({ onSubmitSuccess }) => {
 
     checkAuth();
   }, [navigate]);
+
+  // Fetch website traffic so each space gets correct auto-pricing
+  useEffect(() => {
+    if (!websiteId) return;
+    // If traffic was already passed via navigation state, skip the API call
+    if (websiteMonthlyTraffic) return;
+    const fetchTraffic = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await api.get(`/api/websites/${websiteId}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (response.data?.monthlyTraffic) {
+          setWebsiteMonthlyTraffic(response.data.monthlyTraffic);
+        }
+      } catch (err) {
+        console.error('Failed to fetch website traffic:', err);
+      }
+    };
+    fetchTraffic();
+  }, [websiteId]); // eslint-disable-line
 
   useEffect(() => {
     completedCategories.forEach(category => {
@@ -443,6 +467,8 @@ const AddNewCategory = ({ onSubmitSuccess }) => {
                   <PricingTiers 
                     selectedPrice={categoryData[activeCategory] || {}}
                     onPriceSelect={(price) => updateCategoryData(activeCategory, 'price', price)}
+                    monthlyTraffic={websiteMonthlyTraffic}
+                    spaceType={categoryDetails[activeCategory]?.spaceType}
                   />
   
                   <div className="space-y-6">

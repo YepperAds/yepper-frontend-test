@@ -9,7 +9,7 @@ import axios from 'axios';
 
 // ── Base URL ──────────────────────────────────────────────────
 export const BASE_URL =
-  process.env.REACT_APP_API_URL || 'https://yepper-backend-test.onrender.com';
+  process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
 // ── Axios instance with global defaults ───────────────────────
 const api = axios.create({

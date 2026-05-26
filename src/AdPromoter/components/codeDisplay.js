@@ -101,7 +101,7 @@ const CodeBlock = ({ code, activeLang, onLangChange }) => (
 
 // ── Left panel: auto script ───────────────────────────────────
 const AutoPanel = ({ siteScript, websiteId, codeLang, onCodeLangChange, onAddSpace }) => {
-  const BACKEND = process.env.REACT_APP_API_URL || 'https://yepper-backend-test.onrender.com';
+  const BACKEND = process.env.REACT_APP_API_URL || 'http://localhost:5000';
   const fallbackSrc = `${BACKEND}/api/ads/script/site/${websiteId}`;
   const extractSrc = (val) => {
     if (!val) return null;

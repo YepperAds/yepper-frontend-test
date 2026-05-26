@@ -1,5 +1,5 @@
 // WebsiteDetails.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import {  
@@ -14,7 +14,17 @@ import {
     Copy,
     XCircle,
     RefreshCw,
-    Edit
+    Edit,
+    Globe,
+    Users,
+    Eye,
+    Monitor,
+    Smartphone,
+    Tablet,
+    TrendingUp,
+    BarChart2,
+    MapPin,
+    ExternalLink,
 } from 'lucide-react';
 import CodeDisplay, { MasterIntegration } from '../components/codeDisplay';
 import AddNewCategory from './addNewCategory';
@@ -62,6 +72,13 @@ const WebsiteDetails = () => {
         isOpen: false,
         categoryId: null
     });
+
+    // Analytics state
+    const [analytics, setAnalytics] = useState(null);
+    const [analyticsLoading, setAnalyticsLoading] = useState(false);
+    const [analyticsRange, setAnalyticsRange] = useState(30);
+    const mapRef = useRef(null);
+    const leafletMapRef = useRef(null);
     useEffect(() => {
         fetchWebsiteData();
         if (token) {
@@ -69,6 +86,75 @@ const WebsiteDetails = () => {
             fetchWalletBalance();
         }
     }, [websiteId, token]);
+
+    // Fetch analytics when tab switches to analytics or range changes
+    useEffect(() => {
+        if (activeTab === 'analytics' && token) {
+            fetchAnalytics();
+        }
+    }, [activeTab, analyticsRange, token]);
+
+    // Init / re-render Leaflet map whenever analytics data arrives
+    useEffect(() => {
+        if (activeTab !== 'analytics' || !analytics?.mapPoints?.length) return;
+
+        const init = () => {
+            const container = mapRef.current;
+            if (!container || !window.L) return;
+
+            // Destroy previous map instance to avoid "already initialized" error
+            if (leafletMapRef.current) {
+                leafletMapRef.current.remove();
+                leafletMapRef.current = null;
+            }
+
+            const map = window.L.map(container, { zoomControl: true }).setView([20, 0], 2);
+            window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors',
+                maxZoom: 18,
+            }).addTo(map);
+
+            analytics.mapPoints.forEach(pt => {
+                const deviceColor = pt.device === 'mobile' ? '#3b82f6' : pt.device === 'tablet' ? '#8b5cf6' : '#10b981';
+                const circle = window.L.circleMarker([pt.lat, pt.lon], {
+                    radius: 6,
+                    fillColor: deviceColor,
+                    color: '#fff',
+                    weight: 1,
+                    opacity: 0.9,
+                    fillOpacity: 0.75,
+                });
+                circle.bindPopup(`<strong>${pt.city}, ${pt.country}</strong><br/>${pt.device}<br/>${new Date(pt.timestamp).toLocaleString()}`);
+                circle.addTo(map);
+            });
+
+            leafletMapRef.current = map;
+        };
+
+        // Load Leaflet CSS + JS lazily if not already present
+        if (!window.L) {
+            if (!document.getElementById('leaflet-css')) {
+                const link = document.createElement('link');
+                link.id = 'leaflet-css';
+                link.rel = 'stylesheet';
+                link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+                document.head.appendChild(link);
+            }
+            const script = document.createElement('script');
+            script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+            script.onload = init;
+            document.head.appendChild(script);
+        } else {
+            init();
+        }
+
+        return () => {
+            if (leafletMapRef.current) {
+                leafletMapRef.current.remove();
+                leafletMapRef.current = null;
+            }
+        };
+    }, [analytics, activeTab]);
     
     const { data: websites } = useQuery({
         queryKey: ['websites', user?._id || user?.id],
@@ -136,6 +222,21 @@ const WebsiteDetails = () => {
             const response = await api.get('/api/ad-categories/wallet');
             setWalletBalance(response.data.wallet?.balance || 0);
         } catch (error) {
+        }
+    };
+
+    const fetchAnalytics = async () => {
+        if (!token) return;
+        setAnalyticsLoading(true);
+        try {
+            const response = await api.get(`/api/analytics/${websiteId}?range=${analyticsRange}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            setAnalytics(response.data);
+        } catch (err) {
+            console.error('Failed to fetch analytics', err);
+        } finally {
+            setAnalyticsLoading(false);
         }
     };
 
@@ -581,6 +682,16 @@ const WebsiteDetails = () => {
                                 >
                                     Customize Ads
                                 </button>
+                                <button
+                                    onClick={() => setActiveTab('analytics')}
+                                    className={`px-6 py-2 font-medium transition-all border-l border-black ${
+                                        activeTab === 'analytics' 
+                                            ? 'bg-black text-white' 
+                                            : 'bg-white text-black hover:bg-gray-50'
+                                    }`}
+                                >
+                                    Analytics
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -966,7 +1077,202 @@ const WebsiteDetails = () => {
                 </div>
             )}
 
-            {customizationModal.isOpen && (
+                    {activeTab === 'analytics' && (
+                        <div className="space-y-8">
+                            {/* Header + range selector */}
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <h2 className="text-2xl font-bold text-black">Website Analytics</h2>
+                                    <p className="text-sm text-gray-500 mt-1">Real visitor data collected by your Yepper script</p>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    {[7, 30, 90].map(d => (
+                                        <button key={d}
+                                            onClick={() => setAnalyticsRange(d)}
+                                            className={`px-4 py-2 text-sm border border-black font-medium transition-colors ${analyticsRange === d ? 'bg-black text-white' : 'bg-white text-black hover:bg-gray-100'}`}
+                                        >
+                                            {d}d
+                                        </button>
+                                    ))}
+                                    <button onClick={fetchAnalytics} className="px-4 py-2 text-sm border border-black bg-white hover:bg-gray-100 flex items-center gap-1">
+                                        <RefreshCw size={14} /> Refresh
+                                    </button>
+                                </div>
+                            </div>
+
+                            {analyticsLoading ? (
+                                <div className="flex items-center justify-center h-64">
+                                    <div className="text-center">
+                                        <div className="animate-spin w-8 h-8 border-2 border-black border-t-transparent rounded-full mx-auto mb-3" />
+                                        <p className="text-gray-500 text-sm">Loading analytics...</p>
+                                    </div>
+                                </div>
+                            ) : !analytics ? (
+                                <div className="border border-black p-12 text-center">
+                                    <BarChart2 size={48} className="mx-auto mb-4 text-gray-400" />
+                                    <h3 className="text-lg font-semibold mb-2">No data yet</h3>
+                                    <p className="text-gray-500 text-sm max-w-md mx-auto">
+                                        Install your Yepper script on your website and visitor data will appear here automatically.
+                                    </p>
+                                </div>
+                            ) : (
+                                <>
+                                    {/* KPI cards */}
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                        {[
+                                            { label: 'Total Views', value: analytics.totalViews?.toLocaleString() || '0', icon: Eye },
+                                            { label: 'Unique Visitors', value: analytics.uniqueVisitors?.toLocaleString() || '0', icon: Users },
+                                            { label: 'Monthly Traffic', value: analytics.monthlyTraffic?.toLocaleString() || '0', icon: TrendingUp },
+                                            { label: 'Traffic Tier', value: analytics.trafficTier?.charAt(0).toUpperCase() + analytics.trafficTier?.slice(1) || 'Starter', icon: BarChart2 },
+                                        ].map(({ label, value, icon: Icon }) => (
+                                            <div key={label} className="border border-black p-5 bg-white">
+                                                <div className="flex items-center justify-between mb-3">
+                                                    <span className="text-xs font-medium text-gray-500 uppercase">{label}</span>
+                                                    <Icon size={16} className="text-gray-400" />
+                                                </div>
+                                                <p className="text-2xl font-bold text-black">{value}</p>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    {/* Daily chart (simple SVG bar chart) */}
+                                    {analytics.byDay?.length > 0 && (
+                                        <div className="border border-black p-6 bg-white">
+                                            <h3 className="text-sm font-semibold text-gray-700 uppercase mb-4">Views per Day</h3>
+                                            <div className="flex items-end gap-1 h-32">
+                                                {(() => {
+                                                    const max = Math.max(...analytics.byDay.map(d => d.count), 1);
+                                                    return analytics.byDay.map((d, i) => (
+                                                        <div key={i} className="flex-1 flex flex-col items-center gap-1 group relative">
+                                                            <div
+                                                                style={{ height: `${(d.count / max) * 100}%` }}
+                                                                className="w-full bg-black hover:bg-gray-600 transition-colors min-h-[2px]"
+                                                            />
+                                                            <span className="absolute -top-6 left-1/2 -translate-x-1/2 text-xs bg-black text-white px-1 py-0.5 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap pointer-events-none z-10">{d.count}</span>
+                                                        </div>
+                                                    ));
+                                                })()}
+                                            </div>
+                                            <div className="flex justify-between mt-2 text-xs text-gray-400">
+                                                <span>{analytics.byDay[0]?.date}</span>
+                                                <span>{analytics.byDay[analytics.byDay.length - 1]?.date}</span>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Map + country breakdown side by side */}
+                                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                                        {/* Leaflet map */}
+                                        <div className="lg:col-span-2 border border-black">
+                                            <div className="px-4 py-3 border-b border-black flex items-center gap-2">
+                                                <MapPin size={14} className="text-gray-500" />
+                                                <span className="text-sm font-semibold">Visitor Locations</span>
+                                                <span className="ml-auto text-xs text-gray-400">{analytics.mapPoints?.length || 0} data points</span>
+                                            </div>
+                                            <div className="p-2">
+                                                <div ref={mapRef} style={{ height: '340px', width: '100%' }} />
+                                            </div>
+                                            <div className="px-4 py-2 border-t border-gray-100 flex gap-4 text-xs text-gray-500">
+                                                <span className="flex items-center gap-1"><span className="inline-block w-3 h-3 rounded-full bg-green-500" /> Desktop</span>
+                                                <span className="flex items-center gap-1"><span className="inline-block w-3 h-3 rounded-full bg-blue-500" /> Mobile</span>
+                                                <span className="flex items-center gap-1"><span className="inline-block w-3 h-3 rounded-full bg-violet-500" /> Tablet</span>
+                                            </div>
+                                        </div>
+
+                                        {/* Country breakdown */}
+                                        <div className="border border-black">
+                                            <div className="px-4 py-3 border-b border-black flex items-center gap-2">
+                                                <Globe size={14} className="text-gray-500" />
+                                                <span className="text-sm font-semibold">Top Countries</span>
+                                            </div>
+                                            <div className="divide-y divide-gray-100 max-h-[380px] overflow-y-auto">
+                                                {analytics.byCountry?.length > 0 ? analytics.byCountry.map((c, i) => {
+                                                    const pct = analytics.totalViews > 0
+                                                        ? Math.round((c.count / analytics.totalViews) * 100)
+                                                        : 0;
+                                                    return (
+                                                        <div key={i} className="px-4 py-3">
+                                                            <div className="flex items-center justify-between mb-1">
+                                                                <span className="text-sm font-medium text-black">{c.country}</span>
+                                                                <span className="text-sm text-gray-500">{c.count.toLocaleString()}</span>
+                                                            </div>
+                                                            <div className="w-full bg-gray-100 h-1.5">
+                                                                <div className="h-1.5 bg-black" style={{ width: `${pct}%` }} />
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                }) : (
+                                                    <div className="px-4 py-8 text-center text-sm text-gray-400">No country data yet</div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Device breakdown + top referrers + top pages */}
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                        {/* Devices */}
+                                        <div className="border border-black">
+                                            <div className="px-4 py-3 border-b border-black text-sm font-semibold">Devices</div>
+                                            <div className="divide-y divide-gray-100">
+                                                {analytics.byDevice?.length > 0 ? analytics.byDevice.map((d, i) => {
+                                                    const Icon = d.device === 'mobile' ? Smartphone : d.device === 'tablet' ? Tablet : Monitor;
+                                                    const pct = analytics.totalViews > 0 ? Math.round((d.count / analytics.totalViews) * 100) : 0;
+                                                    return (
+                                                        <div key={i} className="px-4 py-3 flex items-center gap-3">
+                                                            <Icon size={16} className="text-gray-400 shrink-0" />
+                                                            <div className="flex-1 min-w-0">
+                                                                <div className="flex justify-between text-sm mb-1">
+                                                                    <span className="capitalize">{d.device}</span>
+                                                                    <span className="text-gray-500">{pct}%</span>
+                                                                </div>
+                                                                <div className="w-full bg-gray-100 h-1.5">
+                                                                    <div className="h-1.5 bg-black" style={{ width: `${pct}%` }} />
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                }) : (
+                                                    <div className="px-4 py-8 text-center text-sm text-gray-400">No device data</div>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        {/* Top referrers */}
+                                        <div className="border border-black">
+                                            <div className="px-4 py-3 border-b border-black text-sm font-semibold">Top Referrers</div>
+                                            <div className="divide-y divide-gray-100 max-h-64 overflow-y-auto">
+                                                {analytics.topReferrers?.length > 0 ? analytics.topReferrers.map((r, i) => (
+                                                    <div key={i} className="px-4 py-3 flex items-center justify-between gap-2">
+                                                        <span className="text-xs text-black truncate flex-1">{r.referrer || '(direct)'}</span>
+                                                        <span className="text-xs text-gray-500 shrink-0">{r.count}</span>
+                                                    </div>
+                                                )) : (
+                                                    <div className="px-4 py-8 text-center text-sm text-gray-400">No referrer data</div>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        {/* Top pages */}
+                                        <div className="border border-black">
+                                            <div className="px-4 py-3 border-b border-black text-sm font-semibold">Top Pages</div>
+                                            <div className="divide-y divide-gray-100 max-h-64 overflow-y-auto">
+                                                {analytics.topPages?.length > 0 ? analytics.topPages.map((p, i) => (
+                                                    <div key={i} className="px-4 py-3 flex items-center justify-between gap-2">
+                                                        <span className="text-xs text-black truncate flex-1">{p.path}</span>
+                                                        <span className="text-xs text-gray-500 shrink-0">{p.count}</span>
+                                                    </div>
+                                                )) : (
+                                                    <div className="px-4 py-8 text-center text-sm text-gray-400">No page data</div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                    )}
+
+                    {customizationModal.isOpen && (
                 <AdCustomizationModal
                     categoryId={customizationModal.categoryId}
                     onClose={handleCloseCustomization}
@@ -1003,7 +1309,7 @@ const WebsiteDetails = () => {
                         </div>
 
                         <div className="max-w-7xl mx-auto px-6">
-                            <AddNewCategory onSubmitSuccess={handleCloseCategoriesForm} />
+                            <AddNewCategory onSubmitSuccess={handleCloseCategoriesForm} monthlyTraffic={website?.monthlyTraffic} />
                         </div>
                     </div>
                 </div>
