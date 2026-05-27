@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Sparkles, Download, Share2, X, Menu, ChevronLeft, ChevronRight } from 'lucide-react';
 import api, { conversationAPI } from '../utils/api';
 
+const API_URL = process.env.REACT_APP_API_URL || 'https://yepper-backend-test.onrender.com';
 
 const MarketingAssistant = ({ user, isAuthenticated }) => {
   const [conversations, setConversations] = useState([]);

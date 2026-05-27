@@ -440,7 +440,7 @@ const CategoryCreation = () => {
     }
   };
 
-  const renderCategoryModal = () => {
+  const RenderCategoryModal = () => {
     const [showFullImage, setShowFullImage] = useState(false);
     
     if (!activeCategory) return null;
@@ -748,7 +748,7 @@ const CategoryCreation = () => {
       </div>
 
       {/* Modals */}
-      {renderCategoryModal()}
+      {<RenderCategoryModal />}
       {activeInfoModal && (
         <CategoryInfoModal 
           isOpen={!!activeInfoModal}
