@@ -60,6 +60,7 @@ const AddNewCategory = ({ onSubmitSuccess, monthlyTraffic: trafficProp }) => {
   const [activeInfoModal, setActiveInfoModal] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeFilter, setActiveFilter] = useState('all');
+  const [showFullImage, setShowFullImage] = useState(false);
 
   const isCategoryDataEmpty = (category) => {
     const data = categoryData[category];
@@ -305,6 +306,7 @@ const AddNewCategory = ({ onSubmitSuccess, monthlyTraffic: trafficProp }) => {
 
   const handleCategorySelect = (category) => {
       setActiveCategory(category);
+      setShowFullImage(false);
       if (!selectedCategories[category]) {
           setSelectedCategories(prev => ({
               ...prev,
@@ -315,6 +317,7 @@ const AddNewCategory = ({ onSubmitSuccess, monthlyTraffic: trafficProp }) => {
 
   const handleCloseModal = () => {
       setActiveCategory(null);
+      setShowFullImage(false);
   };
 
   const updateCategoryData = (category, field, value) => {
@@ -408,8 +411,6 @@ const AddNewCategory = ({ onSubmitSuccess, monthlyTraffic: trafficProp }) => {
   };
 
   const renderCategoryModal = () => {
-    const [showFullImage, setShowFullImage] = useState(false);
-    
     if (!activeCategory) return null;
     
     const details = categoryDetails[activeCategory];
