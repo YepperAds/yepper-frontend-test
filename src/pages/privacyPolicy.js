@@ -198,7 +198,7 @@ const PrivacyPolicy = () => {
               <a href="mailto:legal@yepper.cc" className="text-white underline">legal@yepper.cc</a>
               {' '}or{' '}
               <a href="mailto:support@yepper.cc" className="text-white underline">support@yepper.cc</a>
-            </p>
+            </p>    
           </div>
         </div>
 
