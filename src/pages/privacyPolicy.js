@@ -4,8 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { Container } from '../components/components';
 import Navbar from '../components/Navbar';
- 
-const PrivacyPolicy = () => {    
+
+const PrivacyPolicy = () => {
   const navigate = useNavigate();
 
   return (
