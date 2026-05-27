@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Sparkles, Download, Share2, X, Menu, ChevronLeft, ChevronRight } from 'lucide-react';
-import api, { conversationAPI } from '../utils/api';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 const API_URL = process.env.REACT_APP_API_URL || 'https://yepper-backend-test.onrender.com';
 
@@ -139,11 +138,11 @@ const MarketingAssistant = ({ user, isAuthenticated }) => {
       }
 
       // List items
-      if (line.match(/^[•\-\*\d+\.]\s/)) {
+      if (line.match(/^[•\-*\d+.]\s/)) {
         if (!currentList) {
           currentList = { items: [] };
         }
-        currentList.items.push(line.replace(/^[•\-\*\d+\.]\s/, '').trim());
+        currentList.items.push(line.replace(/^[•\-*\d+.]\s/, '').trim());
         continue;
       } else if (currentList) {
         parsed.lists.push(currentList);

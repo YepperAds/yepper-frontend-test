@@ -1,7 +1,7 @@
 // VerifyEmail.js
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { CheckCircle, XCircle, Mail } from 'lucide-react';
+import { Mail } from 'lucide-react';
 import { Button, Input } from '../components/components';
 import api from '../utils/api';
 

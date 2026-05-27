@@ -2,7 +2,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
-  Wallet as WalletIcon,
   ArrowLeft,
   Search,
   Download,
@@ -23,7 +22,7 @@ const Wallet = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [pagination, setPagination] = useState({});
+  const [setPagination] = useState({});
   const [transactionsLoading, setTransactionsLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredTransactions, setFilteredTransactions] = useState([]);
@@ -146,7 +145,6 @@ const Wallet = () => {
   const fetchTransactions = async (page = 1) => {
     setTransactionsLoading(true);
     try {
-      const token = getAuthToken();
       const response = await api.get(
         `/api/ad-categories/wallet/${walletType}/transactions?page=${page}&limit=10`, 
         {

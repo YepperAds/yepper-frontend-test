@@ -12,7 +12,7 @@ const Ads = () => {
     const navigate = useNavigate();
     const [ads, setAds] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [selectedFilter, setSelectedFilter] = useState('all');
+    const [selectedFilter] = useState('all');
     const [searchQuery, setSearchQuery] = useState('');
     const [filteredAds, setFilteredAds] = useState([]);
 
@@ -144,25 +144,6 @@ const Ads = () => {
         return <LoadingSpinner />;
     }
 
-    // Calculate filter counts - ONLY incomplete and active
-    const validAds = ads.filter(ad => {
-        const isIncomplete = !ad.websiteSelections || ad.websiteSelections.length === 0;
-        const hasActive = ad.websiteSelections && 
-            ad.websiteSelections.some(ws => ws.status === 'active' && !ws.isRejected);
-        return isIncomplete || hasActive;
-    });
-
-    const filterCounts = {
-        all: validAds.length,
-        incomplete: validAds.filter(ad => 
-            !ad.websiteSelections || ad.websiteSelections.length === 0
-        ).length,
-        active: validAds.filter(ad => 
-            ad.websiteSelections && 
-            ad.websiteSelections.some(ws => ws.status === 'active' && !ws.isRejected)
-        ).length
-    };
-
     return (
         <div className="min-h-screen bg-white">
             <header className="border-b border-gray-200 bg-white">
@@ -196,28 +177,6 @@ const Ads = () => {
                             />
                         </div>
                     </div>
-
-                    {/*
-                    <div className="flex items-center border border-black">
-                        {[
-                            { key: 'all', label: 'All', count: filterCounts.all },
-                            { key: 'incomplete', label: 'Incomplete', count: filterCounts.incomplete },
-                            { key: 'pending_payment', label: 'Pending Payment', count: filterCounts.pending_payment },
-                            { key: 'active', label: 'Active', count: filterCounts.active }
-                        ].map((filter, index, array) => (
-                            <button
-                                key={filter.key}
-                                onClick={() => setSelectedFilter(filter.key)}
-                                className={`px-3 py-2 text-xs font-medium transition-colors duration-200 ${
-                                    selectedFilter === filter.key 
-                                        ? 'bg-black text-white' 
-                                        : 'bg-white text-black hover:bg-gray-50'
-                                } ${index !== array.length - 1 ? 'border-r border-black' : ''}`}
-                            >
-                                {filter.label} ({filter.count})
-                            </button>
-                        ))}
-                    </div> */}
 
                     {/* Add Button */}
                     <div className="flex-shrink-0">

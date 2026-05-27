@@ -13,19 +13,17 @@ import api from '../utils/api';
 
 
 const Home = () => {
-  const { user, token, isAuthenticated } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
-  const [selectedFilter, setSelectedFilter] = useState('all');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedFilter] = useState('all');
+  const [searchQuery] = useState('');
   const [filteredAds, setFilteredAds] = useState([]);
   const [filteredWebsites, setFilteredWebsites] = useState([]);
   const [showAssistant, setShowAssistant] = useState(false);
   const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(true);
-  const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(false);
-
   
 
-  const { data: mixedAds, isLoading, error } = useQuery({
+  const { data: mixedAds, error } = useQuery({
     queryKey: ['mixedAds', user?._id || user?.id],
     queryFn: async () => {
       const userId = user?._id || user?.id;

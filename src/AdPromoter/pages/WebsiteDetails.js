@@ -4,14 +4,11 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import {  
     X,
-    Code,
     AlertCircle,
     ArrowLeft,
     Plus,
-    Trash2,
     Check,
     Palette,
-    Copy,
     XCircle,
     RefreshCw,
     Edit,
@@ -24,9 +21,8 @@ import {
     TrendingUp,
     BarChart2,
     MapPin,
-    ExternalLink,
 } from 'lucide-react';
-import CodeDisplay, { MasterIntegration } from '../components/codeDisplay';
+import { MasterIntegration } from '../components/codeDisplay';
 import AddNewCategory from './addNewCategory';
 import { Button, Card, CardContent, Heading, Text, Input, Badge, Grid, Container } from '../../components/components';
 import LoadingSpinner from '../../components/LoadingSpinner';
@@ -44,20 +40,16 @@ const WebsiteDetails = () => {
     const [result, setResult] = useState(true);
     const [website, setWebsite] = useState(null);
     const [categories, setCategories] = useState([]);
-    const [expandedCategory, setExpandedCategory] = useState(null);
     const [categoriesForm, setCategoriesForm] = useState(false);
     const [loading, setLoading] = useState(true);
     const [fetchError, setFetchError] = useState(null);
     const [categoryToDelete, setCategoryToDelete] = useState(null);
     const [isEditingWebsiteName, setIsEditingWebsiteName] = useState(false);
     const [tempWebsiteName, setTempWebsiteName] = useState('');
-    const [editingUserCount, setEditingUserCount] = useState(null);
-    const [newUserCount, setNewUserCount] = useState('');
     const [isLanguageModalOpen, setIsLanguageModalOpen] = useState(false);
     const [currentCategory, setCurrentCategory] = useState(null);
     const [selectedLanguage, setSelectedLanguage] = useState('english');
     const [activeTab, setActiveTab] = useState('spaces');
-    const [copiedText, setCopiedText] = useState('');
     const [pendingAds, setPendingAds] = useState([]);
     const [activeAds, setActiveAds] = useState([]);
     const [showAdModal, setShowAdModal] = useState(false);
@@ -344,7 +336,6 @@ const WebsiteDetails = () => {
             setRejectionReason('');
             
         } catch (error) {
-            const errorMessage = error.response?.data?.error || 'Failed to reject ad';
         } finally {
             setRejecting(null);
         }
@@ -382,99 +373,10 @@ const WebsiteDetails = () => {
     const handleCancelEditWebsiteName = () => {
         setIsEditingWebsiteName(false);
     };
-    
-    const copyToClipboard = (text, label) => {
-        navigator.clipboard.writeText(text);
-        setCopiedText(label);
-        setTimeout(() => setCopiedText(''), 2000);
-    };
-    
-    const handleCategoryClick = (id) => {
-        setExpandedCategory(expandedCategory === id ? null : id);
-    };
-    
-    const CodeBlock = ({ code, label }) => (
-        <div className="relative bg-black rounded-lg p-4 border border-gray-700">
-            <button
-                onClick={() => copyToClipboard(code, label)}
-                className="absolute top-2 right-2 p-2 rounded bg-gray-800 hover:bg-gray-700 transition-colors"
-            >
-                {copiedText === label ? (
-                    <Check size={16} className="text-green-400" />
-                ) : (
-                    <Copy size={16} className="text-gray-400" />
-                )}
-            </button>
-            <pre className="text-sm text-gray-300 overflow-x-auto pr-12">
-                <code>{code}</code>
-            </pre>
-        </div>
-    );
-    
-    const customizations = [
-    {
-      title: "Change Colors",
-      code: `
-.yepper-ad-item {
-    background: rgba(0, 100, 200, 0.25) !important;
-}`,
-      description: "Make ads blue"
-    },
-    {
-      title: "Round Corners",
-      code: `
-.yepper-ad-item {
-    border-radius: 20px !important;
-}`,
-      description: "Make ads more rounded"
-    },
-    {
-      title: "Custom Button",
-      code: `
-.yepper-ad-cta {
-    background: #ff6b6b !important;
-    color: white !important;
-}`,
-      description: "Red button style"
-    }
-  ];
 
     const handleOpenCategoriesForm = () => {
         setCategoriesForm(true);
         setResult(false);
-    };
-
-    const handleUserCountEdit = (category) => {
-        setEditingUserCount(category._id);
-        setNewUserCount(category.userCount.toString());
-    };
-
-    const handleUserCountSave = async (categoryId) => {
-        try {
-            const parsedCount = parseInt(newUserCount, 10);
-            
-            if (isNaN(parsedCount) || parsedCount < 0) {
-                return;
-            }
-
-            const response = await api.put(`/api/ad-categories/${categoryId}/reset-user-count`, {
-                newUserCount: parsedCount
-            });
-
-            const updatedCategories = categories.map(cat => 
-                cat._id === categoryId 
-                    ? { ...cat, userCount: response.data.category.userCount } 
-                    : cat
-            );
-            setCategories(updatedCategories);
-
-            setEditingUserCount(null);
-            setNewUserCount('');
-
-        } catch (error) {
-            
-            const errorMessage = error.response?.data?.message || 'Failed to update user count';
-        }
     };
 
     const handleCloseCategoriesForm = () => {
@@ -490,12 +392,6 @@ const WebsiteDetails = () => {
     const handleDeleteSuccess = () => {
         setCategoryToDelete(null);
         fetchWebsiteData();
-    };
-
-    const handleOpenLanguageModal = (category) => {
-        setCurrentCategory(category);
-        setSelectedLanguage(category.defaultLanguage || 'english');
-        setIsLanguageModalOpen(true);
     };
 
     // Called from MasterIntegration when user sets language for all spaces at once
@@ -516,11 +412,6 @@ const WebsiteDetails = () => {
         if (!currentCategory) return;
         
         try {
-            const response = await api.patch(
-                `/api/ad-categories/category/${currentCategory._id}/language`,
-                { defaultLanguage: selectedLanguage }
-            );
-            
             setCategories(categories.map(cat => 
                 cat._id === currentCategory._id 
                     ? { ...cat, defaultLanguage: selectedLanguage } 

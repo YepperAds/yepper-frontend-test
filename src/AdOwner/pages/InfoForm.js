@@ -27,8 +27,8 @@ function BusinessForm() {
   const initialData = getInitialData();
   const { file: initialFile, userId: initialUserId } = initialData;
   
-  const [file, setFile] = useState(initialFile || null);
-  const [userId, setUserId] = useState(initialUserId || null);
+  const [file] = useState(initialFile || null);
+  const [userId] = useState(initialUserId || null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -146,7 +146,7 @@ function BusinessForm() {
     });
 
     if (businessData.businessLink && 
-        !/^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/.test(businessData.businessLink)) {
+        !/^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/.test(businessData.businessLink)) {
       newErrors.businessLink = 'Please enter a valid URL';
     }
 
@@ -158,7 +158,7 @@ function BusinessForm() {
     return (
       Object.values(businessData).every((value) => value.trim()) &&
       (!businessData.businessLink || 
-       /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/.test(businessData.businessLink))
+       /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/.test(businessData.businessLink))
     );
   };
 

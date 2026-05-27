@@ -7,7 +7,7 @@ const AuthSuccess = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { handleAutoLogin } = useAuth(); // Changed from 'login' to 'handleAutoLogin'
-  const [error, setError] = useState(null);
+  const [error] = useState(null);
 
   useEffect(() => {
     const processAuth = async () => {

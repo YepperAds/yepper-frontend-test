@@ -1,17 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, AlertCircle } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
 import { Button, Container, Badge } from '../../components/components';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import api from '../../utils/api';
 
 
 const UpdateAdSelections = () => {
-    const { token } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
-    const { adId, isUpdate } = location.state || {};
+    const { adId } = location.state || {};
 
     const [ad, setAd] = useState(null);
     const [websites, setWebsites] = useState([]);

@@ -4,10 +4,8 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { 
     Info, 
     Check, 
-    Users,
     X,
     ArrowLeft,
-    FileText,
     Monitor,
     Smartphone,
     Sidebar as SidebarIcon,
@@ -44,8 +42,8 @@ import api from '../../utils/api';
 
 
 const CategoryCreation = () => {
-  const [user, setUser] = useState(null); // NEW: Custom user state
-  const [loading, setLoading] = useState(true); // NEW: Loading state for auth check
+  const [setUser] = useState(null); // NEW: Custom user state
+  const [setLoading] = useState(true); // NEW: Loading state for auth check
   const { websiteId } = useParams();
   const { state } = useLocation();
   const navigate = useNavigate();

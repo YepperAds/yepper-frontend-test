@@ -9,7 +9,7 @@ const PaymentCallback2 = () => {
   const navigate = useNavigate();
   const [status, setStatus] = useState('verifying');
   const [message, setMessage] = useState('Verifying your payment...');
-  const [details, setDetails] = useState(null);
+  const [setDetails] = useState(null);
 
   useEffect(() => {
     const verifyPayment = async () => {

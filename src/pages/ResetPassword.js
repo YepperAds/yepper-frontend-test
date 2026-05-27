@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { Button, Input, Container } from '../components/components';
-import api from '../utils/api';
 
 
 const ResetPassword = () => {

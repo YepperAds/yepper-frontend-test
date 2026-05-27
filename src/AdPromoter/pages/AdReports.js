@@ -1,15 +1,12 @@
 // AdReports.js
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { 
   Clock, 
   AlertTriangle, 
   CheckCircle, 
   XCircle, 
   Eye, 
-  DollarSign,
   RefreshCw,
-  Wallet,
   AlertCircle,
   X,
   Search
@@ -21,7 +18,6 @@ import api from '../../utils/api';
 
 
 const AdReports = () => {
-  const navigate = useNavigate();
   const [pendingAds, setPendingAds] = useState([]);
   const [activeAds, setActiveAds] = useState([]);
   const [loading, setLoading] = useState(true);

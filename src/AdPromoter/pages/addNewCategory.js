@@ -3,10 +3,7 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { 
     Info, 
     Check, 
-    Users,
     X,
-    FileText,
-    ArrowRight,
     Monitor,
     Smartphone,
     Sidebar as SidebarIcon,
@@ -18,7 +15,6 @@ import {
     PieChart,
     Layout,
     Maximize,
-    Star,
     Search
 } from 'lucide-react';
 import { Button, Grid, Input, TextArea } from '../../components/components';
@@ -45,11 +41,10 @@ import api from '../../utils/api';
 
 const AddNewCategory = ({ onSubmitSuccess, monthlyTraffic: trafficProp }) => {
   const [user, setUser] = useState(null); // NEW: Custom user state
-  const [loading, setLoading] = useState(true); // NEW: Loading state for auth check
+  const [setLoading] = useState(true); // NEW: Loading state for auth check
   const { websiteId } = useParams();
   const { state } = useLocation();
   const navigate = useNavigate();
-  const [websiteDetails] = useState(state?.websiteDetails || null);
   const [websiteMonthlyTraffic, setWebsiteMonthlyTraffic] = useState(
     trafficProp || state?.websiteDetails?.monthlyTraffic || null
   );
@@ -299,11 +294,6 @@ const AddNewCategory = ({ onSubmitSuccess, monthlyTraffic: trafficProp }) => {
       });
   }, [categoryDetails, searchTerm, activeFilter]);
 
-  const handleInfoClick = (e, category) => {
-      e.stopPropagation();
-      setActiveInfoModal(category);
-  };
-
   const handleCategorySelect = (category) => {
       setActiveCategory(category);
       setShowFullImage(false);
@@ -391,15 +381,6 @@ const AddNewCategory = ({ onSubmitSuccess, monthlyTraffic: trafficProp }) => {
                 return { ...response.data, name: category.categoryName };
             })
         );
-  
-        const categoriesWithId = responses.reduce((acc, category) => {
-            acc[category.name.toLowerCase()] = { 
-                id: category._id, 
-                price: category.price,
-                apiCodes: category.apiCodes
-            };
-            return acc;
-        }, {});
   
         onSubmitSuccess();
     } catch (error) {

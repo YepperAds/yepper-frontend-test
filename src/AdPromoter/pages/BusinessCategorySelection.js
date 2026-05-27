@@ -1,13 +1,12 @@
 // BusinessCategorySelection.js - Modified version
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Check, ArrowLeft, Building2, Code, Utensils, Home, Car, Heart, Gamepad2, Shirt, BookOpen, Briefcase, Plane, Music, Camera, Gift, Shield, Zap, Loader } from 'lucide-react';
 import { Button, Grid, Badge, Container } from '../../components/components';
 import api from '../../utils/api';
 
 
 function BusinessCategorySelection() {
-  const { websiteId } = useParams(); // This is tempId
   const navigate = useNavigate();
   const location = useLocation();
   
@@ -26,7 +25,7 @@ function BusinessCategorySelection() {
     return {};
   };
 
-  const [websiteDetails, setWebsiteDetails] = useState(getWebsiteDetails());
+  const [websiteDetails] = useState(getWebsiteDetails());
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);

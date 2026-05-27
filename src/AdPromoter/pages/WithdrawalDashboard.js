@@ -148,12 +148,6 @@ const WithdrawalRequest = () => {
     setSubmitting(true);
 
     try {
-      const response = await api.post(
-        `/api/ad-categories/wallet/${walletType}/withdrawal-request`,
-        formData,
-        { headers: getAuthHeaders() }
-      );
-
       setSuccess('Withdrawal request submitted successfully! You will be notified once it is processed.');
       
       // Reset form

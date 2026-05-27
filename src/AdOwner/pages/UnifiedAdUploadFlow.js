@@ -1,16 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
-import api, { websiteAPI, categoryAPI } from '../../utils/api';
+import { websiteAPI, categoryAPI } from '../../utils/api';
 import {
   Upload, ArrowLeft, Check, AlertTriangle, X,
-  Mail, Lock, User, Eye, EyeOff, Building2, Tag,
+  Building2, Tag,
   MapPin, FileText, Globe, Search, Cloud, Sparkles, RotateCcw
 } from 'lucide-react';
 
 const UnifiedAdUploadFlow = () => {
   const [currentStep, setCurrentStep] = useState(1);
-  const [showAuthModal, setShowAuthModal] = useState(false);
-  const [authMode, setAuthMode] = useState('login');
-  const [showPassword, setShowPassword] = useState(false);
   const fileInputRef = useRef(null);
 
   // Step 1: File Upload
@@ -48,18 +45,8 @@ const UnifiedAdUploadFlow = () => {
 
   // UI States
   const [errors, setErrors] = useState({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [verificationSent, setVerificationSent] = useState(false);
-  const [maskedEmail, setMaskedEmail] = useState('');
   const [totalCost, setTotalCost] = useState(0);
-
-  // Auth form data
-  const [authFormData, setAuthFormData] = useState({
-    email: '',
-    password: '',
-    name: ''
-  });
 
   // Business categories
   const businessCategories = [
@@ -343,19 +330,11 @@ const UnifiedAdUploadFlow = () => {
     processFile(e.dataTransfer.files[0]);
   };
 
-  const formatFileSize = (bytes) => {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-  };
-
   const isFormValid = () => {
     return (
       Object.values(businessData).every((value) => value.trim()) &&
       (!businessData.businessLink || 
-       /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/.test(businessData.businessLink))
+       /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/.test(businessData.businessLink))
     );
   };
 
@@ -393,12 +372,6 @@ const UnifiedAdUploadFlow = () => {
 
   const toggleCategoryExpansion = (categoryId) => {
     setExpandedCategory(expandedCategory === categoryId ? null : categoryId);
-  };
-
-  const handleAuthInputChange = (e) => {
-    const { name, value } = e.target;
-    setAuthFormData(prev => ({ ...prev, [name]: value }));
-    setErrors(prev => ({ ...prev, [name]: '' }));
   };
 
   const handleNext = () => {

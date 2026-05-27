@@ -1,6 +1,6 @@
 // AdModalData.js
 import React, { useEffect } from 'react';
-import { Globe, Eye, XCircle, Clock, CheckCircle, MousePointer, ExternalLink, Mail, Phone, X } from 'lucide-react';
+import { Globe, ExternalLink, X } from 'lucide-react';
 import { useNavigate } from "react-router-dom";
 import { useAuth } from '../../context/AuthContext';
 import { Button } from '../../components/components';

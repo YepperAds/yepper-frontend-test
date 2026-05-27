@@ -1,13 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
-  Upload, ArrowLeft, Check, Info, AlertTriangle,
+  Upload, ArrowLeft, Check, AlertTriangle,
   Building2, Code, Utensils, Home, Car, Heart, Gamepad2, 
   Shirt, BookOpen, Briefcase, Plane, Music, Camera, Gift, 
-  Shield, Zap, Loader, X, Mail, Lock, User, Eye, EyeOff,
+  Shield, Zap, Loader, X, Mail, Eye, EyeOff,
   Layers, Monitor, Smartphone, Search, CheckCircle,
   Sidebar as SidebarIcon, PanelRight, PanelLeft, AlignJustify,
-  PanelBottom, PieChart, Layout, Maximize, Globe, TrendingUp,
+  PanelBottom, Layout, Maximize, Globe, TrendingUp,
   BadgeCheck, AlertCircle, DollarSign
 } from 'lucide-react';
 import LoadingSpinner from '../../components/LoadingSpinner';

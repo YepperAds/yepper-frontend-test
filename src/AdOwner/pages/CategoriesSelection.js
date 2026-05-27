@@ -60,7 +60,6 @@ const Categories = () => {
     initialData.selectedCategories || []
   );
   const [error, setError] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [expandedCategory, setExpandedCategory] = useState(null);
   const [showPaymentSummary, setShowPaymentSummary] = useState(false);
@@ -167,7 +166,6 @@ const Categories = () => {
 
   useEffect(() => {
     const fetchCategories = async () => {
-      setIsLoading(true);
       try {
         const promises = selectedWebsites.map(async (websiteId) => {
           const websiteResponse = await fetch(`/api/createWebsite/website/${websiteId}`);
@@ -204,7 +202,6 @@ const Categories = () => {
       } catch (error) {
         setError('Failed to load categories. Please try again.');
       } finally {
-        setIsLoading(false);
       }
     };
 

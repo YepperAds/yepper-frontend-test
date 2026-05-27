@@ -1,5 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { X, Save, Monitor, Smartphone, Tablet, AlertCircle, Eye, Code } from 'lucide-react';
+import React, { useRef } from 'react';
 
 // CSS Editor Component with Syntax Highlighting
 const CSSEditor = ({ value, onChange, onValidate }) => {

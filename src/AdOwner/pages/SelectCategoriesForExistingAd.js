@@ -3,14 +3,9 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
   Check,
-  DollarSign,
   ArrowLeft,
   Eye,
-  CreditCard,
-  ShoppingCart,
-  AlertCircle,
   Wallet,
-  RefreshCcw
 } from 'lucide-react';
 import { Button, Text, Heading, Container, Badge } from '../../components/components';
 import LoadingSpinner from '../../components/LoadingSpinner';
@@ -37,7 +32,7 @@ import api from '../../utils/api';
 const SelectCategoriesForExistingAd = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { adId, selectedWebsites, ad, isReassignment, availableRefund } = location.state || {};
+  const { adId, selectedWebsites, ad, isReassignment } = location.state || {};
   
   const [categoriesByWebsite, setCategoriesByWebsite] = useState([]);
   const [selectedCategories, setSelectedCategories] = useState([]);
@@ -45,10 +40,10 @@ const SelectCategoriesForExistingAd = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPaymentSummary, setShowPaymentSummary] = useState(false);
   const [paymentSelections, setPaymentSelections] = useState([]);
-  const [walletInfo, setWalletInfo] = useState({ balance: 0, hasWallet: false });
+  const [setWalletInfo] = useState({ balance: 0, hasWallet: false });
   const [expandedCategory, setExpandedCategory] = useState(null);
   const [error, setError] = useState(false);
-  const [totalCost, setTotalCost] = useState(0);
+  const [setTotalCost] = useState(0);
   
   const [paymentBreakdown, setPaymentBreakdown] = useState({
     totalCost: 0,
@@ -256,25 +251,6 @@ const SelectCategoriesForExistingAd = () => {
     setExpandedCategory(expandedCategory === categoryId ? null : categoryId);
   };
 
-  const getSelectedCategoryDetails = () => {
-    const details = [];
-    selectedCategories.forEach(categoryId => {
-      categoriesByWebsite.forEach(website => {
-        const category = website.categories.find(cat => cat._id === categoryId);
-        if (category) {
-          details.push({
-            categoryId: category._id,
-            websiteId: website.websiteId,
-            websiteName: website.websiteName,
-            categoryName: category.categoryName,
-            price: category.price
-          });
-        }
-      });
-    });
-    return details;
-  };
-
   const handleProceedToPayment = async () => {
     if (selectedCategories.length === 0) {
       setError(true);
@@ -350,10 +326,8 @@ const SelectCategoriesForExistingAd = () => {
         }
 
         if (response.data.allPaid) {
-          const message = response.data.summary?.message || response.data.message || 'Payment completed successfully!';
           navigate('/my-ads');
         } else {
-          const message = response.data.summary?.message || response.data.message || 'Redirecting to complete payment...';
           
           if (response.data.paymentUrl) {
             window.location.href = response.data.paymentUrl;
@@ -362,7 +336,7 @@ const SelectCategoriesForExistingAd = () => {
           }
         }
       } else {
-        throw new Error(response.data.error || response.data.message || 'Payment failed');
+        throw new Error(response.data.error || 'Payment failed');
       }
     } catch (error) {
       let errorMessage = 'Payment failed';
@@ -384,7 +358,7 @@ const SelectCategoriesForExistingAd = () => {
   };
 
   const getPaymentButtonText = () => {
-    const { totalCost, paidFromWallet, paidFromRefunds, needsExternalPayment, isReassignment } = paymentBreakdown;
+    const { paidFromWallet, paidFromRefunds, needsExternalPayment, isReassignment } = paymentBreakdown;
     
     const actualRefundAmount = isReassignment ? 0 : paidFromRefunds;
     

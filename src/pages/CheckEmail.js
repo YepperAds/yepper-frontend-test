@@ -1,6 +1,6 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
-import { Button, Badge, Grid, Container } from '../components/components';
+import { Container } from '../components/components';
 
 const CheckEmail = () => {
   const location = useLocation();

@@ -1,13 +1,12 @@
 // AvailableAdsForWebOwners.js - Page for web owners to find rejected/available ads
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Search, Filter, Eye, Plus, Clock, CheckCircle, XCircle } from 'lucide-react';
+import { useParams } from 'react-router-dom';
+import { Search, Eye, Plus, Clock, CheckCircle, XCircle } from 'lucide-react';
 import api from '../../utils/api';
 
 
 function AvailableAdsForWebOwners() {
   const { websiteId } = useParams();
-  const navigate = useNavigate();
   const [availableAds, setAvailableAds] = useState([]);
   const [filteredAds, setFilteredAds] = useState([]);
   const [loading, setLoading] = useState(true);

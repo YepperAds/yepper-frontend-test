@@ -1,12 +1,10 @@
 // pendingWebAds.js
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from "react-router-dom";
-import { AlertCircle, ArrowLeft, CheckCircle, Clock, Loader } from 'lucide-react';
+import { AlertCircle, ArrowLeft, Loader } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { Button, Grid, Badge, Container } from '../../components/components';
 import LoadingSpinner from '../../components/LoadingSpinner';
-import api from '../../utils/api';
-
 
 const PendingAds = () => {
   const { user, token } = useAuth();

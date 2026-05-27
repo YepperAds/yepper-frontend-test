@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { Eye, EyeOff, ArrowLeft, Globe,Building2, Link as LinkIcon, MapPin, FileText, Upload, X } from 'lucide-react';
 import LoadingSpinner from '../../components/LoadingSpinner';
@@ -8,13 +8,11 @@ import api from '../../utils/api';
 
 function DirectAdvertise() {
   const { user, isAuthenticated, login, signup } = useAuth();
-  const navigate = useNavigate();
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   
   const websiteId = queryParams.get('websiteId');
   const categoryId = queryParams.get('categoryId');
-  const verificationReturn = queryParams.get('verificationReturn');
   
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
