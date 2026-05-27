@@ -1,62 +1,16 @@
-// PricingTiers.js — auto-prices based on traffic tier from the website
-import React, { useEffect } from 'react';
-import { TrendingUp, Users, Info } from 'lucide-react';
+// PricingTiers.js — silent auto-pricer: emits price based on traffic, renders nothing.
+// Prices are NOT shown to web owners during space selection.
+// Earnings are revealed in WebsiteDetails once real traffic is detected.
+import { useEffect } from 'react';
 
-// Yepper pricing model (RWF) — matches yepper_web_owner_pricing.xlsx
 const TRAFFIC_TIERS = [
-  {
-    tier: 'starter',
-    label: 'Starter',
-    min: 500,
-    max: 2000,
-    basePrice: 6000,      // Banner base (RWF)
-    ownerPct: 0.70,
-    color: '#6B7280',
-    bg: '#F9FAFB',
-  },
-  {
-    tier: 'basic',
-    label: 'Basic',
-    min: 2001,
-    max: 10000,
-    basePrice: 15000,
-    ownerPct: 0.70,
-    color: '#2563EB',
-    bg: '#EFF6FF',
-  },
-  {
-    tier: 'standard',
-    label: 'Standard',
-    min: 10001,
-    max: 50000,
-    basePrice: 35000,
-    ownerPct: 0.70,
-    color: '#7C3AED',
-    bg: '#F5F3FF',
-  },
-  {
-    tier: 'premium',
-    label: 'Premium',
-    min: 50001,
-    max: 200000,
-    basePrice: 80000,
-    ownerPct: 0.70,
-    color: '#B45309',
-    bg: '#FFFBEB',
-  },
-  {
-    tier: 'elite',
-    label: 'Elite',
-    min: 200001,
-    max: Infinity,
-    basePrice: 180000,
-    ownerPct: 0.70,
-    color: '#000000',
-    bg: '#F0FDF4',
-  },
+  { tier: 'starter',  label: 'Starter',  min: 500,    max: 2000,   basePrice: 6000   },
+  { tier: 'basic',    label: 'Basic',    min: 2001,   max: 10000,  basePrice: 15000  },
+  { tier: 'standard', label: 'Standard', min: 10001,  max: 50000,  basePrice: 35000  },
+  { tier: 'premium',  label: 'Premium',  min: 50001,  max: 200000, basePrice: 80000  },
+  { tier: 'elite',    label: 'Elite',    min: 200001, max: Infinity,basePrice: 180000 },
 ];
 
-// Format multipliers per space type (matches xlsx Ad Format Definitions)
 const FORMAT_MULTIPLIERS = {
   'Header': 1.0,
   'Above The Fold': 1.0,
@@ -88,22 +42,16 @@ export function getAutoPrice(monthlyVisitors, spaceType) {
   return Math.round(tier.basePrice * multiplier);
 }
 
-const formatRWF = (n) => `RWF ${Number(n).toLocaleString()}`;
-
+// Silent component — emits price data upward but renders nothing visible.
 const PricingTiers = ({ selectedPrice, onPriceSelect, monthlyTraffic, spaceType }) => {
-  // If traffic is 0 or not yet measured, default to starter tier (1000 visitors).
-  // Real traffic is auto-tracked by the Yepper script after installation.
   const effectiveTraffic = (monthlyTraffic && parseInt(monthlyTraffic) >= 500)
     ? parseInt(monthlyTraffic)
     : 1000;
-  const isEstimated = !monthlyTraffic || parseInt(monthlyTraffic) < 500;
+  const tier        = getTierFromTraffic(effectiveTraffic);
+  const autoPrice   = getAutoPrice(effectiveTraffic, spaceType);
+  const ownerEarns  = Math.round(autoPrice * 0.70);
+  const yepperCut   = autoPrice - ownerEarns;
 
-  const tier = getTierFromTraffic(effectiveTraffic);
-  const autoPrice = getAutoPrice(effectiveTraffic, spaceType);
-  const ownerEarns = Math.round(autoPrice * tier.ownerPct);
-  const yepperCut = autoPrice - ownerEarns;
-
-  // Auto-emit price whenever traffic or spaceType changes
   useEffect(() => {
     onPriceSelect({
       price: autoPrice,
@@ -113,57 +61,10 @@ const PricingTiers = ({ selectedPrice, onPriceSelect, monthlyTraffic, spaceType 
       ownerEarns,
       yepperCut,
     });
-  // eslint-disable-line
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [effectiveTraffic, spaceType]);
 
-  return (
-    <div className="space-y-5">
-      <h3 className="text-lg font-semibold text-black">Pricing — Based on Your Traffic</h3>
-
-      {/* Tier badge */}
-      <div
-        className="border p-4 flex items-center justify-between"
-        style={{ borderColor: tier.color, backgroundColor: tier.bg }}
-      >
-        <div className="flex items-center gap-3">
-          <TrendingUp size={22} style={{ color: tier.color }} />
-          <div>
-            <span className="text-xs font-semibold uppercase tracking-wide" style={{ color: tier.color }}>
-              {tier.label} Tier
-            </span>
-            <p className="text-sm text-gray-600 mt-0.5 flex items-center gap-1">
-              <Users size={13} />
-              {Number(tier.min).toLocaleString()}–{tier.max === Infinity ? '200K+' : Number(tier.max).toLocaleString()} monthly visitors
-            </p>
-          </div>
-        </div>
-        <span className="text-xs text-gray-500">
-          {isEstimated ? 'starter tier (traffic not yet measured)' : 'detected from your traffic'}
-        </span>
-      </div>
-
-      {/* Price breakdown */}
-      <div className="border border-black p-5 space-y-3 bg-white">
-        <div className="flex justify-between items-center">
-          <span className="text-sm text-gray-600">Advertiser pays (monthly)</span>
-          <span className="text-base font-bold text-black">{formatRWF(autoPrice)}</span>
-        </div>
-        <div className="flex justify-between items-center">
-          <span className="text-sm text-gray-600">Yepper commission (30%)</span>
-          <span className="text-sm text-gray-500">− {formatRWF(yepperCut)}</span>
-        </div>
-        <div className="border-t border-gray-200 pt-3 flex justify-between items-center">
-          <span className="text-sm font-semibold text-black">You earn per space / month</span>
-          <span className="text-lg font-bold text-green-700">{formatRWF(ownerEarns)}</span>
-        </div>
-      </div>
-
-      <p className="text-xs text-gray-400 flex items-start gap-1.5">
-        <Info size={12} className="mt-0.5 shrink-0" />
-        Price is automatically set by Yepper based on your traffic tier. You will earn 70% of each booking.
-      </p>
-    </div>
-  );
+  return null; // No UI — pricing is revealed in WebsiteDetails after traffic is tracked
 };
 
 export default PricingTiers;

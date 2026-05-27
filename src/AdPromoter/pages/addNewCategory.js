@@ -462,14 +462,23 @@ const AddNewCategory = ({ onSubmitSuccess, monthlyTraffic: trafficProp }) => {
             ) : (
               /* Side by Side Layout */
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {/* Left Side - Pricing and Inputs */}
+                {/* Left Side - Inputs */}
                 <div className="space-y-6">
+                  {/* Silent price emitter — computes price internally, reveals earnings in WebsiteDetails after traffic is tracked */}
                   <PricingTiers 
                     selectedPrice={categoryData[activeCategory] || {}}
                     onPriceSelect={(price) => updateCategoryData(activeCategory, 'price', price)}
                     monthlyTraffic={websiteMonthlyTraffic}
                     spaceType={categoryDetails[activeCategory]?.spaceType}
                   />
+
+                  {/* Earnings hint — shown instead of prices */}
+                  <div className="border border-black bg-gray-50 p-4 rounded-none">
+                    <p className="text-sm font-semibold text-black mb-1">💰 Earnings revealed after traffic is tracked</p>
+                    <p className="text-xs text-gray-600">
+                      Once you add this space and install the Yepper script on your site, we'll detect your real traffic and show you exactly how much you'll earn per month — right inside your website details.
+                    </p>
+                  </div>
   
                   <div className="space-y-6">
                     <div className="w-full">
@@ -543,7 +552,7 @@ const AddNewCategory = ({ onSubmitSuccess, monthlyTraffic: trafficProp }) => {
                 <Button
                   variant="secondary"
                   onClick={handleNext}
-                  disabled={!categoryData[activeCategory]?.price}
+                  disabled={!categoryData[activeCategory]?.price && !categoryData[activeCategory]?.tier}
                   size="lg"
                 >
                   Save & Continue
@@ -664,9 +673,9 @@ const AddNewCategory = ({ onSubmitSuccess, monthlyTraffic: trafficProp }) => {
                     <span className="text-xs text-gray-500 uppercase">
                       {details.position}
                     </span>
-                    {completedCategories.includes(category) && categoryData[category]?.price && (
-                      <span className="text-sm font-bold text-black">
-                        ${categoryData[category].price}/mo
+                    {completedCategories.includes(category) && (
+                      <span className="text-xs text-green-600 font-medium">
+                        ✓ Added
                       </span>
                     )}
                   </div>

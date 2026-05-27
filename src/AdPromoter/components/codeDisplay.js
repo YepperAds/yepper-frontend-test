@@ -101,7 +101,7 @@ const CodeBlock = ({ code, activeLang, onLangChange }) => (
 
 // ── Left panel: auto script ───────────────────────────────────
 const AutoPanel = ({ siteScript, websiteId, codeLang, onCodeLangChange, onAddSpace }) => {
-  const BACKEND = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+  const BACKEND = process.env.REACT_APP_API_URL || 'https://yepper-backend-test.onrender.com';
   const fallbackSrc = `${BACKEND}/api/ads/script/site/${websiteId}`;
   const extractSrc = (val) => {
     if (!val) return null;
@@ -197,7 +197,7 @@ const ManualPanel = ({ categories, codeLang, onCodeLangChange, onAddSpace, onDel
 );
 
 // ── Master container ──────────────────────────────────────────
-export const MasterIntegration = ({ website, categories = [], onAddSpace, onLanguageChange, onDeleteCategory, onEditLanguage, onEditUserCount }) => {
+export const MasterIntegration = ({ website, categories = [], onAddSpace, onLanguageChange, onDeleteCategory, onEditLanguage, onEditUserCount, earningsSummary }) => {
   const [open, setOpen]             = useState(true);
   const [codeLang, setCodeLang]     = useState('HTML');
   const [humanLang, setHumanLang]   = useState('english');
@@ -301,30 +301,37 @@ export const MasterIntegration = ({ website, categories = [], onAddSpace, onLang
                 {categories.length} Ad Space{categories.length !== 1 ? 's' : ''} on this site
               </p>
               <div className="flex flex-wrap gap-2">
-                {categories.map(cat => (
-                  <div
-                    key={cat._id}
-                    className="flex items-center gap-2 bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-1.5 text-xs group"
-                  >
-                    <span className="font-semibold text-zinc-200">{cat.categoryName || cat.spaceType}</span>
-                    <span className="text-zinc-600">·</span>
-                    <span className="text-zinc-400">${cat.price}/ad</span>
-                    <span className="text-zinc-600">·</span>
-                    <span className="text-zinc-400">{cat.userCount} user{cat.userCount !== 1 ? 's' : ''}</span>
-                    <span className="text-zinc-600">·</span>
-                    <span className="text-zinc-500 capitalize">{cat.defaultLanguage || currentHumanLabel}</span>
-                    {/* Delete button in summary strip */}
-                    {onDeleteCategory && (
-                      <button
-                        onClick={() => onDeleteCategory(cat)}
-                        className="ml-1 opacity-0 group-hover:opacity-100 flex items-center justify-center w-4 h-4 rounded text-red-500 hover:text-red-400 hover:bg-red-950 transition-all"
-                        title="Delete space"
+                {categories.map(cat => {
+                    const earning = earningsSummary?.categories?.find(e => e.categoryId?.toString() === cat._id?.toString());
+                    return (
+                      <div
+                        key={cat._id}
+                        className="flex items-center gap-2 bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-1.5 text-xs group"
                       >
-                        <X className="w-3 h-3" />
-                      </button>
-                    )}
-                  </div>
-                ))}
+                        <span className="font-semibold text-zinc-200">{cat.categoryName || cat.spaceType}</span>
+                        <span className="text-zinc-600">·</span>
+                        {earning?.available ? (
+                          <span className="text-green-400 font-medium">RWF {Number(earning.ownerEarns).toLocaleString()}/mo</span>
+                        ) : (
+                          <span className="text-zinc-500 italic">earnings pending traffic</span>
+                        )}
+                        <span className="text-zinc-600">·</span>
+                        <span className="text-zinc-400">{cat.userCount} user{cat.userCount !== 1 ? 's' : ''}</span>
+                        <span className="text-zinc-600">·</span>
+                        <span className="text-zinc-500 capitalize">{cat.defaultLanguage || currentHumanLabel}</span>
+                        {/* Delete button in summary strip */}
+                        {onDeleteCategory && (
+                          <button
+                            onClick={() => onDeleteCategory(cat)}
+                            className="ml-1 opacity-0 group-hover:opacity-100 flex items-center justify-center w-4 h-4 rounded text-red-500 hover:text-red-400 hover:bg-red-950 transition-all"
+                            title="Delete space"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })}
               </div>
             </div>
           )}

@@ -77,6 +77,7 @@ const WebsiteDetails = () => {
     const [analytics, setAnalytics] = useState(null);
     const [analyticsLoading, setAnalyticsLoading] = useState(false);
     const [analyticsRange, setAnalyticsRange] = useState(30);
+    const [earningsSummary, setEarningsSummary] = useState(null);
     const mapRef = useRef(null);
     const leafletMapRef = useRef(null);
     useEffect(() => {
@@ -86,6 +87,23 @@ const WebsiteDetails = () => {
             fetchWalletBalance();
         }
     }, [websiteId, token]);
+
+    // Fetch earnings summary (traffic-based) whenever website or categories change
+    useEffect(() => {
+        if (!websiteId || !token) return;
+        const fetchEarnings = async () => {
+            try {
+                const res = await api.get(`/api/websites/${websiteId}/earnings-summary`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                setEarningsSummary(res.data);
+            } catch (err) {
+                // Non-fatal — earnings just won't show
+                setEarningsSummary({ available: false, reason: 'error' });
+            }
+        };
+        fetchEarnings();
+    }, [websiteId, token, categories.length]); // re-fetch when categories count changes
 
     // Fetch analytics when tab switches to analytics or range changes
     useEffect(() => {
@@ -698,6 +716,44 @@ const WebsiteDetails = () => {
                     
                     {activeTab === 'spaces' && (
                         <div>
+                            {/* ── Earnings Panel — shown only when real traffic is detected ── */}
+                            {earningsSummary?.available ? (
+                                <div className="mb-6 border border-green-700 bg-green-50 p-5 rounded-none">
+                                    <div className="flex items-center justify-between mb-3">
+                                        <div>
+                                            <p className="text-sm font-bold text-green-800">💰 Your Estimated Monthly Earnings</p>
+                                            <p className="text-xs text-green-700 mt-0.5">
+                                                Based on {Number(earningsSummary.monthlyTraffic).toLocaleString()} visitors/month detected by your Yepper script
+                                                &nbsp;·&nbsp; <span className="capitalize font-semibold">{earningsSummary.trafficTier}</span> tier
+                                            </p>
+                                        </div>
+                                        <div className="text-right">
+                                            <p className="text-2xl font-bold text-green-800">
+                                                RWF {Number(earningsSummary.totalOwnerEarnsPerMonth).toLocaleString()}
+                                            </p>
+                                            <p className="text-xs text-green-600">total / month across all spaces</p>
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-2 mt-3">
+                                        {earningsSummary.categories?.map(c => (
+                                            <div key={c.categoryId} className="flex items-center justify-between bg-white border border-green-200 px-3 py-2 text-xs">
+                                                <span className="text-gray-700 font-medium truncate mr-2">{c.name}</span>
+                                                <span className="text-green-700 font-bold whitespace-nowrap">
+                                                    RWF {Number(c.ownerEarns).toLocaleString()}/mo
+                                                </span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            ) : earningsSummary?.reason === 'no_traffic' ? (
+                                <div className="mb-6 border border-gray-300 bg-gray-50 p-5">
+                                    <p className="text-sm font-semibold text-gray-700 mb-1">📡 Install your script to see earnings</p>
+                                    <p className="text-xs text-gray-500">
+                                        {earningsSummary.message || 'Add the Yepper script below to your site. Once we detect visitors, your earnings per ad space will appear here — calculated from your real traffic.'}
+                                    </p>
+                                </div>
+                            ) : null}
+
                             {/* Master Integration Container */}
                             <MasterIntegration
                                 website={website}
@@ -705,6 +761,7 @@ const WebsiteDetails = () => {
                                 onAddSpace={handleOpenCategoriesForm}
                                 onLanguageChange={handleAllSpacesLanguageChange}
                                 onDeleteCategory={handleDeleteCategory}
+                                earningsSummary={earningsSummary}
                             />
                         </div>
                     )}
