@@ -61,7 +61,6 @@ const PricingTiers = ({ selectedPrice, onPriceSelect, monthlyTraffic, spaceType 
       ownerEarns,
       yepperCut,
     });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [effectiveTraffic, spaceType]);
 
   return null; // No UI — pricing is revealed in WebsiteDetails after traffic is tracked
