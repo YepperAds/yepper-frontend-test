@@ -371,7 +371,7 @@ const AddNewCategory = ({ onSubmitSuccess, monthlyTraffic: trafficProp }) => {
   
         // CHANGED: Added authorization header for API calls
         const token = localStorage.getItem('token');
-        const responses = await Promise.all(
+        await Promise.all(
             categoriesToSubmit.map(async (category) => {
                 const response = await api.post('/api/ad-categories', category, {
                   headers: {

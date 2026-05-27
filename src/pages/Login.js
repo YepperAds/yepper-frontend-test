@@ -1,13 +1,12 @@
 // Login.js
 import React, { useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { ArrowLeft } from 'lucide-react';
 import { Button, Input, Container} from '../components/components';
 
 const Login = () => {
     const navigate = useNavigate();
-    const location = useLocation();
     const { login } = useAuth();
     const [formData, setFormData] = useState({
         email: '',
@@ -17,8 +16,8 @@ const Login = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [emailError, setEmailError] = useState('');
     const [passwordError, setPasswordError] = useState('');
-    const [emailTouched, setEmailTouched] = useState(false);
-    const [passwordTouched, setPasswordTouched] = useState(false);
+    const [setEmailTouched] = useState(false);
+    const [setPasswordTouched] = useState(false);
     const [loginError, setLoginError] = useState(''); // New state for login failure
 
     const validateEmail = (email) => {
@@ -104,10 +103,6 @@ const Login = () => {
         } finally {
             setIsLoading(false);
         }
-    };
-
-    const handleGoogleLogin = () => {
-        window.location.href = `${process.env.REACT_APP_API_URL || 'https://yepper-backend-test.onrender.com'}/api/auth/google`;
     };
 
     return (

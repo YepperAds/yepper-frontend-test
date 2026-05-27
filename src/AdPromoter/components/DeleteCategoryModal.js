@@ -4,27 +4,19 @@ import {
     AlertTriangle,
     X 
 } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
-import api from '../../utils/api';
-
 
 const DeleteCategoryModal = ({ 
     categoryId, 
     onDeleteSuccess, 
     onCancel 
 }) => {
-    const { user } = useAuth();
-    const userId = user?.id;
-  
     const [isDeleting, setIsDeleting] = useState(false);
     const [error, setError] = useState(null);
   
     const handleDeleteCategory = async () => {
         setIsDeleting(true);
         try {
-          const response = await api.delete(`/api/ad-categories/${categoryId}`, {
-            data: { ownerId: userId }
-          });
+          
           
           // Handle successful deletion
           onDeleteSuccess();

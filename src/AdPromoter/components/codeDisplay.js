@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Copy, Check, Plus, Code, Info, Zap, MousePointer, Globe, Trash2, ChevronDown, Edit, X } from 'lucide-react';
+import { Copy, Check, Plus, Code, Info, Zap, MousePointer, Globe, Trash2, X } from 'lucide-react';
 
 const AUTO_RELIABLE = [
   'header','floating','overlay','modalpic',
