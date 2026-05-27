@@ -907,123 +907,6 @@ const WebsiteDetails = () => {
                             )}
                         </div>
                     )}
-                </Container>
-            )}
-
-            {/* Language Modal */}
-            {isLanguageModalOpen && currentCategory && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                    <Card className="w-full max-w-md max-h-[80vh] flex flex-col">
-                        <div className="p-4 border-b border-gray-200">
-                            <Heading level={3}>Set Default Language</Heading>
-                            <Text variant="muted" className="mt-1">
-                                Choose the default language for your ad space.
-                            </Text>
-                        </div>
-                        
-                        <div className="p-4 overflow-y-auto flex-1">
-                            <div className="grid grid-cols-2 gap-2">
-                                {languages.map(lang => (
-                                    <div 
-                                        key={lang.value}
-                                        className={`p-2 text-sm border cursor-pointer transition-all ${
-                                            selectedLanguage === lang.value
-                                                ? 'border-black bg-gray-50'
-                                                : 'border-gray-200 hover:border-gray-300'
-                                        }`}
-                                        onClick={() => setSelectedLanguage(lang.value)}
-                                    >
-                                        <div className="flex items-center">
-                                            {selectedLanguage === lang.value && (
-                                                <div className="w-4 h-4 bg-black flex items-center justify-center mr-2">
-                                                    <Check size={10} className="text-white" />
-                                                </div>
-                                            )}
-                                            <span>{lang.label}</span>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                        
-                        <div className="p-4 border-t border-gray-200 flex justify-end gap-2">
-                            <Button
-                                onClick={() => setIsLanguageModalOpen(false)}
-                                variant="outline"
-                                size="sm"
-                            >
-                                Cancel
-                            </Button>
-                            <Button
-                                onClick={handleSaveLanguage}
-                                variant="primary"
-                                size="sm"
-                            >
-                                Save
-                            </Button>
-                        </div>
-                    </Card>
-                </div>
-            )}
-
-            {/* Rejection Modal */}
-            {showRejectModal && selectedAd && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-                    <div className="bg-white border border-black max-w-md w-full p-6">
-                        <div className="flex items-center justify-between mb-4">
-                            <Heading level={3}>Reject Ad</Heading>
-                            <button
-                                onClick={closeRejectModal}
-                                className="text-gray-400 hover:text-black"
-                            >
-                                <X size={20} />
-                            </button>
-                        </div>
-                        
-                        <div className="mb-4">
-                            <Text className="mb-2">
-                                Rejecting: <strong>{selectedAd.businessName}</strong>
-                            </Text>
-                            <Text className="mb-4">
-                                Refund: <strong>{formatCurrency(selectedAd.paymentAmount)}</strong>
-                            </Text>
-                        </div>
-                        
-                        <div className="mb-6">
-                            <label className="block text-sm font-medium text-black mb-2">
-                                Reason for rejection
-                            </label>
-                            <textarea
-                                value={rejectionReason}
-                                onChange={(e) => setRejectionReason(e.target.value)}
-                                className="w-full px-3 py-2 border border-black bg-white text-black placeholder-gray-500 focus:outline-none focus:ring-0"
-                                rows={3}
-                                placeholder="Why are you rejecting this ad?"
-                                required
-                            />
-                        </div>
-                        
-                        <div className="flex justify-end gap-3">
-                            <Button
-                                variant="outline"
-                                onClick={closeRejectModal}
-                                disabled={rejecting === selectedAd._id}
-                            >
-                                Cancel
-                            </Button>
-                            <Button
-                                variant="danger"
-                                onClick={handleRejectAd}
-                                disabled={!rejectionReason.trim() || rejecting === selectedAd._id}
-                                icon={rejecting === selectedAd._id ? RefreshCw : null}
-                                iconPosition="left"
-                            >
-                                {rejecting === selectedAd._id ? 'Rejecting...' : 'Reject Ad'}
-                            </Button>
-                        </div>
-                    </div>
-                </div>
-            )}
 
                     {activeTab === 'analytics' && (
                         <div className="space-y-8">
@@ -1219,6 +1102,124 @@ const WebsiteDetails = () => {
                             )}
                         </div>
                     )}
+                </Container>
+            )}
+
+            {/* Language Modal */}
+            {isLanguageModalOpen && currentCategory && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                    <Card className="w-full max-w-md max-h-[80vh] flex flex-col">
+                        <div className="p-4 border-b border-gray-200">
+                            <Heading level={3}>Set Default Language</Heading>
+                            <Text variant="muted" className="mt-1">
+                                Choose the default language for your ad space.
+                            </Text>
+                        </div>
+                        
+                        <div className="p-4 overflow-y-auto flex-1">
+                            <div className="grid grid-cols-2 gap-2">
+                                {languages.map(lang => (
+                                    <div 
+                                        key={lang.value}
+                                        className={`p-2 text-sm border cursor-pointer transition-all ${
+                                            selectedLanguage === lang.value
+                                                ? 'border-black bg-gray-50'
+                                                : 'border-gray-200 hover:border-gray-300'
+                                        }`}
+                                        onClick={() => setSelectedLanguage(lang.value)}
+                                    >
+                                        <div className="flex items-center">
+                                            {selectedLanguage === lang.value && (
+                                                <div className="w-4 h-4 bg-black flex items-center justify-center mr-2">
+                                                    <Check size={10} className="text-white" />
+                                                </div>
+                                            )}
+                                            <span>{lang.label}</span>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                        
+                        <div className="p-4 border-t border-gray-200 flex justify-end gap-2">
+                            <Button
+                                onClick={() => setIsLanguageModalOpen(false)}
+                                variant="outline"
+                                size="sm"
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                onClick={handleSaveLanguage}
+                                variant="primary"
+                                size="sm"
+                            >
+                                Save
+                            </Button>
+                        </div>
+                    </Card>
+                </div>
+            )}
+
+            {/* Rejection Modal */}
+            {showRejectModal && selectedAd && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+                    <div className="bg-white border border-black max-w-md w-full p-6">
+                        <div className="flex items-center justify-between mb-4">
+                            <Heading level={3}>Reject Ad</Heading>
+                            <button
+                                onClick={closeRejectModal}
+                                className="text-gray-400 hover:text-black"
+                            >
+                                <X size={20} />
+                            </button>
+                        </div>
+                        
+                        <div className="mb-4">
+                            <Text className="mb-2">
+                                Rejecting: <strong>{selectedAd.businessName}</strong>
+                            </Text>
+                            <Text className="mb-4">
+                                Refund: <strong>{formatCurrency(selectedAd.paymentAmount)}</strong>
+                            </Text>
+                        </div>
+                        
+                        <div className="mb-6">
+                            <label className="block text-sm font-medium text-black mb-2">
+                                Reason for rejection
+                            </label>
+                            <textarea
+                                value={rejectionReason}
+                                onChange={(e) => setRejectionReason(e.target.value)}
+                                className="w-full px-3 py-2 border border-black bg-white text-black placeholder-gray-500 focus:outline-none focus:ring-0"
+                                rows={3}
+                                placeholder="Why are you rejecting this ad?"
+                                required
+                            />
+                        </div>
+                        
+                        <div className="flex justify-end gap-3">
+                            <Button
+                                variant="outline"
+                                onClick={closeRejectModal}
+                                disabled={rejecting === selectedAd._id}
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                variant="danger"
+                                onClick={handleRejectAd}
+                                disabled={!rejectionReason.trim() || rejecting === selectedAd._id}
+                                icon={rejecting === selectedAd._id ? RefreshCw : null}
+                                iconPosition="left"
+                            >
+                                {rejecting === selectedAd._id ? 'Rejecting...' : 'Reject Ad'}
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
 
                     {customizationModal.isOpen && (
                 <AdCustomizationModal

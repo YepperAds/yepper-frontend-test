@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Filter, Plus, DollarSign, MapPin, Calendar, Clock, TrendingUp, CheckCircle } from 'lucide-react';
-import api from '../../utils/api';
-
+import { Search, Filter, Plus, DollarSign, MapPin, Calendar, TrendingUp } from 'lucide-react';
 
 const AvailableAds = () => {
   const [availableAds, setAvailableAds] = useState([]);
