@@ -1496,5 +1496,4 @@ const WebsiteDetails = () => {
         </div>
     );
 };
-
 export default WebsiteDetails;
