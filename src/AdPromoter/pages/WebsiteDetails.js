@@ -72,6 +72,11 @@ const WebsiteDetails = () => {
     const [earningsSummary, setEarningsSummary] = useState(null);
     const mapRef = useRef(null);
     const leafletMapRef = useRef(null);
+
+    // Google Search Console state
+    const [gscData, setGscData] = useState(null);
+    const [gscLoading, setGscLoading] = useState(false);
+    const [gscConnecting, setGscConnecting] = useState(false);
     useEffect(() => {
         fetchWebsiteData();
         if (token) {
@@ -101,8 +106,24 @@ const WebsiteDetails = () => {
     useEffect(() => {
         if (activeTab === 'analytics' && token) {
             fetchAnalytics();
+            fetchGscData();
         }
     }, [activeTab, analyticsRange, token]);
+
+    // Handle redirect back from Google OAuth (?gsc=connected)
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const gscStatus = params.get('gsc');
+        const tab = params.get('tab');
+        if (gscStatus && tab === 'analytics') {
+            setActiveTab('analytics');
+            // Clean the URL
+            const url = new URL(window.location.href);
+            url.searchParams.delete('gsc');
+            url.searchParams.delete('tab');
+            window.history.replaceState({}, '', url.toString());
+        }
+    }, []);
 
     // Init / re-render Leaflet map whenever analytics data arrives
     useEffect(() => {
@@ -247,6 +268,48 @@ const WebsiteDetails = () => {
             console.error('Failed to fetch analytics', err);
         } finally {
             setAnalyticsLoading(false);
+        }
+    };
+
+    const fetchGscData = async () => {
+        if (!token) return;
+        setGscLoading(true);
+        try {
+            const response = await api.get(`/api/analytics/gsc/data/${websiteId}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            setGscData(response.data);
+        } catch (err) {
+            console.error('Failed to fetch GSC data', err);
+        } finally {
+            setGscLoading(false);
+        }
+    };
+
+    const handleConnectGsc = async () => {
+        if (!token) return;
+        setGscConnecting(true);
+        try {
+            const response = await api.get(`/api/analytics/gsc/connect/${websiteId}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            // Redirect the user to Google's OAuth consent screen
+            window.location.href = response.data.url;
+        } catch (err) {
+            console.error('Failed to start GSC connect', err);
+            setGscConnecting(false);
+        }
+    };
+
+    const handleDisconnectGsc = async () => {
+        if (!window.confirm('Disconnect Google Search Console from this website?')) return;
+        try {
+            await api.delete(`/api/analytics/gsc/disconnect/${websiteId}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            setGscData(null);
+        } catch (err) {
+            console.error('Failed to disconnect GSC', err);
         }
     };
 
@@ -1100,6 +1163,173 @@ const WebsiteDetails = () => {
                                     </div>
                                 </>
                             )}
+
+                            {/* ── Google Search Console Section ── */}
+                            <div className="mt-10">
+                                <div className="flex items-center justify-between mb-4">
+                                    <div>
+                                        <h2 className="text-xl font-bold text-black flex items-center gap-2">
+                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M21.35 11.1h-9.17v2.73h5.51c-.33 1.81-1.87 3.14-3.77 3.14a5.02 5.02 0 01-5.03-5.02 5.02 5.02 0 015.03-5.02c1.22 0 2.33.44 3.19 1.16l2.02-2.02A8.46 8.46 0 0014.51 4c-4.69 0-8.5 3.8-8.5 8.5s3.81 8.5 8.5 8.5c4.91 0 8.17-3.45 8.17-8.3 0-.56-.06-1.1-.17-1.6h-1.16z" fill="#4285F4"/>
+                                            </svg>
+                                            Organic Traffic (Search Console)
+                                        </h2>
+                                        <p className="text-xs text-gray-500 mt-0.5">Real clicks & impressions from Google Search — last 28 days</p>
+                                    </div>
+                                    {gscData?.connected && (
+                                        <button
+                                            onClick={handleDisconnectGsc}
+                                            className="text-xs text-gray-400 hover:text-red-500 transition-colors underline"
+                                        >
+                                            Disconnect
+                                        </button>
+                                    )}
+                                </div>
+
+                                {gscLoading ? (
+                                    <div className="border border-black p-8 flex items-center justify-center gap-3">
+                                        <div className="animate-spin w-5 h-5 border-2 border-black border-t-transparent rounded-full" />
+                                        <span className="text-sm text-gray-500">Loading Search Console data...</span>
+                                    </div>
+                                ) : !gscData || !gscData.connected ? (
+                                    /* Not connected yet */
+                                    <div className="border border-dashed border-gray-300 p-10 text-center">
+                                        <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-gray-50 border border-gray-200 flex items-center justify-center">
+                                            <svg width="28" height="28" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M43.6 20.2H24v7.3H35.2c-.9 4.8-5 8.4-11.2 8.4A13.4 13.4 0 0110.6 24a13.4 13.4 0 0113.4-13.4c3.2 0 6.2 1.2 8.5 3.1l5.4-5.4A22.5 22.5 0 0024 2C11.9 2 2 11.9 2 24s9.9 22 22 22c13.1 0 21.8-9.2 21.8-22.1 0-1.5-.2-2.9-.4-4.3l-1.8.6z" fill="#4285F4"/>
+                                            </svg>
+                                        </div>
+                                        <h3 className="text-base font-semibold text-black mb-2">Connect Google Search Console</h3>
+                                        <p className="text-sm text-gray-500 mb-6 max-w-sm mx-auto">
+                                            See how many people find your site through Google — total clicks, impressions, CTR, and top search queries.
+                                        </p>
+                                        <button
+                                            onClick={handleConnectGsc}
+                                            disabled={gscConnecting}
+                                            className="inline-flex items-center gap-2 px-6 py-3 bg-black text-white text-sm font-medium hover:bg-gray-800 transition-colors disabled:opacity-60"
+                                        >
+                                            {gscConnecting ? (
+                                                <>
+                                                    <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full" />
+                                                    Connecting...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M21.35 11.1h-9.17v2.73h5.51c-.33 1.81-1.87 3.14-3.77 3.14a5.02 5.02 0 01-5.03-5.02 5.02 5.02 0 015.03-5.02c1.22 0 2.33.44 3.19 1.16l2.02-2.02A8.46 8.46 0 0014.51 4c-4.69 0-8.5 3.8-8.5 8.5s3.81 8.5 8.5 8.5c4.91 0 8.17-3.45 8.17-8.3 0-.56-.06-1.1-.17-1.6h-1.16z" fill="white"/></svg>
+                                                    Connect with Google
+                                                </>
+                                            )}
+                                        </button>
+                                        <p className="text-xs text-gray-400 mt-3">Your website must be verified in Google Search Console first.</p>
+                                    </div>
+                                ) : gscData.connected && !gscData.siteMatched ? (
+                                    /* Connected but no matching GSC property found */
+                                    <div className="border border-yellow-300 bg-yellow-50 p-6 text-center">
+                                        <p className="text-sm font-semibold text-yellow-800 mb-1">Connected — but no matching property found</p>
+                                        <p className="text-xs text-yellow-700 mb-4">
+                                            Make sure <strong>{website?.websiteLink}</strong> is verified in your Google Search Console account.
+                                        </p>
+                                        <button onClick={handleConnectGsc} className="text-xs underline text-yellow-800 hover:text-yellow-900">
+                                            Reconnect
+                                        </button>
+                                    </div>
+                                ) : (
+                                    /* Connected + data available */
+                                    <div className="space-y-6">
+                                        {/* KPI cards */}
+                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                            {[
+                                                { label: 'Total Clicks', value: gscData.summary?.clicks?.toLocaleString() ?? '0', sub: 'from Google Search' },
+                                                { label: 'Impressions', value: gscData.summary?.impressions?.toLocaleString() ?? '0', sub: 'times shown in results' },
+                                                { label: 'Avg. CTR', value: `${gscData.summary?.ctr ?? 0}%`, sub: 'click-through rate' },
+                                                { label: 'Avg. Position', value: gscData.summary?.position ?? '—', sub: 'mean ranking position' },
+                                            ].map(({ label, value, sub }) => (
+                                                <div key={label} className="border border-black p-5 bg-white">
+                                                    <p className="text-xs font-medium text-gray-500 uppercase mb-1">{label}</p>
+                                                    <p className="text-2xl font-bold text-black">{value}</p>
+                                                    <p className="text-xs text-gray-400 mt-1">{sub}</p>
+                                                </div>
+                                            ))}
+                                        </div>
+
+                                        {/* Clicks by day sparkline */}
+                                        {gscData.byDay?.length > 0 && (
+                                            <div className="border border-black p-6 bg-white">
+                                                <h3 className="text-sm font-semibold text-gray-700 uppercase mb-4">Clicks per Day</h3>
+                                                <div className="flex items-end gap-1 h-24">
+                                                    {(() => {
+                                                        const max = Math.max(...gscData.byDay.map(d => d.clicks), 1);
+                                                        return gscData.byDay.map((d, i) => (
+                                                            <div key={i} className="flex-1 flex flex-col items-center group relative">
+                                                                <div
+                                                                    style={{ height: `${(d.clicks / max) * 100}%` }}
+                                                                    className="w-full bg-blue-500 hover:bg-blue-400 transition-colors min-h-[2px]"
+                                                                />
+                                                                <span className="absolute -top-6 left-1/2 -translate-x-1/2 text-xs bg-black text-white px-1 py-0.5 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap pointer-events-none z-10">{d.clicks}</span>
+                                                            </div>
+                                                        ));
+                                                    })()}
+                                                </div>
+                                                <div className="flex justify-between mt-2 text-xs text-gray-400">
+                                                    <span>{gscData.byDay[0]?.date}</span>
+                                                    <span>{gscData.byDay[gscData.byDay.length - 1]?.date}</span>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Top queries + Top pages side by side */}
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            {/* Top queries */}
+                                            <div className="border border-black">
+                                                <div className="px-4 py-3 border-b border-black text-sm font-semibold">Top Search Queries</div>
+                                                <div className="divide-y divide-gray-100 max-h-72 overflow-y-auto">
+                                                    {gscData.topQueries?.length > 0 ? gscData.topQueries.map((q, i) => (
+                                                        <div key={i} className="px-4 py-3">
+                                                            <div className="flex items-center justify-between mb-1">
+                                                                <span className="text-xs font-medium text-black truncate flex-1 mr-2">{q.query}</span>
+                                                                <span className="text-xs text-gray-500 shrink-0">{q.clicks} clicks</span>
+                                                            </div>
+                                                            <div className="flex items-center gap-3 text-xs text-gray-400">
+                                                                <span>{q.impressions.toLocaleString()} imp.</span>
+                                                                <span>{q.ctr}% CTR</span>
+                                                                <span>#{q.position}</span>
+                                                            </div>
+                                                        </div>
+                                                    )) : (
+                                                        <div className="px-4 py-8 text-center text-sm text-gray-400">No query data yet</div>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            {/* Top pages */}
+                                            <div className="border border-black">
+                                                <div className="px-4 py-3 border-b border-black text-sm font-semibold">Top Pages (Organic)</div>
+                                                <div className="divide-y divide-gray-100 max-h-72 overflow-y-auto">
+                                                    {gscData.topPages?.length > 0 ? gscData.topPages.map((p, i) => (
+                                                        <div key={i} className="px-4 py-3">
+                                                            <div className="flex items-center justify-between mb-1">
+                                                                <span className="text-xs font-medium text-black truncate flex-1 mr-2">{p.page.replace(/^https?:\/\/[^/]+/, '') || '/'}</span>
+                                                                <span className="text-xs text-gray-500 shrink-0">{p.clicks} clicks</span>
+                                                            </div>
+                                                            <div className="flex items-center gap-3 text-xs text-gray-400">
+                                                                <span>{p.impressions.toLocaleString()} imp.</span>
+                                                                <span>{p.ctr}% CTR</span>
+                                                                <span>#{p.position}</span>
+                                                            </div>
+                                                        </div>
+                                                    )) : (
+                                                        <div className="px-4 py-8 text-center text-sm text-gray-400">No page data yet</div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <p className="text-xs text-gray-400 text-right">
+                                            Connected to: {gscData.siteUrl} · Data: {gscData.dateRange?.start} → {gscData.dateRange?.end}
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     )}
                 </Container>
