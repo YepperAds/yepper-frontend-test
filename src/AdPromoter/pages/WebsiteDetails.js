@@ -102,6 +102,11 @@ const WebsiteDetails = () => {
         fetchEarnings();
     }, [websiteId, token, categories.length]); // re-fetch when categories count changes
 
+    // Fetch GSC data on mount so tier is available when adding spaces
+    useEffect(() => {
+        if (token) { fetchGscData(); }
+    }, [websiteId, token]); // eslint-disable-line
+
     // Fetch analytics when tab switches to analytics or range changes
     useEffect(() => {
         if (activeTab === 'analytics' && token) {
@@ -1569,7 +1574,7 @@ const WebsiteDetails = () => {
                         </div>
 
                         <div className="max-w-7xl mx-auto px-6">
-                            <AddNewCategory onSubmitSuccess={handleCloseCategoriesForm} monthlyTraffic={website?.monthlyTraffic} />
+                            <AddNewCategory onSubmitSuccess={handleCloseCategoriesForm} monthlyTraffic={website?.monthlyTraffic} gscData={gscData} />
                         </div>
                     </div>
                 </div>

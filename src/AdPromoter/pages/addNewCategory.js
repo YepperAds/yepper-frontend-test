@@ -39,7 +39,7 @@ import StickySidebar from '../img/stickySidebar.png';
 import api from '../../utils/api';
 
 
-const AddNewCategory = ({ onSubmitSuccess, monthlyTraffic: trafficProp }) => {
+const AddNewCategory = ({ onSubmitSuccess, monthlyTraffic: trafficProp, gscData }) => {
   const [user, setUser] = useState(null); // NEW: Custom user state
   const [setLoading] = useState(true); // NEW: Loading state for auth check
   const { websiteId } = useParams();
@@ -446,21 +446,14 @@ const AddNewCategory = ({ onSubmitSuccess, monthlyTraffic: trafficProp }) => {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Left Side - Inputs */}
                 <div className="space-y-6">
-                  {/* Silent price emitter — computes price internally, reveals earnings in WebsiteDetails after traffic is tracked */}
+                  {/* Tier-aware pricer — shows tier badge and prices based on GSC data */}
                   <PricingTiers 
                     selectedPrice={categoryData[activeCategory] || {}}
                     onPriceSelect={(price) => updateCategoryData(activeCategory, 'price', price)}
                     monthlyTraffic={websiteMonthlyTraffic}
                     spaceType={categoryDetails[activeCategory]?.spaceType}
+                    gscData={gscData}
                   />
-
-                  {/* Earnings hint — shown instead of prices */}
-                  <div className="border border-black bg-gray-50 p-4 rounded-none">
-                    <p className="text-sm font-semibold text-black mb-1">💰 Earnings revealed after traffic is tracked</p>
-                    <p className="text-xs text-gray-600">
-                      Once you add this space and install the Yepper script on your site, we'll detect your real traffic and show you exactly how much you'll earn per month — right inside your website details.
-                    </p>
-                  </div>
   
                   <div className="space-y-6">
                     <div className="w-full">
