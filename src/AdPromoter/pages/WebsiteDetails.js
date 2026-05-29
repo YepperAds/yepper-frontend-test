@@ -670,77 +670,6 @@ const WebsiteDetails = () => {
                     
                     {activeTab === 'spaces' && (
                         <div>
-                            {/* ── Script Installation Gate ── */}
-                            {!earningsSummary?.scriptInstalled && (
-                                <div className="mb-8 border-2 border-dashed border-yellow-400 bg-yellow-50 rounded-xl p-8 text-center">
-                                    <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-yellow-100 border-2 border-yellow-400 flex items-center justify-center text-3xl">
-                                        📡
-                                    </div>
-                                    <h3 className="text-xl font-bold text-yellow-900 mb-2">Install Your Yepper Script First</h3>
-                                    <p className="text-sm text-yellow-800 max-w-xl mx-auto mb-6">
-                                        Before you can add ad spaces, you need to install the Yepper tracking script on your site.
-                                        This lets the system track your traffic, assign you to the right pricing tier, and verify
-                                        your site in Google Search Console — so you get the best ad prices.
-                                    </p>
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-2xl mx-auto text-left mb-6">
-                                        {[
-                                            { step: '1', title: 'Copy the script below', desc: 'Pick your framework and copy the integration code.' },
-                                            { step: '2', title: 'Paste it on your site', desc: 'Follow the step-by-step guide for your framework.' },
-                                            { step: '3', title: 'System verifies tracking', desc: 'Once we detect traffic, ad spaces unlock automatically.' },
-                                        ].map(({ step, title, desc }) => (
-                                            <div key={step} className="flex gap-3 bg-white border border-yellow-200 rounded-lg p-3">
-                                                <div className="w-7 h-7 rounded-full bg-yellow-400 text-yellow-900 flex items-center justify-center font-bold text-sm shrink-0">{step}</div>
-                                                <div>
-                                                    <p className="text-sm font-semibold text-gray-800">{title}</p>
-                                                    <p className="text-xs text-gray-500 mt-0.5">{desc}</p>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                    <p className="text-xs text-yellow-700">
-                                        ✅ Scroll down to see the integration code for your framework.
-                                    </p>
-                                </div>
-                            )}
-
-                            {/* ── GSC Unverified Warning (shown after script installed but no GSC) ── */}
-                            {earningsSummary?.scriptInstalled && !earningsSummary?.gscVerified && (
-                                <div className={`mb-6 border rounded-xl p-5 ${earningsSummary?.unverifiedSurchargeActive ? 'border-red-300 bg-red-50' : 'border-orange-300 bg-orange-50'}`}>
-                                    <div className="flex items-start gap-4">
-                                        <div className="text-2xl shrink-0">{earningsSummary?.unverifiedSurchargeActive ? '⚠️' : '🔍'}</div>
-                                        <div>
-                                            <h4 className={`font-bold mb-1 ${earningsSummary?.unverifiedSurchargeActive ? 'text-red-800' : 'text-orange-800'}`}>
-                                                {earningsSummary?.unverifiedSurchargeActive
-                                                    ? 'Unverified Site — Ad Prices at 4× Rate'
-                                                    : 'Connect Google Search Console to Verify Your Site'}
-                                            </h4>
-                                            <p className={`text-sm ${earningsSummary?.unverifiedSurchargeActive ? 'text-red-700' : 'text-orange-700'}`}>
-                                                {earningsSummary?.unverifiedSurchargeActive
-                                                    ? 'Your site has been running for 7+ days without GSC verification. Ad spaces are currently priced at 4× the standard rate until you verify. Connect Google Search Console in the Analytics tab to restore normal pricing.'
-                                                    : 'Your script is installed! Connect Google Search Console in the Analytics tab so we can verify your site domain. Verification unlocks your correct traffic tier and standard ad pricing. You have 7 days before unverified pricing takes effect.'}
-                                            </p>
-                                        </div>
-                                        <button
-                                            onClick={() => setActiveTab('analytics')}
-                                            className="shrink-0 px-4 py-2 bg-black text-white text-xs font-semibold rounded-lg hover:bg-gray-800 transition-colors"
-                                        >
-                                            Go to Analytics
-                                        </button>
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* ── Verified badge ── */}
-                            {earningsSummary?.scriptInstalled && earningsSummary?.gscVerified && (
-                                <div className="mb-6 border border-green-300 bg-green-50 rounded-xl p-4 flex items-center gap-3">
-                                    <span className="text-2xl">✅</span>
-                                    <div>
-                                        <p className="text-sm font-bold text-green-800">Site Verified — Standard Pricing Active</p>
-                                        <p className="text-xs text-green-600 mt-0.5">Your script is installed and your site is verified in Google Search Console. Your ad spaces use tier-based pricing based on your real traffic.</p>
-                                    </div>
-                                </div>
-                            )}
-
                             {/* ── Earnings Panel — shown only when real traffic is detected ── */}
                             {earningsSummary?.available ? (
                                 <div className="mb-6 border border-green-700 bg-green-50 p-5 rounded-none">
@@ -783,21 +712,11 @@ const WebsiteDetails = () => {
                             <MasterIntegration
                                 website={website}
                                 categories={categories}
-                                onAddSpace={earningsSummary?.scriptInstalled ? handleOpenCategoriesForm : () => {}}
+                                onAddSpace={handleOpenCategoriesForm}
                                 onLanguageChange={handleAllSpacesLanguageChange}
                                 onDeleteCategory={handleDeleteCategory}
                                 earningsSummary={earningsSummary}
-                                scriptInstalled={!!earningsSummary?.scriptInstalled}
                             />
-
-                            {/* Block adding spaces until script is installed */}
-                            {!earningsSummary?.scriptInstalled && earningsSummary !== null && (
-                                <div className="mt-4 border border-gray-200 bg-gray-50 rounded-xl p-6 text-center">
-                                    <p className="text-sm text-gray-600 font-medium">
-                                        📌 Ad spaces will unlock once the Yepper script is detected running on your site.
-                                    </p>
-                                </div>
-                            )}
                         </div>
                     )}
 
