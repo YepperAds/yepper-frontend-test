@@ -683,15 +683,14 @@ const WebsiteDetails = () => {
                                     </div>
                                     <h3 className="text-xl font-bold text-yellow-900 mb-2">Install Your Yepper Script First</h3>
                                     <p className="text-sm text-yellow-800 max-w-xl mx-auto mb-6">
-                                        Before you can add ad spaces, you need to install the Yepper tracking script on your site.
-                                        This lets the system track your traffic, assign you to the right pricing tier, and verify
-                                        your site in Google Search Console — so you get the best ad prices.
+                                        Install the Yepper tracking script on your site to track your real traffic and unlock tier-based pricing.
+                                        You can add ad spaces now — they'll run on the Unverified tier (RWF 63,000 total cap) until your script is detected.
                                     </p>
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-2xl mx-auto text-left mb-6">
                                         {[
                                             { step: '1', title: 'Copy the script below', desc: 'Pick your framework and copy the integration code.' },
                                             { step: '2', title: 'Paste it on your site', desc: 'Follow the step-by-step guide for your framework.' },
-                                            { step: '3', title: 'System verifies tracking', desc: 'Once we detect traffic, ad spaces unlock automatically.' },
+                                            { step: '3', title: 'Traffic detected → tier upgrade', desc: 'Once visitors are tracked, your tier upgrades and prices update automatically.' },
                                         ].map(({ step, title, desc }) => (
                                             <div key={step} className="flex gap-3 bg-white border border-yellow-200 rounded-lg p-3">
                                                 <div className="w-7 h-7 rounded-full bg-yellow-400 text-yellow-900 flex items-center justify-center font-bold text-sm shrink-0">{step}</div>
@@ -709,7 +708,7 @@ const WebsiteDetails = () => {
                             )}
 
                             {/* ── GSC Unverified Warning (shown after script installed but no GSC) ── */}
-                            {earningsSummary?.scriptInstalled && !earningsSummary?.gscVerified && (
+                            {!earningsSummary?.gscVerified && (
                                 <div className={`mb-6 border rounded-xl p-5 ${earningsSummary?.unverifiedSurchargeActive ? 'border-red-300 bg-red-50' : 'border-orange-300 bg-orange-50'}`}>
                                     <div className="flex items-start gap-4">
                                         <div className="text-2xl shrink-0">{earningsSummary?.unverifiedSurchargeActive ? '⚠️' : '🔍'}</div>
@@ -722,7 +721,7 @@ const WebsiteDetails = () => {
                                             <p className={`text-sm ${earningsSummary?.unverifiedSurchargeActive ? 'text-red-700' : 'text-orange-700'}`}>
                                                 {earningsSummary?.unverifiedSurchargeActive
                                                     ? 'Your site has been running for 7+ days without GSC verification. Ad spaces are currently priced at 4× the standard rate until you verify. Connect Google Search Console in the Analytics tab to restore normal pricing.'
-                                                    : 'Your script is installed! Connect Google Search Console in the Analytics tab so we can verify your site domain. Verification unlocks your correct traffic tier and standard ad pricing. You have 7 days before unverified pricing takes effect.'}
+                                                    : 'Connect Google Search Console in the Analytics tab to verify your site and unlock tier-based pricing. Your ad spaces are currently on the Unverified tier (RWF 63,000 total cap split across all spaces).'}
                                             </p>
                                         </div>
                                         <button
@@ -736,7 +735,7 @@ const WebsiteDetails = () => {
                             )}
 
                             {/* ── Verified badge ── */}
-                            {earningsSummary?.scriptInstalled && earningsSummary?.gscVerified && (
+                            {earningsSummary?.gscVerified && (
                                 <div className="mb-6 border border-green-300 bg-green-50 rounded-xl p-4 flex items-center gap-3">
                                     <span className="text-2xl">✅</span>
                                     <div>
@@ -788,21 +787,14 @@ const WebsiteDetails = () => {
                             <MasterIntegration
                                 website={website}
                                 categories={categories}
-                                onAddSpace={earningsSummary?.scriptInstalled ? handleOpenCategoriesForm : () => {}}
+                                onAddSpace={handleOpenCategoriesForm}
                                 onLanguageChange={handleAllSpacesLanguageChange}
                                 onDeleteCategory={handleDeleteCategory}
                                 earningsSummary={earningsSummary}
                                 scriptInstalled={!!earningsSummary?.scriptInstalled}
                             />
 
-                            {/* Block adding spaces until script is installed */}
-                            {!earningsSummary?.scriptInstalled && earningsSummary !== null && (
-                                <div className="mt-4 border border-gray-200 bg-gray-50 rounded-xl p-6 text-center">
-                                    <p className="text-sm text-gray-600 font-medium">
-                                        📌 Ad spaces will unlock once the Yepper script is detected running on your site.
-                                    </p>
-                                </div>
-                            )}
+
                         </div>
                     )}
 
