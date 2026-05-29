@@ -78,7 +78,7 @@ const TRAFFIC_TIERS = [
 // ── Exact prices per space per tier (from Yepper pricing xlsx) ───────────────
 const TIER_PRICES = {
   unverified: {
-    // 63,000 total cap — individual prices shown as maximums per space
+    // 63,000 total cap — individual space prices allocated by visibility
     totalCap: 63000,
     'Header': 9000,
     'Above The Fold': 7800,
@@ -349,68 +349,59 @@ const PricingTiers = ({ selectedPrice, onPriceSelect, monthlyTraffic, spaceType,
         </p>
 
         {/* Price block */}
-        {tierKey === 'unverified' && spacePrice !== null ? (
-          <div
-            style={{
-              borderTop: `1px solid ${resolvedTier.border}`,
-              paddingTop: '12px',
-            }}
-          >
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr 1fr',
-                gap: '8px',
-                marginBottom: '10px',
-              }}
-            >
-              <div style={{ textAlign: 'center' }}>
-                <p style={{ fontSize: '11px', color: resolvedTier.textColor, margin: '0 0 2px 0', opacity: 0.7, fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                  Price Cap
-                </p>
-                <p style={{ fontSize: '16px', fontWeight: '800', color: resolvedTier.color, margin: 0 }}>
-                  RWF {spacePrice.toLocaleString()}
-                </p>
-                <p style={{ fontSize: '10px', color: resolvedTier.textColor, margin: '2px 0 0 0', opacity: 0.6 }}>
-                  per advertiser/mo
-                </p>
-              </div>
-              <div style={{ textAlign: 'center', borderLeft: `1px solid ${resolvedTier.border}`, borderRight: `1px solid ${resolvedTier.border}` }}>
-                <p style={{ fontSize: '11px', color: resolvedTier.textColor, margin: '0 0 2px 0', opacity: 0.7, fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                  You Earn (70%)
-                </p>
-                <p style={{ fontSize: '16px', fontWeight: '800', color: '#16a34a', margin: 0 }}>
-                  RWF {ownerEarns.toLocaleString()}
-                </p>
-                <p style={{ fontSize: '10px', color: resolvedTier.textColor, margin: '2px 0 0 0', opacity: 0.6 }}>
-                  per advertiser/mo
-                </p>
-              </div>
-              <div style={{ textAlign: 'center' }}>
-                <p style={{ fontSize: '11px', color: resolvedTier.textColor, margin: '0 0 2px 0', opacity: 0.7, fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                  Yepper (30%)
-                </p>
-                <p style={{ fontSize: '16px', fontWeight: '800', color: resolvedTier.textColor, margin: 0, opacity: 0.6 }}>
-                  RWF {yepperCut.toLocaleString()}
-                </p>
-                <p style={{ fontSize: '10px', color: resolvedTier.textColor, margin: '2px 0 0 0', opacity: 0.6 }}>
-                  per advertiser/mo
-                </p>
-              </div>
-            </div>
-            <p style={{ fontSize: '11px', color: '#b45309', margin: 0, borderTop: `1px solid ${resolvedTier.border}`, paddingTop: '8px' }}>
-              ⚠️ Unverified cap: RWF 63,000 total across all active spaces. Connect GSC to unlock tier-based pricing.
-            </p>
-          </div>
-        ) : tierKey === 'unverified' ? (
+        {tierKey === 'unverified' ? (
           <div style={{ borderTop: `1px solid ${resolvedTier.border}`, paddingTop: '12px' }}>
+            {spacePrice !== null ? (
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1fr 1fr',
+                  gap: '8px',
+                  marginBottom: '10px',
+                }}
+              >
+                <div style={{ textAlign: 'center' }}>
+                  <p style={{ fontSize: '11px', color: resolvedTier.textColor, margin: '0 0 2px 0', opacity: 0.7, fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    Price Cap
+                  </p>
+                  <p style={{ fontSize: '16px', fontWeight: '800', color: resolvedTier.color, margin: 0 }}>
+                    RWF {spacePrice.toLocaleString()}
+                  </p>
+                  <p style={{ fontSize: '10px', color: resolvedTier.textColor, margin: '2px 0 0 0', opacity: 0.6 }}>
+                    per advertiser/mo
+                  </p>
+                </div>
+                <div style={{ textAlign: 'center', borderLeft: `1px solid ${resolvedTier.border}`, borderRight: `1px solid ${resolvedTier.border}` }}>
+                  <p style={{ fontSize: '11px', color: resolvedTier.textColor, margin: '0 0 2px 0', opacity: 0.7, fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    You Earn (70%)
+                  </p>
+                  <p style={{ fontSize: '16px', fontWeight: '800', color: '#16a34a', margin: 0 }}>
+                    RWF {ownerEarns.toLocaleString()}
+                  </p>
+                  <p style={{ fontSize: '10px', color: resolvedTier.textColor, margin: '2px 0 0 0', opacity: 0.6 }}>
+                    per advertiser/mo
+                  </p>
+                </div>
+                <div style={{ textAlign: 'center' }}>
+                  <p style={{ fontSize: '11px', color: resolvedTier.textColor, margin: '0 0 2px 0', opacity: 0.7, fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    Yepper (30%)
+                  </p>
+                  <p style={{ fontSize: '16px', fontWeight: '800', color: resolvedTier.textColor, margin: 0, opacity: 0.6 }}>
+                    RWF {yepperCut.toLocaleString()}
+                  </p>
+                  <p style={{ fontSize: '10px', color: resolvedTier.textColor, margin: '2px 0 0 0', opacity: 0.6 }}>
+                    per advertiser/mo
+                  </p>
+                </div>
+              </div>
+            ) : null}
             <p style={{ fontSize: '12px', color: '#92400e', fontWeight: '600', margin: 0 }}>
               ⚠️ Unverified pricing: RWF 63,000 total shared across ALL your active ad spaces.
             </p>
             <p style={{ fontSize: '11px', color: '#b45309', marginTop: '4px', margin: '4px 0 0 0' }}>
               {gscData?.connected && gscData?.siteMatched
                 ? `Your organic traffic (${gscMonthlyClicks ?? 0} clicks/mo) is below the 500/mo minimum for Starter tier. Keep growing — prices will unlock automatically once you hit 500.`
-                : 'Individual space prices are set automatically by Yepper (63,000 ÷ number of spaces). Connect GSC to unlock tier-based pricing.'}
+                : 'Connect GSC to unlock tier-based pricing and higher price caps.'}
             </p>
           </div>
         ) : spacePrice !== null ? (
