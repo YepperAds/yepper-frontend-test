@@ -13,7 +13,7 @@ const AdCustomizationModal = ({ categoryId, onClose, onSave }) => {
     maxWidth: 100,
     borderRadius: 16,
     padding: 18,
-    backgroundColor: 'rgba(255, 255, 255, 0.25)',
+    backgroundColor: 'rgba(255, 255, 255, 0.25)', 
     borderColor: 'rgba(255, 255, 255, 0.18)',
     borderWidth: 1,
     imagePosition: 'top',
