@@ -5,7 +5,6 @@ import { Container } from '../components/components';
 const CheckEmail = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  
   const { maskedEmail } = location.state || {};
 
   const handleBackToRegister = () => {
