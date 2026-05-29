@@ -92,7 +92,7 @@ const CategoryCreation = () => {
             try {
                 // CHANGED: Added authorization header for API calls
                 const token = localStorage.getItem('token');
-                const response = await api.get(`/api/websites/${websiteId}`, {
+                const response = await api.get(`/api/createWebsite/website/${websiteId}`, {
                   headers: {
                     'Authorization': `Bearer ${token}` // NEW: Added auth header
                   }

@@ -93,7 +93,7 @@ const AddNewCategory = ({ onSubmitSuccess, monthlyTraffic: trafficProp, gscData 
     const fetchTraffic = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await api.get(`/api/websites/${websiteId}`, {
+        const response = await api.get(`/api/createWebsite/website/${websiteId}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (response.data?.monthlyTraffic) {
