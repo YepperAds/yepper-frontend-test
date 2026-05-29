@@ -10,7 +10,7 @@ const TRAFFIC_TIERS = [
   {
     tier: 'unverified',
     label: 'Unverified',
-    description: 'GSC not connected — 63,000 RWF total cap split across all spaces',
+    description: 'GSC connected but under 500 monthly organic clicks — 63,000 RWF total cap split across all spaces',
     min: 0,
     max: 0,
     color: '#f59e0b',
@@ -225,9 +225,11 @@ export function getTierFromGsc(gscData) {
   const clicks = gscData.summary?.clicks || 0;
   // GSC gives 28-day clicks; extrapolate to monthly (~30 days)
   const monthly = Math.round(clicks * (30 / 28));
+  // If monthly < 500, they don't qualify for any verified tier yet — still Unverified
+  if (monthly < 500) return TRAFFIC_TIERS.find(t => t.tier === 'unverified');
   return (
     TRAFFIC_TIERS.find(t => t.tier !== 'unverified' && monthly >= t.min && monthly <= t.max) ||
-    TRAFFIC_TIERS.find(t => t.tier === 'starter')
+    TRAFFIC_TIERS.find(t => t.tier === 'unverified')
   );
 }
 
@@ -339,7 +341,11 @@ const PricingTiers = ({ selectedPrice, onPriceSelect, monthlyTraffic, spaceType,
         </div>
 
         <p style={{ fontSize: '12px', color: resolvedTier.textColor, marginBottom: '12px', margin: '0 0 12px 0' }}>
-          {resolvedTier.description}
+          {tierKey === 'unverified'
+            ? (gscData?.connected && gscData?.siteMatched
+                ? `GSC connected — only ${gscMonthlyClicks ?? 0} organic clicks/mo (need 500+ for Starter tier)`
+                : 'GSC not connected — connect Search Console to unlock tier-based pricing')
+            : resolvedTier.description}
         </p>
 
         {/* Price block */}
@@ -349,8 +355,9 @@ const PricingTiers = ({ selectedPrice, onPriceSelect, monthlyTraffic, spaceType,
               ⚠️ Unverified pricing: RWF 63,000 total shared across ALL your active ad spaces.
             </p>
             <p style={{ fontSize: '11px', color: '#b45309', marginTop: '4px', margin: '4px 0 0 0' }}>
-              Individual space prices are set automatically by Yepper (63,000 ÷ number of spaces).
-              Connect GSC to unlock tier-based pricing.
+              {gscData?.connected && gscData?.siteMatched
+                ? `Your organic traffic (${gscMonthlyClicks ?? 0} clicks/mo) is below the 500/mo minimum for Starter tier. Keep growing — prices will unlock automatically once you hit 500.`
+                : 'Individual space prices are set automatically by Yepper (63,000 ÷ number of spaces). Connect GSC to unlock tier-based pricing.'}
             </p>
           </div>
         ) : spacePrice !== null ? (
