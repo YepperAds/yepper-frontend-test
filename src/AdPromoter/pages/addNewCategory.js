@@ -41,7 +41,6 @@ import api from '../../utils/api';
 
 const AddNewCategory = ({ onSubmitSuccess, monthlyTraffic: trafficProp, gscData }) => {
   const [user, setUser] = useState(null); // NEW: Custom user state
-  const [setLoading] = useState(true); // NEW: Loading state for auth check
   const { websiteId } = useParams();
   const { state } = useLocation();
   const navigate = useNavigate();
@@ -76,7 +75,6 @@ const AddNewCategory = ({ onSubmitSuccess, monthlyTraffic: trafficProp, gscData 
         });
 
         setUser(response.data.user); // Set user data from your API
-        setLoading(false);
       } catch (error) {
         localStorage.removeItem('token'); // Remove invalid token
       }
