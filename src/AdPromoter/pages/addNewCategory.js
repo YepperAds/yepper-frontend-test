@@ -364,7 +364,7 @@ const AddNewCategory = ({ onSubmitSuccess, monthlyTraffic: trafficProp, gscData 
                 webOwnerEmail: user?.email, // NEW: Use your custom user email field
                 // Add the required fields
                 visitorRange: categoryData[category]?.visitorRange || { min: 0, max: 10000 },
-                tier: categoryData[category]?.tier || 'bronze'
+                tier: categoryData[category]?.tier || 'starter'
             }));
   
         // CHANGED: Added authorization header for API calls
