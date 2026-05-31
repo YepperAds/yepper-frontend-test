@@ -1245,6 +1245,58 @@ const WebsiteDetails = () => {
                                 </>
                             )}
 
+                            {/* ── Granted Traffic Display Section ── */}
+                            {analytics?.grantDisplay && (() => {
+                                const gd = analytics.grantDisplay;
+                                const TIER_COLORS = {
+                                    elite:'#000',premium:'#f97316',standard:'#8b5cf6',
+                                    basic:'#10b981',starter:'#3b82f6',unverified:'#f59e0b'
+                                };
+                                const tierColor = TIER_COLORS[gd.trafficTier] || '#888';
+                                const hoursLeft = gd.grantWindowExpiresAt
+                                    ? Math.max(0, Math.ceil((new Date(gd.grantWindowExpiresAt) - Date.now()) / (1000*60*60)))
+                                    : 0;
+                                return (
+                                    <div className="mt-10">
+                                        <div className="flex items-center justify-between mb-4">
+                                            <div>
+                                                <h2 className="text-xl font-bold text-black flex items-center gap-2">
+                                                    <span style={{fontSize:18}}>🎁</span>
+                                                    Your Stated Traffic
+                                                </h2>
+                                                <p className="text-xs text-gray-500 mt-0.5">
+                                                    Numbers you provided via your analytics boost — shown separately from script-counted data
+                                                    {hoursLeft > 0 && <span className="text-amber-500 ml-2">· Visible for {hoursLeft}h more</span>}
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                                            <div className="border border-black p-5 bg-white">
+                                                <div className="text-xs font-medium text-gray-500 uppercase mb-2">Monthly Visitors</div>
+                                                <p className="text-2xl font-bold text-black">{gd.grantedTraffic?.toLocaleString() ?? '—'}</p>
+                                                <div className="text-xs text-gray-400 mt-1">as stated by you</div>
+                                            </div>
+                                            <div className="border border-black p-5 bg-white">
+                                                <div className="text-xs font-medium text-gray-500 uppercase mb-2">Monthly Views</div>
+                                                <p className="text-2xl font-bold text-black">{gd.grantedViews?.toLocaleString() ?? '—'}</p>
+                                                <div className="text-xs text-gray-400 mt-1">as stated by you</div>
+                                            </div>
+                                            <div className="border border-black p-5 bg-white">
+                                                <div className="text-xs font-medium text-gray-500 uppercase mb-2">Traffic Tier</div>
+                                                <p className="text-2xl font-bold capitalize" style={{color: tierColor}}>{gd.trafficTier}</p>
+                                                <div className="text-xs text-gray-400 mt-1">applied to your ad spaces</div>
+                                            </div>
+                                        </div>
+
+                                        <div className="border border-gray-200 rounded-lg p-4 bg-gray-50 text-sm text-gray-600">
+                                            <span className="font-medium text-gray-800">Note:</span> These numbers reflect what you reported and are used to set your tier and ad space pricing.
+                                            They do not change what the Yepper script has counted from real visitors above, nor what Google Search Console reports below.
+                                        </div>
+                                    </div>
+                                );
+                            })()}
+
                             {/* ── Google Search Console Section ── */}
                             <div className="mt-10">
                                 <div className="flex items-center justify-between mb-4">

@@ -7,8 +7,6 @@ import { AuthProvider } from './context/AuthContext';
 import Home from './pages/Home';
 import ProtectedRoute from './components/ProtectedRoute';
 
-// Admin Panel
-import AdminApp from './admin/AdminApp';
 import TrafficGrant from './pages/TrafficGrant';
 
 import MarketingSection from './pages/MarketingSection';
@@ -79,9 +77,6 @@ function App() {
             <Routes>
               {/* Traffic Grant — user-facing page, no login required */}
               <Route path="/traffic-grant" element={<TrafficGrant />} />
-
-              {/* Admin Panel */}
-              <Route path="/admin/*" element={<AdminApp />} />
 
               <Route path="/" element={<Home />} />
               <Route path="/about-yepper" element={<MarketingSection />} />

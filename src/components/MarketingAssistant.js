@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-const API_URL = process.env.REACT_APP_API_URL || 'https://yepper-backend-test.onrender.com';
+const API_URL = process.env.REACT_APP_API_URL || 'https://yepper-backend.onrender.com';
 
 const MarketingAssistant = ({ user, isAuthenticated }) => {
   const [conversations, setConversations] = useState([]);

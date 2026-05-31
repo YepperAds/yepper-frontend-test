@@ -517,7 +517,7 @@ export const MasterIntegration = ({ website, categories = [], onAddSpace, onLang
   const [langSaved, setLangSaved] = useState(false);
   const [showManual, setShowManual] = useState(false);
 
-  const BACKEND = process.env.REACT_APP_API_URL || 'https://yepper-backend-test.onrender.com';
+  const BACKEND = process.env.REACT_APP_API_URL || 'https://yepper-backend.onrender.com';
   const extractSrc = (val) => {
     if (!val) return null;
     const match = val.match(/src=["']([^"']+)['"]/);
