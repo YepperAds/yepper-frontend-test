@@ -32,12 +32,6 @@ export default function TrafficGrantBanner({ websiteId }) {
 
   const isPending     = grant.grantType === 'pending';
 
-  // How many hours left in the 24-hr window
-  const windowMs   = grant.grantWindowExpiresAt
-    ? Math.max(0, new Date(grant.grantWindowExpiresAt) - Date.now())
-    : 0;
-  const hoursLeft  = Math.ceil(windowMs / (1000 * 60 * 60));
-
   // How many days until the pending grant link expires
   const expiresIn  = grant.expiresAt
     ? Math.ceil((new Date(grant.expiresAt) - Date.now()) / (1000 * 60 * 60 * 24))
@@ -86,11 +80,9 @@ export default function TrafficGrantBanner({ websiteId }) {
               </div>
               <div style={{ color: '#6ee7b7', fontSize: 13, lineHeight: 1.5 }}>
                 {grant.grantedTraffic?.toLocaleString()} visitors · {grant.trafficTier} tier
-                {hoursLeft > 0 && (
-                  <span style={{ color: '#a7f3d0', marginLeft: 8 }}>
-                    · This notice disappears in {hoursLeft}h
-                  </span>
-                )}
+                <span style={{ color: '#a7f3d0', marginLeft: 8 }}>
+                  · Active until your real traffic reaches this tier
+                </span>
               </div>
             </>
           )}

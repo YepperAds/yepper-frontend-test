@@ -47,6 +47,8 @@ const AddNewCategory = ({ onSubmitSuccess, monthlyTraffic: trafficProp, gscData 
   const [websiteMonthlyTraffic, setWebsiteMonthlyTraffic] = useState(
     trafficProp || state?.websiteDetails?.monthlyTraffic || null
   );
+  // Grant display: if admin granted traffic, use that tier for pricing
+  const [grantDisplay, setGrantDisplay] = useState(null);
   const [selectedCategories, setSelectedCategories] = useState({});
   const [categoryData, setCategoryData] = useState({});
   const [activeCategory, setActiveCategory] = useState(null);
@@ -83,25 +85,34 @@ const AddNewCategory = ({ onSubmitSuccess, monthlyTraffic: trafficProp, gscData 
     checkAuth();
   }, [navigate]);
 
-  // Fetch website traffic so each space gets correct auto-pricing
+  // Fetch website traffic + grant data so each space gets correct auto-pricing
   useEffect(() => {
     if (!websiteId) return;
-    // If traffic was already passed via navigation state, skip the API call
-    if (websiteMonthlyTraffic) return;
-    const fetchTraffic = async () => {
+    const fetchTrafficAndGrant = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await api.get(`/api/createWebsite/website/${websiteId}`, {
+        // Fetch analytics which includes grantDisplay if a grant is active
+        const analyticsRes = await api.get(`/api/analytics/${websiteId}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
-        if (response.data?.monthlyTraffic) {
-          setWebsiteMonthlyTraffic(response.data.monthlyTraffic);
+        if (analyticsRes.data?.grantDisplay) {
+          // Admin granted traffic is active — use it for pricing
+          setGrantDisplay(analyticsRes.data.grantDisplay);
+          setWebsiteMonthlyTraffic(analyticsRes.data.grantDisplay.grantedTraffic);
+        } else if (!websiteMonthlyTraffic) {
+          // No grant active — fall back to raw website traffic
+          const siteRes = await api.get(`/api/createWebsite/website/${websiteId}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          if (siteRes.data?.monthlyTraffic) {
+            setWebsiteMonthlyTraffic(siteRes.data.monthlyTraffic);
+          }
         }
       } catch (err) {
-        console.error('Failed to fetch website traffic:', err);
+        console.error('Failed to fetch website traffic/grant:', err);
       }
     };
-    fetchTraffic();
+    fetchTrafficAndGrant();
   }, [websiteId]); // eslint-disable-line
 
   useEffect(() => {
@@ -444,13 +455,14 @@ const AddNewCategory = ({ onSubmitSuccess, monthlyTraffic: trafficProp, gscData 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Left Side - Inputs */}
                 <div className="space-y-6">
-                  {/* Tier-aware pricer — shows tier badge and prices based on GSC data */}
+                  {/* Tier-aware pricer — shows tier badge and prices based on GSC data or grant */}
                   <PricingTiers 
                     selectedPrice={categoryData[activeCategory] || {}}
                     onPriceSelect={(price) => updateCategoryData(activeCategory, 'price', price)}
                     monthlyTraffic={websiteMonthlyTraffic}
                     spaceType={categoryDetails[activeCategory]?.spaceType}
-                    gscData={gscData}
+                    gscData={grantDisplay ? undefined : gscData}
+                    grantedTier={grantDisplay?.trafficTier || null}
                   />
   
                   <div className="space-y-6">

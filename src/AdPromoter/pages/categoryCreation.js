@@ -51,6 +51,8 @@ const CategoryCreation = () => {
   const [websiteMonthlyTraffic, setWebsiteMonthlyTraffic] = useState(
     state?.websiteDetails?.monthlyTraffic || null
   );
+  // Grant display: if admin granted traffic, use that tier for pricing
+  const [grantDisplay, setGrantDisplay] = useState(null);
   const [selectedCategories, setSelectedCategories] = useState({});
   const [categoryData, setCategoryData] = useState({});
   const [activeCategory, setActiveCategory] = useState(null);
@@ -87,26 +89,34 @@ const CategoryCreation = () => {
         return;
     }
 
-    if (!websiteDetails) {
-        const fetchWebsiteDetails = async () => {
+    const fetchWebsiteDetails = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            // Fetch analytics first — includes grantDisplay if a grant is active
             try {
-                // CHANGED: Added authorization header for API calls
-                const token = localStorage.getItem('token');
-                const response = await api.get(`/api/createWebsite/website/${websiteId}`, {
-                  headers: {
-                    'Authorization': `Bearer ${token}` // NEW: Added auth header
-                  }
-                });
-                // Capture monthlyTraffic so PricingTiers can auto-price
-                if (response.data?.monthlyTraffic) {
-                  setWebsiteMonthlyTraffic(response.data.monthlyTraffic);
-                }
-            } catch (error) {
-                navigate('/create-website');
+              const analyticsRes = await api.get(`/api/analytics/${websiteId}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+              });
+              if (analyticsRes.data?.grantDisplay) {
+                setGrantDisplay(analyticsRes.data.grantDisplay);
+                setWebsiteMonthlyTraffic(analyticsRes.data.grantDisplay.grantedTraffic);
+                return; // pricing resolved from grant — no need to fetch raw traffic
+              }
+            } catch (_) { /* analytics fetch failed, fall through to website fetch */ }
+
+            if (!websiteDetails) {
+              const response = await api.get(`/api/createWebsite/website/${websiteId}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+              });
+              if (response.data?.monthlyTraffic) {
+                setWebsiteMonthlyTraffic(response.data.monthlyTraffic);
+              }
             }
-        };
-        fetchWebsiteDetails();
-    }
+        } catch (error) {
+            navigate('/create-website');
+        }
+    };
+    fetchWebsiteDetails();
   }, [websiteId, websiteDetails, navigate]);
 
   const isCategoryDataEmpty = (category) => {
@@ -500,6 +510,7 @@ const CategoryCreation = () => {
                     onPriceSelect={(price) => updateCategoryData(activeCategory, 'price', price)}
                     monthlyTraffic={websiteMonthlyTraffic}
                     spaceType={categoryDetails[activeCategory]?.spaceType}
+                    grantedTier={grantDisplay?.trafficTier || null}
                   />
   
                   <div className="space-y-6">

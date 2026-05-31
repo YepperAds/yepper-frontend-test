@@ -1621,7 +1621,7 @@ const WebsiteDetails = () => {
                         </div>
 
                         <div className="max-w-7xl mx-auto px-6">
-                            <AddNewCategory onSubmitSuccess={handleCloseCategoriesForm} monthlyTraffic={website?.monthlyTraffic} gscData={gscData} />
+                            <AddNewCategory onSubmitSuccess={handleCloseCategoriesForm} monthlyTraffic={analytics?.grantDisplay ? analytics.grantDisplay.grantedTraffic : website?.monthlyTraffic} gscData={analytics?.grantDisplay ? undefined : gscData} />
                         </div>
                     </div>
                 </div>

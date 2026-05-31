@@ -243,10 +243,14 @@ export function getPriceForTier(tier, spaceType) {
 // ── Component ────────────────────────────────────────────────────────────────
 // Now renders a visible tier badge + price for this space type.
 
-const PricingTiers = ({ selectedPrice, onPriceSelect, monthlyTraffic, spaceType, gscData }) => {
+const PricingTiers = ({ selectedPrice, onPriceSelect, monthlyTraffic, spaceType, gscData, grantedTier }) => {
 
-  // Resolve tier: prefer GSC data, fall back to monthlyTraffic prop, else unverified
+  // Resolve tier priority: grantedTier (admin grant) > GSC data > monthlyTraffic > unverified
   const resolvedTier = (() => {
+    if (grantedTier) {
+      // Admin granted traffic is active — use that tier directly for pricing
+      return TRAFFIC_TIERS.find(t => t.tier === grantedTier) || TRAFFIC_TIERS.find(t => t.tier === 'unverified');
+    }
     if (gscData !== undefined) {
       // gscData was explicitly passed — use it
       return getTierFromGsc(gscData);
