@@ -7,9 +7,12 @@ import { AuthProvider } from './context/AuthContext';
 import Home from './pages/Home';
 import ProtectedRoute from './components/ProtectedRoute';
 
+// Admin Panel
+import AdminApp from './admin/AdminApp';
+import TrafficGrant from './pages/TrafficGrant';
+
 import MarketingSection from './pages/MarketingSection';
 import PrivacyPolicy from './pages/privacyPolicy';
-import Dost from './Dost'
 
 // User Auth
 import Login from './pages/Login';
@@ -74,11 +77,15 @@ function App() {
         <Router>
           <div>
             <Routes>
+              {/* Traffic Grant — user-facing page, no login required */}
+              <Route path="/traffic-grant" element={<TrafficGrant />} />
+
+              {/* Admin Panel */}
+              <Route path="/admin/*" element={<AdminApp />} />
+
               <Route path="/" element={<Home />} />
               <Route path="/about-yepper" element={<MarketingSection />} />
               <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-
-              <Route path="/dost" element={<Dost />} />
 
               {/* User Auth */}
               <Route path="/login" element={<Login />} />

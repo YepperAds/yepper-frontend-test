@@ -32,6 +32,7 @@ import DeleteCategoryModal from '../components/DeleteCategoryModal';
 import AdCustomizationModal from '../components/AdCustomizationModal';
 import api from '../../utils/api';
 
+import TrafficGrantBanner from '../components/TrafficGrantBanner';
 
 const WebsiteDetails = () => {
     const navigate = useNavigate();
@@ -625,6 +626,8 @@ const WebsiteDetails = () => {
                                 </a>
                             </div>
                         )}
+
+                        <TrafficGrantBanner websiteId={websiteId} />
 
                         {/* Tabs */}
                         <div className="flex justify-center">
