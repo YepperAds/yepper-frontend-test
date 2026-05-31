@@ -31,7 +31,6 @@ export default function TrafficGrantBanner({ websiteId }) {
   if (loading || !grant || dismissed) return null;
 
   const isPending     = grant.grantType === 'pending';
-  const isActiveWindow = grant.grantType === 'active_window';
 
   // How many hours left in the 24-hr window
   const windowMs   = grant.grantWindowExpiresAt
