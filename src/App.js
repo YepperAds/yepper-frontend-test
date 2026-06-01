@@ -10,7 +10,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import TrafficGrant from './pages/TrafficGrant';
 
 import MarketingSection from './pages/MarketingSection';
-import PrivacyPolicy from './pages/privacyPolicy';
+import PrivacyPolicy from './pages/PrivacyPolicy';
 
 // User Auth
 import Login from './pages/Login';

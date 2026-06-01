@@ -1,7 +1,8 @@
-// PaymentCallback2.js — XentriPay version
+// PaymentCallback2.js — Flutterwave version
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button, Text, Heading, Container } from '../../components/components';
+import { FlaskConical } from 'lucide-react';
 import api from '../../utils/api';
 
 const PaymentCallback2 = () => {
@@ -9,23 +10,33 @@ const PaymentCallback2 = () => {
   const navigate = useNavigate();
   const [status, setStatus] = useState('verifying');
   const [message, setMessage] = useState('Verifying your payment...');
-  const [setDetails] = useState(null);
+  const [sandboxMode, setSandboxMode] = useState(false);
+
+  // Fetch sandbox mode on mount
+  useEffect(() => {
+    api.get('/api/web-advertise/payment/debug-config')
+      .then(res => setSandboxMode(!!res.data.sandboxMode))
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     const verifyPayment = async () => {
-      // XentriPay returns these query params on redirect
-      const reference = searchParams.get('reference') || searchParams.get('tx_ref');
-      const xpStatus  = searchParams.get('status');
+      // Flutterwave redirects with ?transaction_id=...&tx_ref=...&status=...
+      const transaction_id = searchParams.get('transaction_id');
+      const tx_ref        = searchParams.get('tx_ref');
+      const flwStatus     = searchParams.get('status');
 
-      if (!reference) {
+      if (flwStatus === 'cancelled') {
         setStatus('failed');
-        setMessage('No payment reference found in the callback URL. Please contact support.');
+        setMessage('Payment was cancelled. Please try again.');
         return;
       }
 
-      if (xpStatus === 'cancelled' || xpStatus === 'failed') {
+      const identifier = transaction_id || tx_ref;
+
+      if (!identifier) {
         setStatus('failed');
-        setMessage('Payment was cancelled or failed. Please try again.');
+        setMessage('No payment reference found in the callback URL. Please contact support.');
         return;
       }
 
@@ -34,19 +45,17 @@ const PaymentCallback2 = () => {
 
         const response = await api.post(
           '/api/web-advertise/payment/verify-callback',
-          { tx_ref: reference },
+          { transaction_id, tx_ref },
           { timeout: 30000, headers: { 'Content-Type': 'application/json' } }
         );
 
         if (response.data.success) {
           setStatus('success');
           setMessage(response.data.message || 'Payment successful! Your ad is now live.');
-          setDetails(response.data);
           setTimeout(() => navigate('/'), 3000);
         } else {
           setStatus('failed');
           setMessage(response.data.message || 'Payment verification failed');
-          setDetails(response.data);
         }
       } catch (error) {
         setStatus('error');
@@ -55,7 +64,7 @@ const PaymentCallback2 = () => {
           setMessage('Verification timed out. Please check your payment status in the dashboard.');
         } else if (error.response) {
           const statusCode = error.response.status;
-          const errorData = error.response.data;
+          const errorData  = error.response.data;
 
           switch (statusCode) {
             case 401:
@@ -76,7 +85,6 @@ const PaymentCallback2 = () => {
             default:
               setMessage(errorData?.message || errorData?.error || `Server error (${statusCode})`);
           }
-          setDetails(errorData);
         } else {
           setMessage('Network error — unable to reach the payment verification server. Please check your connection.');
         }
@@ -111,6 +119,17 @@ const PaymentCallback2 = () => {
     <div className="min-h-screen bg-white flex items-center justify-center">
       <Container>
         <div className="max-w-md mx-auto text-center">
+
+          {/* Sandbox banner */}
+          {sandboxMode && (
+            <div className="flex items-center gap-2 justify-center bg-amber-50 border border-amber-400 text-amber-800 rounded px-4 py-2 mb-6 text-sm">
+              <FlaskConical size={15} className="shrink-0" />
+              <span>
+                <strong>Sandbox Mode</strong> — this was a test transaction. No real money was charged.
+              </span>
+            </div>
+          )}
+
           <Heading level={2} className={`mb-4 ${getTitleColor()}`}>
             {getTitle()}
           </Heading>

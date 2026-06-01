@@ -1,4 +1,4 @@
-// PaymentCallback.js — XentriPay version
+// PaymentCallback.js — Flutterwave version
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button, Text, Heading, Container } from '../../components/components';
@@ -15,16 +15,26 @@ const PaymentCallback = () => {
   // Fetch sandbox mode on mount
   useEffect(() => {
     api.get('/api/web-advertise/payment/debug-config')
-      .then(res => setSandboxMode(!!res.data.testMode))
+      .then(res => setSandboxMode(!!res.data.sandboxMode))
       .catch(() => {});
   }, []);
 
   useEffect(() => {
     const verifyPayment = async () => {
-      // XentriPay redirects with ?reference=... or ?tx_ref=...
-      const reference = searchParams.get('reference') || searchParams.get('tx_ref');
+      // Flutterwave redirects with ?transaction_id=...&tx_ref=...&status=...
+      const transaction_id = searchParams.get('transaction_id');
+      const tx_ref        = searchParams.get('tx_ref');
+      const flwStatus     = searchParams.get('status');
 
-      if (!reference) {
+      if (flwStatus === 'cancelled') {
+        setStatus('failed');
+        setMessage('Payment was cancelled. Please try again.');
+        return;
+      }
+
+      const identifier = transaction_id || tx_ref;
+
+      if (!identifier) {
         setStatus('failed');
         setMessage('No payment reference found in the callback URL.');
         return;
@@ -32,14 +42,13 @@ const PaymentCallback = () => {
 
       try {
         const response = await api.post('/api/web-advertise/payment/verify', {
-          tx_ref: reference,
+          transaction_id,
+          tx_ref,
         });
 
         if (response.data.success) {
           setStatus('success');
-          setMessage(
-            response.data.message || 'Payment successful! Your ad is now live.'
-          );
+          setMessage(response.data.message || 'Payment successful! Your ad is now live.');
         } else {
           setStatus('failed');
           setMessage(response.data.message || 'Payment verification failed.');
