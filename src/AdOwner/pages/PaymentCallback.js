@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button, Text, Heading, Container } from '../../components/components';
+import { FlaskConical } from 'lucide-react';
 import api from '../../utils/api';
 
 const PaymentCallback = () => {
@@ -9,6 +10,14 @@ const PaymentCallback = () => {
   const navigate = useNavigate();
   const [status, setStatus] = useState('verifying');
   const [message, setMessage] = useState('');
+  const [sandboxMode, setSandboxMode] = useState(false);
+
+  // Fetch sandbox mode on mount
+  useEffect(() => {
+    api.get('/api/web-advertise/payment/debug-config')
+      .then(res => setSandboxMode(!!res.data.testMode))
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     const verifyPayment = async () => {
@@ -17,7 +26,7 @@ const PaymentCallback = () => {
 
       if (!reference) {
         setStatus('failed');
-        setMessage('No payment reference found');
+        setMessage('No payment reference found in the callback URL.');
         return;
       }
 
@@ -28,14 +37,20 @@ const PaymentCallback = () => {
 
         if (response.data.success) {
           setStatus('success');
-          setMessage('Payment successful! Your ad is now live.');
+          setMessage(
+            response.data.message || 'Payment successful! Your ad is now live.'
+          );
         } else {
           setStatus('failed');
-          setMessage('Payment verification failed');
+          setMessage(response.data.message || 'Payment verification failed.');
         }
       } catch (error) {
         setStatus('failed');
-        setMessage(error.response?.data?.message || 'Payment verification failed');
+        setMessage(
+          error.response?.data?.message ||
+          error.response?.data?.error ||
+          'Payment verification failed. Please contact support.'
+        );
       }
     };
 
@@ -44,10 +59,10 @@ const PaymentCallback = () => {
 
   const getTitle = () => {
     switch (status) {
-      case 'verifying': return 'Verifying Payment...';
+      case 'verifying': return 'Verifying Payment…';
       case 'success':   return 'Payment Successful!';
       case 'failed':    return 'Payment Failed';
-      default:          return 'Processing...';
+      default:          return 'Processing…';
     }
   };
 
@@ -64,6 +79,17 @@ const PaymentCallback = () => {
     <div className="min-h-screen bg-white flex items-center justify-center">
       <Container>
         <div className="max-w-md mx-auto text-center">
+
+          {/* Sandbox banner */}
+          {sandboxMode && (
+            <div className="flex items-center gap-2 justify-center bg-amber-50 border border-amber-400 text-amber-800 rounded px-4 py-2 mb-6 text-sm">
+              <FlaskConical size={15} className="shrink-0" />
+              <span>
+                <strong>Sandbox Mode</strong> — this was a test transaction. No real money was charged.
+              </span>
+            </div>
+          )}
+
           <Heading level={2} className={`mb-4 ${getTitleColor()}`}>
             {getTitle()}
           </Heading>
