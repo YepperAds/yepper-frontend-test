@@ -40,9 +40,19 @@ const PaymentCallback = () => {
         return;
       }
 
+      // Ensure transaction_id is a string if present (Flutterwave returns numeric ID in URL)
+      const parsedTransactionId = transaction_id ? String(transaction_id) : null;
+
+      console.log('[PaymentCallback] Sending verify request:', {
+        transaction_id: parsedTransactionId,
+        tx_ref,
+        flwStatus,
+      });
+
       try {
+        const transactionIdFromUrl = searchParams.get('transaction_id');
         const response = await api.post('/api/web-advertise/payment/verify', {
-          transaction_id,
+          transaction_id: transactionIdFromUrl,   // always include if present
           tx_ref,
         });
 
