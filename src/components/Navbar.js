@@ -54,14 +54,6 @@ const Navbar = () => {
                 <span>Read about Yepper</span>
               </Button>
             </Link>
-            <Link to="/privacy-policy">
-              <Button 
-                variant='ghost'
-                className="h-9 flex items-center space-x-2 focus:outline-none focus:ring-0"
-              >
-                <span>Privacy &amp; Policy</span>
-              </Button>
-            </Link>
             {isAuthenticated ? (
               <div className="relative">
                 {/* Avatar Button */}

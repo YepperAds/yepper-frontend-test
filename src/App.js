@@ -10,7 +10,6 @@ import ProtectedRoute from './components/ProtectedRoute';
 import TrafficGrant from './pages/TrafficGrant';
 
 import MarketingSection from './pages/MarketingSection';
-import PrivacyPolicy from './pages/PrivacyPolicy';
 
 // User Auth
 import Login from './pages/Login';
@@ -80,7 +79,6 @@ function App() {
 
               <Route path="/" element={<Home />} />
               <Route path="/about-yepper" element={<MarketingSection />} />
-              <Route path="/privacy-policy" element={<PrivacyPolicy />} />
 
               {/* User Auth */}
               <Route path="/login" element={<Login />} />
