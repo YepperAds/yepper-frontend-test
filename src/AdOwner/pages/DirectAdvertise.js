@@ -391,27 +391,78 @@ function DirectAdvertise() {
   const handlePayment = async () => {
     try {
       setIsLoading(true);
-      
+
       const paymentResponse = await api.post(`/api/web-advertise/payment/initiate`, {
         adId: adId,
-        selections: [{
-          websiteId: websiteId,
-          categoryId: categoryId
-        }]
+        selections: [{ websiteId: websiteId, categoryId: categoryId }]
       }, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token') || ''}`
-        }
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token') || ''}` }
       });
 
-      if (paymentResponse.data.success && paymentResponse.data.paymentUrl) {
-        window.location.href = paymentResponse.data.paymentUrl;
-      } else {
-        throw new Error('Failed to get payment URL');
+      if (!paymentResponse.data.success) {
+        throw new Error(paymentResponse.data.error || 'Failed to initiate payment');
       }
-      
+
+      const { tx_ref, totalAmount, baseReference } = paymentResponse.data;
+
+      // Load Flutterwave inline SDK if not already loaded
+      await new Promise((resolve, reject) => {
+        if (window.FlutterwaveCheckout) { resolve(); return; }
+        const script = document.createElement('script');
+        script.src = 'https://checkout.flutterwave.com/v3.js';
+        script.onload = resolve;
+        script.onerror = reject;
+        document.body.appendChild(script);
+      });
+
+      setIsLoading(false);
+
+      window.FlutterwaveCheckout({
+        public_key: process.env.REACT_APP_FLW_PUBLIC_KEY,
+        tx_ref,
+        amount: totalAmount,
+        currency: 'RWF',
+        payment_options: 'card, mobilemoney',
+        customer: {
+          email: user?.email || '',
+          name: user?.name || businessData.businessName,
+        },
+        customizations: {
+          title: 'Yepper Ads',
+          description: `Ad placement on ${websiteInfo?.websiteName}`,
+          logo: '',
+        },
+        callback: async (data) => {
+          if (data.status === 'successful' || data.status === 'completed') {
+            try {
+              setIsLoading(true);
+              const verifyRes = await api.post('/api/web-advertise/payment/verify', {
+                transaction_id: String(data.transaction_id),
+                tx_ref: data.tx_ref,
+              }, {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('token') || ''}` }
+              });
+              if (verifyRes.data.success) {
+                setSuccess('Payment successful! Your ad is now live.');
+              } else {
+                setError(verifyRes.data.message || 'Payment verification failed.');
+              }
+            } catch (err) {
+              setError(err.response?.data?.error || 'Payment verification failed.');
+            } finally {
+              setIsLoading(false);
+            }
+          } else {
+            setError('Payment was not completed. Please try again.');
+          }
+        },
+        onclose: () => {
+          setIsLoading(false);
+        },
+      });
+
     } catch (error) {
-      setError(error.response?.data?.error || 'Failed to initiate payment');
+      setError(error.response?.data?.error || error.message || 'Failed to initiate payment');
       setIsLoading(false);
     }
   };
