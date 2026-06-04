@@ -42,19 +42,19 @@ const clearCachedUser = () => {
 // ─────────────────────────────────────────────────────────────
 
 export const AuthProvider = ({ children }) => {
-  // Seed from cache so the UI renders immediately without waiting for the network
   const [user, setUser]                     = useState(() => getCachedUser());
   const [isAuthenticated, setIsAuthenticated] = useState(() => !!getCachedUser());
+  const [token, setToken] = useState(() => localStorage.getItem('token'));
   const [isLoading, setIsLoading]           = useState(() => {
-    // Only show loading spinner if there's a token but no cached user yet
     return !!localStorage.getItem('token') && !getCachedUser();
   });
 
   // ── Token helpers ─────────────────────────────────────────
-  const setAuthToken = (token) => {
-    if (token) {
-      localStorage.setItem('token', token);
-      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+  const setAuthToken = (newToken) => {
+    if (newToken) {
+      localStorage.setItem('token', newToken);
+      setToken(newToken);
+      api.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
     } else {
       handleInvalidToken();
     }
@@ -62,6 +62,7 @@ export const AuthProvider = ({ children }) => {
 
   const handleInvalidToken = () => {
     localStorage.removeItem('token');
+    setToken(null);
     delete api.defaults.headers.common['Authorization'];
     clearCachedUser();
     setUser(null);
@@ -174,7 +175,7 @@ export const AuthProvider = ({ children }) => {
       getCurrentUser,
       handleAutoLogin,
       retryAuthentication,
-      token: localStorage.getItem('token'),
+      token,
     }}>
       {children}
     </AuthContext.Provider>

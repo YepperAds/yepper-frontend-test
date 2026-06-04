@@ -91,9 +91,7 @@ const WebsiteDetails = () => {
         if (!websiteId || !token) return;
         const fetchEarnings = async () => {
             try {
-                const res = await api.get(`/api/websites/${websiteId}/earnings-summary`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
+                const res = await api.get(`/api/websites/${websiteId}/earnings-summary`);
                 setEarningsSummary(res.data);
             } catch (err) {
                 // Non-fatal — earnings just won't show
