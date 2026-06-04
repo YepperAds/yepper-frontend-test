@@ -256,8 +256,8 @@ const UnifiedWebsiteCreation = () => {
           const existing = allSites.data.find(
             s => s.websiteLink === websiteData.url || s.websiteLink === websiteData.url.replace(/\/+$/, '')
           );
-          if (existing) {
-            websiteId = existing._id;
+          if (existing) { 
+            websiteId = existing.id; 
           } else {
             throw new Error('This website URL is already registered by another account.');
           }
