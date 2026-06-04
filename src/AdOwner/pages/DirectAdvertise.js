@@ -403,7 +403,7 @@ function DirectAdvertise() {
         throw new Error(paymentResponse.data.error || 'Failed to initiate payment');
       }
 
-      const { tx_ref, totalAmount, baseReference } = paymentResponse.data;
+      const { tx_ref, totalAmount } = paymentResponse.data;
 
       // Load Flutterwave inline SDK if not already loaded
       await new Promise((resolve, reject) => {
