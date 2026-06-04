@@ -246,7 +246,7 @@ const UnifiedWebsiteCreation = () => {
           },
           { headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' } }
         );
-        websiteId = websiteResponse.data.data._id;
+        websiteId = websiteResponse.data.data.id;
       } catch (createError) {
         if (createError.response?.status === 409) {
           // Already exists — find it and still navigate there
