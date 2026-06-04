@@ -548,7 +548,7 @@ const WebsiteDetails = () => {
     }
 
     // Get ads for this website
-    const { pending, active } = website ? getAdsForWebsite(website._id) : { pending: [], active: [] };
+    const { pending, active } = website ? getAdsForWebsite(website.id) : { pending: [], active: [] };
 
     return (
         <div className="min-h-screen bg-white">
@@ -919,7 +919,7 @@ const WebsiteDetails = () => {
                                                             variant="secondary"
                                                             size="sm"
                                                             className="w-full"
-                                                            onClick={() => openAdModal(ad, website._id)}
+                                                            onClick={() => openAdModal(ad, website.id)}
                                                         >
                                                             View Full Ad
                                                         </Button>
