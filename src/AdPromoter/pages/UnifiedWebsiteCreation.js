@@ -59,7 +59,7 @@ const UnifiedWebsiteCreation = () => {
     setDomainVerification(prev => ({ ...prev, status: 'loading', errorMessage: '' }));
     try {
       const response = await api.post(
-        '/api/createWebsite/initiate-verification',
+        '/api/websites/initiate-verification',
         { websiteLink: websiteData.url },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -82,7 +82,7 @@ const UnifiedWebsiteCreation = () => {
     const token = localStorage.getItem('token');
     try {
       const response = await api.post(
-        '/api/createWebsite/verify-domain',
+        '/api/websites/verify-domain',
         { websiteLink: websiteData.url, verificationToken: domainVerification.token },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -235,7 +235,7 @@ const UnifiedWebsiteCreation = () => {
       let websiteId;
       try {
         const websiteResponse = await api.post(
-          `/api/createWebsite/createWebsiteWithCategories`,
+          `/api/websites/createWebsiteWithCategories`,
           {
             websiteName: websiteData.name,
             websiteLink: websiteData.url,
@@ -271,7 +271,7 @@ const UnifiedWebsiteCreation = () => {
         const formData = new FormData();
         formData.append('file', websiteData.image);
         try {
-          await api.post(`/api/createWebsite/upload/${websiteId}`, formData, {
+          await api.post(`/api/websites/upload/${websiteId}`, formData, {
             headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' },
           });
         } catch (uploadError) {
