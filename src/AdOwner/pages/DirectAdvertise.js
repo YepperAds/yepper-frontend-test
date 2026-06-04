@@ -433,6 +433,9 @@ function DirectAdvertise() {
           logo: '',
         },
         callback: async (data) => {
+          // Close the Flutterwave modal immediately so the user isn't stuck
+          window.FlutterwaveCheckout.closePaymentModal();
+
           if (data.status === 'successful' || data.status === 'completed') {
             try {
               setIsLoading(true);
