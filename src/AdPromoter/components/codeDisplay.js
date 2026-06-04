@@ -523,7 +523,7 @@ export const MasterIntegration = ({ website, categories = [], onAddSpace, onLang
     const match = val.match(/src=["']([^"']+)['"]/);
     return match ? match[1] : val;
   };
-  const rawSrc = extractSrc(website?.siteScript) || `${BACKEND}/api/p/site/${website?._id}`;
+  const rawSrc = extractSrc(website?.siteScript) || `${BACKEND}/api/p/site/${website?.id}`;
 
   const mainCode   = buildSiteScript(rawSrc, framework);
   const currentLabel = HUMAN_LANGUAGES.find(l => l.value === humanLang)?.label || 'English';
