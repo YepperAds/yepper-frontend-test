@@ -119,7 +119,7 @@ function BusinessCategorySelection() {
       
       // Create the website with categories in one request
       const response = await api.post(
-        '/api/createWebsite/createWebsiteWithCategories',
+        '/api/websites/createWebsiteWithCategories',
         {
           websiteName: websiteDetails.name,
           websiteLink: websiteDetails.url,

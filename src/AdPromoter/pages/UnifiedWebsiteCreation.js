@@ -250,7 +250,7 @@ const UnifiedWebsiteCreation = () => {
       } catch (createError) {
         if (createError.response?.status === 409) {
           // Already exists — find it and still navigate there
-          const allSites = await api.get(`/api/createWebsite/`, {
+          const allSites = await api.get(`/api/websites/`, {
             headers: { Authorization: `Bearer ${token}` }
           });
           const existing = allSites.data.find(

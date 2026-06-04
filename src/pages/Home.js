@@ -40,7 +40,7 @@ const Home = () => {
     queryKey: ['websites', user?._id || user?.id],
     queryFn: async () => {
       const userId = user?._id || user?.id;
-      const response = await api.get(`/api/createWebsite/${userId}`);
+      const response = await api.get(`/api/websites/${userId}`);
       return response.data;
     },
     enabled: isAuthenticated && !!(user?._id || user?.id),

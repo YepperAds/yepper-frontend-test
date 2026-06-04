@@ -198,7 +198,7 @@ const WebsiteDetails = () => {
         queryFn: async () => {
             try {
                 const userId = user?._id || user?.id;
-                const response = await api.get(`/api/createWebsite/${userId}`);
+                const response = await api.get(`/api/websites/${userId}`);
                 return response.data;
             } catch (error) {
                 throw error;
@@ -221,7 +221,7 @@ const WebsiteDetails = () => {
         setFetchError(null);
 
         try {
-            const websiteResponse = await api.get(`/api/createWebsite/website/${websiteId}`);
+            const websiteResponse = await api.get(`/api/websites/website/${websiteId}`);
             const categoriesResponse = await api.get(`/api/ad-categories/${websiteId}`);
             setWebsite(websiteResponse.data);
             setCategories(categoriesResponse.data.categories);
@@ -420,7 +420,7 @@ const WebsiteDetails = () => {
         if (!tempWebsiteName.trim()) return;
 
         try {
-            const response = await api.patch(`/api/createWebsite/${websiteId}/name`, {
+            const response = await api.patch(`/api/websites/${websiteId}/name`, {
                 websiteName: tempWebsiteName.trim()
             });
             

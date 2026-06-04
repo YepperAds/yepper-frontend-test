@@ -102,7 +102,7 @@ function WebsiteCreation() {
 
       const token = localStorage.getItem('token');
       const response = await api.post(
-        '/api/createWebsite/prepareWebsite',
+        '/api/websites/prepareWebsite',
         formData,
         {
           headers: {

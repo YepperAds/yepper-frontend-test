@@ -37,7 +37,7 @@ const AvailableAds = () => {
 
   const fetchWebsites = async () => {
     try {
-      const response = await fetch('/api/createWebsite', {
+      const response = await fetch('/api/websites', {
         headers: getAuthHeaders()
       });
       const data = await response.json();

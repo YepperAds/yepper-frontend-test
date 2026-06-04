@@ -105,7 +105,7 @@ const CategoryCreation = () => {
             } catch (_) { /* analytics fetch failed, fall through to website fetch */ }
 
             if (!websiteDetails) {
-              const response = await api.get(`/api/createWebsite/website/${websiteId}`, {
+              const response = await api.get(`/api/websites/website/${websiteId}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
               });
               if (response.data?.monthlyTraffic) {

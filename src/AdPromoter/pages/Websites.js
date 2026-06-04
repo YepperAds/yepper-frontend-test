@@ -31,7 +31,7 @@ function Websites() {
     queryFn: async () => {
       try {
         const userId = user?._id || user?.id;
-        const response = await api.get(`/api/createWebsite/${userId}`);
+        const response = await api.get(`/api/websites/${userId}`);
         return response.data;
       } catch (error) {
         throw error;
@@ -68,7 +68,7 @@ function Websites() {
 
   const updateWebsiteNameMutation = useMutation({
     mutationFn: ({ websiteId, websiteName }) => 
-      api.patch(`/api/createWebsite/${websiteId}/name`, { websiteName }),
+      api.patch(`/api/websites/${websiteId}/name`, { websiteName }),
     onSuccess: (response) => {
       queryClient.setQueryData(['websites', user?._id || user?.id], (oldData) => 
         oldData.map(website => 
