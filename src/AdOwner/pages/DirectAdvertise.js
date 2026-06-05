@@ -125,14 +125,9 @@ function DirectAdvertise() {
         
         if (parsed.step === 2) {
           setBusinessData(parsed.businessData || {});
-          
-          setAuthSuccess('You are successfully signed in! Now continue with paying for your advertisement...');
+          setStep(2);
+          setAuthSuccess('You are signed in. Review your details and click "Create Ad & Proceed to Payment" when ready.');
           setAuthError(null);
-          
-          setTimeout(() => {
-            setAuthSuccess(null);
-            createAdAndProceed();
-          }, 2000);
         }
       } catch (e) {
       }
