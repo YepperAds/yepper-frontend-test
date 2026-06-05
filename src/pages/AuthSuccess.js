@@ -26,7 +26,14 @@ const AuthSuccess = () => {
           const result = await handleAutoLogin(token);
           
           if (result.success) {
-            navigate('/');
+            // If the user was in the middle of a direct-advertise flow, go back there
+            const returnTo = localStorage.getItem('googleOAuthReturnTo');
+            if (returnTo) {
+              localStorage.removeItem('googleOAuthReturnTo');
+              navigate(returnTo);
+            } else {
+              navigate('/');
+            }
           } else {
             throw new Error('Authentication failed');
           }
