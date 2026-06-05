@@ -417,7 +417,7 @@ function DirectAdvertise() {
 
       setIsLoading(false);
 
-      window.FlutterwaveCheckout({
+      const flwModal = window.FlutterwaveCheckout({
         public_key: process.env.REACT_APP_FLW_PUBLIC_KEY,
         tx_ref,
         amount: totalAmount,
@@ -433,7 +433,8 @@ function DirectAdvertise() {
           logo: '',
         },
         callback: async (data) => {
-          window.FlutterwaveCheckout.closePaymentModal(); // ← ADD THIS LINE
+          // Close the modal immediately — it won't close itself
+          if (flwModal && typeof flwModal.close === 'function') flwModal.close();
 
           if (data.status === 'successful' || data.status === 'completed') {
             try {
