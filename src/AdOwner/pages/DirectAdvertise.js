@@ -92,10 +92,8 @@ function DirectAdvertise() {
     if (savedData) {
       try {
         const parsed = JSON.parse(savedData);
-        setBusinessData(parsed.businessData || businessData);
-        setStep(parsed.step || 1);
-      } catch (e) {
-      }
+        setBusinessData(parsed.businessData || {});
+      } catch (e) {}
     }
   }, []);
 
@@ -113,26 +111,6 @@ function DirectAdvertise() {
       window.removeEventListener('storage', handleStorageChange);
     };
   }, []);
-
-  useEffect(() => {
-    if (isLoading || !fileLoaded) return;
-    
-    const savedData = localStorage.getItem('directAdvertise_formData');
-    
-    if (isAuthenticated && savedData && !adId && step !== 3) {
-      try {
-        const parsed = JSON.parse(savedData);
-        
-        if (parsed.step === 2) {
-          setBusinessData(parsed.businessData || {});
-          setStep(2);
-          setAuthSuccess('You are signed in. Review your details and click "Create Ad & Proceed to Payment" when ready.');
-          setAuthError(null);
-        }
-      } catch (e) {
-      }
-    }
-  }, [isAuthenticated, isLoading, fileLoaded]);
 
   useEffect(() => {
     const fetchData = async () => {
