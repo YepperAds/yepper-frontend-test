@@ -16,7 +16,7 @@ const GoogleIcon = () => (
 
 
 function DirectAdvertise() {
-  const { user, isAuthenticated, login, signup, handleAutoLogin } = useAuth();
+  const { user, isAuthenticated, login, signup } = useAuth();
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   
@@ -71,7 +71,7 @@ function DirectAdvertise() {
     { value: 'general-retail', label: 'General Retail' }
   ];
 
-  const [fileLoaded, setFileLoaded] = useState(false);
+  const [setFileLoaded] = useState(false);
   
   useEffect(() => {
     const loadSavedFile = async () => {
