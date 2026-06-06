@@ -507,7 +507,7 @@ const WebsiteDetails = () => {
     };
 
     const openAdModal = (ad, websiteId) => {
-        const currentWebsite = websites?.find(w => w._id === websiteId);
+        const currentWebsite = websites?.find(w => (w._id || w.id) === websiteId);
         const websiteSelection = ad.websiteSelections?.find(sel => 
             sel.websiteId === websiteId
         );
